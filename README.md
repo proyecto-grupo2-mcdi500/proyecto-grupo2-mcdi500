@@ -65,6 +65,7 @@ proyecto-grupo2-mcdi500/
 ├── F1/
 │   ├── brainstorming/
 │   │   └── ideas-dataset.md
+│   ├── F1_Definicion.ipynb
 │   └── test_verification.ipynb
 ├── F2/
 │   ├── F2_Limpieza.ipynb
