@@ -1,0 +1,88 @@
+name: Actualizar estructura en README
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+
+      - name: Generar árbol de directorios y actualizar README.md
+        shell: python
+        run: |
+          import subprocess
+          import re
+          from pathlib import Path
+
+          START_TAG = "<!-- ESTRUCTURA:INICIO -->"
+          END_TAG = "<!-- ESTRUCTURA:FIN -->"
+
+          files = subprocess.check_output(["git", "ls-files"], text=True).splitlines()
+          files = [
+              f for f in files
+              if not f.startswith(".github/") and f != ".gitignore" and not f.endswith(".gitkeep")
+          ]
+
+          tree = {}
+          for path_str in files:
+              parts = path_str.split("/")
+              node = tree
+              for part in parts[:-1]:
+                  node = node.setdefault(part, {})
+              node[parts[-1]] = None
+
+          priority_order = {"data": 0, "docs": 1, "src": 2, "F1": 3, "F2": 4, "F3": 5, "F4": 6}
+
+          def sort_key(item):
+              name, val = item
+              is_file = val is None
+              return (is_file, priority_order.get(name, 99), name.lower())
+
+          def render_tree(node, prefix=""):
+              lines = []
+              items = sorted(node.items(), key=sort_key)
+              for idx, (name, child) in enumerate(items):
+                  is_last = idx == len(items) - 1
+                  connector = "└── " if is_last else "├── "
+                  if child is None:
+                      lines.append(f"{prefix}{connector}{name}")
+                  else:
+                      lines.append(f"{prefix}{connector}{name}/")
+                      ext_prefix = "    " if is_last else "│   "
+                      lines.extend(render_tree(child, prefix + ext_prefix))
+              return lines
+
+          tree_lines = ["proyecto-grupo2-mcdi500/"] + render_tree(tree)
+          new_block = f"{START_TAG}\n```text\n" + "\n".join(tree_lines) + f"\n```\n{END_TAG}"
+
+          readme_path = Path("README.md")
+          content = readme_path.read_text(encoding="utf-8")
+
+          if START_TAG in content and END_TAG in content:
+              pattern = re.compile(re.escape(START_TAG) + r".*?" + re.escape(END_TAG), re.DOTALL)
+              updated = pattern.sub(new_block, content)
+              if updated != content:
+                  readme_path.write_text(updated, encoding="utf-8")
+                  print("README.md actualizado con la nueva estructura.")
+              else:
+                  print("README.md ya está al día.")
+
+      - name: Commit y Push si hubo cambios
+        run: |
+          if [[ -n $(git status --porcelain README.md) ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add README.md
+            git commit -m "chore: actualizar estructura del repositorio en README.md [skip ci]"
+            git push
+          fi
+

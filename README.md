@@ -46,32 +46,49 @@ El análisis está implementado principalmente en **Python**:
 
 ## Estructura del Repositorio
 
+<!-- ESTRUCTURA:INICIO -->
 ```text
 proyecto-grupo2-mcdi500/
 ├── data/
 │   ├── processed/
+│   │   └── README.md
 │   └── raw/
+│       ├── 04LicitacionesEne.csv
+│       └── README.md
 ├── docs/
+│   └── README.md
 ├── src/
+│   ├── README.md
+│   └── validar_dataset.py
 ├── F1/
-│   └── brainstorming/
+│   ├── brainstorming/
+│   │   └── ideas-dataset.md
+│   └── test_verification.ipynb
 ├── F2/
+│   └── F2_Preprocesamiento.ipynb
 ├── F3/
+│   └── README.md
 ├── F4/
+│   └── README.md
 ├── README.md
 ├── requirements.txt
 └── validar_dataset.py
 ```
+<!-- ESTRUCTURA:FIN -->
 
 - `README.md`: presenta el proyecto, su contexto, objetivos, fuente de datos y herramientas utilizadas.
 - `requirements.txt`: contiene las dependencias de Python necesarias para ejecutar el proyecto.
-- `validar_dataset.py` y `src/`: scripts y módulos reutilizables para revisar y validar archivos de datos entre fases.
-- `data/raw/`: datos originales (`04LicitacionesEne.csv`), almacenados una sola vez.
-- `data/processed/`: datos derivados y preparados para el análisis.
+- `validar_dataset.py` y `src/validar_dataset.py`: scripts y módulos reutilizables para revisar y validar archivos de datos entre fases.
+- `data/raw/`: contiene los datos originales (`data/raw/04LicitacionesEne.csv`), almacenados en una única ubicación compartida.
+- `data/processed/`: carpeta destinada a almacenar los datos derivados y preparados para el análisis.
 - `docs/`: documentación compartida del proyecto.
-- `F1/`: reúne materiales de la primera etapa del proyecto (`brainstorming/` y `test_verification.ipynb`).
-- `F2/`: contiene el cuaderno `F2_Preprocesamiento.ipynb`, dedicado al preprocesamiento de los datos.
+- `F1/`: reúne materiales de la primera etapa del proyecto, incluyendo ideas iniciales en `F1/brainstorming/ideas-dataset.md` y el cuaderno de verificación `F1/test_verification.ipynb`.
+- `F2/`: contiene el cuaderno `F2/F2_Preprocesamiento.ipynb`, dedicado a la exploración y preprocesamiento de los datos.
 - `F3/` y `F4/`: carpetas destinadas a los notebooks y entregables específicos de las etapas posteriores.
+
+Las carpetas de fase (`F1/` a `F4/`) no deben contener copias propias de `data/`, `docs/` ni `src/`. Si una fase genera un archivo reutilizable, se guarda en la ubicación compartida correspondiente; sus notebooks permanecen en la carpeta de la fase.
+
+-------------------------------------------------------------------------------------------
 
 ## Validar el dataset
 
