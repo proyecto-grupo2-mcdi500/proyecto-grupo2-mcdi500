@@ -51,6 +51,7 @@ El análisis está implementado principalmente en **Python**:
 proyecto-grupo2-mcdi500/
 ├── data/
 │   ├── processed/
+│   │   ├── 04LicitacionesEne_procesado.csv
 │   │   └── README.md
 │   └── raw/
 │       ├── 04LicitacionesEne.csv
