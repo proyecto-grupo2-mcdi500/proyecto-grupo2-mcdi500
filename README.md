@@ -60,6 +60,7 @@ proyecto-grupo2-mcdi500/
 │   └── README.md
 ├── src/
 │   ├── README.md
+│   ├── utilidades.py
 │   └── validar_dataset.py
 ├── F1/
 │   ├── brainstorming/
