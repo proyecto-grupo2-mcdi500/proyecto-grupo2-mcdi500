@@ -67,6 +67,7 @@ proyecto-grupo2-mcdi500/
 │   │   └── ideas-dataset.md
 │   └── test_verification.ipynb
 ├── F2/
+│   ├── F2_Limpieza.ipynb
 │   └── F2_Preprocesamiento.ipynb
 ├── F3/
 │   └── README.md
