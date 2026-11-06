@@ -1,6 +1,6 @@
 # Documentación Compartida: Metadatos y Diccionario de Variables
 
-Esta carpeta reúne la documentación técnica compartida del proyecto **Análisis de Licitaciones Públicas en Chile (Primer Semestre 2025 — MCDI-500, Grupo 2)**, incluyendo los metadatos del conjunto de datos, las reglas y hallazgos del preprocesamiento (Fase 2) y el diccionario completo de las **74 variables** de la base.
+Esta carpeta reúne la documentación técnica compartida del proyecto **Análisis de Licitaciones Públicas en Chile (Enero 2025 — MCDI-500, Grupo 2)**, incluyendo los metadatos del conjunto de datos, las reglas y hallazgos del preprocesamiento (Fase 2) y el diccionario completo de las **74 variables** de la base.
 
 ---
 
