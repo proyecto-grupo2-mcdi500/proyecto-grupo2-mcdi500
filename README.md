@@ -39,7 +39,7 @@ Los objetivos se definen en `F1/F1_Definicion.ipynb`; esta sección los resume.
 
 El análisis está implementado principalmente en **Python**:
 
-* **Entorno:** Jupyter Notebook / Python 3.10+
+* **Entorno:** JupyterLab / Python 3.12 (versión con la que se generó `requirements.txt`)
 * **Procesamiento y Análisis:** `pandas`, `numpy`
 * **Visualización:** `matplotlib`, `seaborn`
 * **Entorno de desarrollo:** Git, GitHub, VS Code
@@ -96,9 +96,78 @@ Las carpetas de fase (`F1/` a `F4/`) no deben contener copias propias de `data/`
 
 -------------------------------------------------------------------------------------------
 
+## Configurar el entorno
+
+Estos pasos se hacen **una vez por computador**, desde la terminal y en la raíz del repositorio (en la rama de trabajo). El entorno no se crea desde los cuadernos: los cuadernos solo verifican que se esté usando el entorno correcto.
+
+### 1. Crear y activar el entorno virtual
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate        # macOS / Linux
+```
+
+Cuando el entorno está activo, la terminal muestra `(.venv)`. Para salir del entorno: `deactivate`.
+
+### 2. Instalar las dependencias
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip check              # debe indicar: No broken requirements found
+```
+
+`requirements.txt` fija la versión exacta de cada paquete. Incluye la base de trabajo con la que se configuró el proyecto:
+
+- Jupyter: `jupyterlab`, `notebook`, `ipykernel`
+- Análisis: `numpy`, `pandas`, `matplotlib`, `seaborn`, `scikit-learn`
+- Integración con Git: `jupyterlab-git`, `jupytext`, `nbstripout`
+
+El archivo se generó con `pip freeze`, por lo que también lista las dependencias indirectas de esos paquetes (unos 120 en total). Si un integrante instala o elimina una librería, debe regenerarlo con el entorno activo y subirlo en el mismo *commit*:
+
+```bash
+python -m pip freeze > requirements.txt
+```
+
+### 3. Registrar el kernel del proyecto
+
+Con el entorno activo y en otra consola ejecutar:
+
+```bash
+python -m ipykernel install --user --name grupo2_mcdi500 --display-name "Python (grupo2-mcdi500)"
+```
+
+`--name` es el identificador interno; `--display-name` es el nombre que aparece en JupyterLab. Los cuadernos del proyecto usan este kernel.
+
+### 4. Abrir JupyterLab
+
+```bash
+python -m jupyter lab
+```
+
+La terminal queda ocupada mientras JupyterLab esté abierto. Para seguir usando la terminal, abra una segunda ventana, vuelva a la carpeta del proyecto y active el entorno con `source .venv/bin/activate`.
+
+> **Nota sobre `nbstripout`:** está instalado, pero **no** debe activarse en el repositorio (`nbstripout --install`), porque borraría las salidas de los cuadernos al hacer *commit* y los entregables deben quedar ejecutados.
+
+### 5. Verificar el entorno
+
+En JupyterLab, abra `F1/test_verification.ipynb`, seleccione el kernel **Python (grupo2-mcdi500)** y ejecútelo. Debe cumplirse que:
+
+- la ruta del intérprete contiene `.venv`;
+- `numpy`, `pandas`, `matplotlib` y `sklearn` muestran su versión (ninguno aparece como `NO DISPONIBLE`).
+
+| Si ocurre | Causa probable | Qué hacer |
+| --- | --- | --- |
+| El intérprete no contiene `.venv` | Kernel equivocado | *Kernel → Change Kernel* → Python (grupo2-mcdi500) |
+| `ModuleNotFoundError` con un paquete instalado | Se instaló fuera del entorno o falta el paso 3 | Activar `.venv` y repetir los pasos 2 y 3 |
+| Falla `pip install -r requirements.txt` | Versión de Python distinta | Usar Python 3.12 |
+
+-------------------------------------------------------------------------------------------
+
 ## Validar el dataset
 
 Desde la raíz del repositorio:
+Siempre con el entorno activado `source .venv/bin/activate`
 
 ```bash
 python validar_dataset.py data/raw/04LicitacionesEne.csv --sep ";" --encoding latin-1
