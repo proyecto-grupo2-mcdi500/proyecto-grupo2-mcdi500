@@ -97,6 +97,8 @@ Las carpetas de fase (`F1/` a `F4/`) no deben contener copias propias de `data/`
 -------------------------------------------------------------------------------------------
 
 ## Configurar el entorno
+-------------------------------------------------------------------------------------------
+### macOS / Linux
 
 Estos pasos se hacen **una vez por computador**, desde la terminal y en la raíz del repositorio (en la rama de trabajo). El entorno no se crea desde los cuadernos: los cuadernos solo verifican que se esté usando el entorno correcto.
 
@@ -163,11 +165,66 @@ En JupyterLab, abra `F1/test_verification.ipynb`, seleccione el kernel **Python 
 | Falla `pip install -r requirements.txt` | Versión de Python distinta | Usar Python 3.12 |
 
 -------------------------------------------------------------------------------------------
+### Windows
+
+Estos pasos se realizan desde **Git Bash** (o la terminal integrada de **VS Code** con Git Bash) ubicados en la raíz del repositorio:
+
+### 1. Crear y activar el entorno virtual
+
+```bash
+python -m venv .venv
+source .venv/Scripts/activate    # Windows (Git Bash)
+```
+
+Cuando el entorno está activo, la terminal de Git Bash muestra `(.venv)`. Para salir del entorno: `deactivate`.
+
+### 2. Instalar las dependencias
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install pandas numpy matplotlib seaborn scikit-learn scipy ipykernel
+python -m pip check              # debe indicar: No broken requirements found
+```
+
+> **Nota para Windows:** Como `requirements.txt` fue generado con `pip freeze` en macOS, contiene dependencias exclusivas de sistemas Unix (`appnope`, `pexpect`, `ptyprocess`). Por ello, en Windows se instalan directamente las librerías principales de análisis y el kernel de Jupyter con el comando anterior.
+
+### 3. Registrar el kernel del proyecto
+
+Con el entorno activo en Git Bash, ejecutar:
+
+```bash
+python -m ipykernel install --user --name grupo2_mcdi500 --display-name "Python (grupo2-mcdi500)"
+```
+
+### 4. Abrir el proyecto en VS Code
+
+Desde Git Bash en la raíz del repositorio:
+
+```bash
+code .
+```
+
+Dentro de **VS Code**, al abrir cualquier cuaderno (`.ipynb`), hacer clic en **Select Kernel** (esquina superior derecha) → **Jupyter Kernel...** (o **Python Environments...**) y seleccionar **Python (grupo2-mcdi500)**.
+
+### 5. Verificar el entorno en VS Code
+
+Abrir `F1/test_verification.ipynb` en VS Code, seleccionar el kernel **Python (grupo2-mcdi500)** y ejecutar la celda. Debe comprobarse que:
+
+- la ruta del intérprete apunte al entorno configurado;
+- `numpy`, `pandas`, `matplotlib` y `sklearn` muestren su versión instalada (ninguno aparece como `NO DISPONIBLE`).
+
+| Si ocurre | Causa probable | Qué hacer |
+| --- | --- | --- |
+| VS Code pide seleccionar un kernel | Primera vez que se abre el cuaderno | Hacer clic en *Select Kernel* → *Python (grupo2-mcdi500)* |
+| `ModuleNotFoundError` al ejecutar una celda | Librerías instaladas en otro intérprete o kernel sin reiniciar | Ejecutar los pasos 2 y 3 en Git Bash y presionar *Restart* en la barra superior del notebook |
+| Falla `pip install -r requirements.txt` en Windows | Paquetes exclusivos de macOS (`appnope`, `ptyprocess`) | Instalar los paquetes principales con `python -m pip install pandas numpy matplotlib seaborn scikit-learn scipy ipykernel` |
+
+-------------------------------------------------------------------------------------------
 
 ## Validar el dataset
 
 Desde la raíz del repositorio:
-Siempre con el entorno activado `source .venv/bin/activate`
+Siempre con el entorno activado (`source .venv/bin/activate` en macOS/Linux o `source .venv/Scripts/activate` en Git Bash para Windows):
 
 ```bash
 python validar_dataset.py data/raw/04LicitacionesEne.csv --sep ";" --encoding latin-1
