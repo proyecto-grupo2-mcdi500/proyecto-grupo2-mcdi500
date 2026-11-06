@@ -31,7 +31,7 @@ En el cuaderno `F2/F2_Preprocesamiento.ipynb` se aplicaron transformaciones cont
 - **Resultado de validación:**
   - `FechaPublicacion`: 0 nulos originales, **0 fallos de conversión**.
   - `FechaCierre`: 0 nulos originales, **0 fallos de conversión**.
-  - `FechaAdjudicacion`: 91 nulos originales (0,20%, correspondientes a licitaciones en estado `Cerrada`, `Desierta` o `Suspendida`), **0 fallos de conversión**.
+  - `FechaAdjudicacion`: 91 nulos originales (0,20%, todos correspondientes a licitaciones en estado `Cerrada`; las `Desierta` y `Suspendida` sí registran fecha), **0 fallos de conversión**.
 
 ### 2.2. Limpieza y conversión de montos de oferta (`Float64`)
 - **Columnas transformadas:** `MontoNetoOferta` y `MontoTotalOferta`.
@@ -106,7 +106,7 @@ Los montos están expresados en 4 unidades monetarias distintas que **no deben m
 | 15 | `FechaActoAperturaTecnica` | `str` | `str` | 0 | 0,00% | 1.100 | Fecha y hora de apertura de las ofertas técnicas. |
 | 16 | `FechaActoAperturaEconomica` | `str` | `str` | 0 | 0,00% | 1.104 | Fecha y hora de apertura de las ofertas económicas. |
 | 17 | `FechaCierre` | `str` | `datetime64[ns]` | 0 | 0,00% | 810 | Fecha y hora límite para presentar ofertas en la licitación *(convertida en Paso 14)*. |
-| 18 | `FechaAdjudicacion` | `str` | `datetime64[ns]` | 91 | 0,20% | 2.144 | Fecha y hora efectiva de adjudicación de la licitación *(convertida en Paso 14)*. |
+| 18 | `FechaAdjudicacion` | `str` | `datetime64[ns]` | 91 | 0,20% | 2.144 | Fecha y hora efectiva de adjudicación de la licitación; vacía en 91 filas de licitaciones `Cerrada` *(convertida en Paso 14)*. |
 | 19 | `FechaEntregaEnSoporteFisico` | `str` | `str` | 45.457 | 99,38% | 22 | Fecha límite de entrega de antecedentes físicos (cuando aplica). |
 | 20 | `FechaEstimadaEvaluacionOfertas` | `str` | `str` | 43.489 | 95,08% | 22 | Fecha estimada de evaluación de las ofertas recibidas. |
 | 21 | `UnidadTiempoEvaluacion` | `str` | `str` | 88 | 0,19% | 3 | Unidad de medida del plazo de evaluación (ej. horas, días). |
@@ -115,7 +115,7 @@ Los montos están expresados en 4 unidades monetarias distintas que **no deben m
 
 | # | Variable | Tipo Original | Tipo Procesado | Nulos | % Nulos | Valores Distintos | Descripción |
 | :---: | :--- | :---: | :---: | ---: | ---: | ---: | :--- |
-| 22 | `EstadoLicitacion` | `str` | `str` | 0 | 0,00% | 4 | Estado del proceso (`Adjudicada`: 45.570, `Cerrada`: 95, `Desierta`: 72, `Suspendida`: 4). |
+| 22 | `EstadoLicitacion` | `str` | `str` | 0 | 0,00% | 4 | Estado del proceso (`Adjudicada`: 45.570, `Cerrada`: 95, `Desierta (o art. 3 ó 9 Ley 19.886)`: 72, `Suspendida`: 4). |
 | 23 | `ContemplaObrasPublicas` | `str` | `str` | 4.929 | 10,78% | 2 | Indica si la licitación contempla ejecución de obras públicas (`Si` / `No`). |
 | 24 | `LicitacionInformada` | `str` | `str` | 0 | 0,00% | 1 | Indicador constante en la muestra (`1` valor único). |
 | 25 | `LicitacionBaseTipo` | `float64` | `float64` | 45.741 | 100,00% | 0 | Indicador de uso de Bases Tipo de Contraloría *(columna 100% nula)*. |

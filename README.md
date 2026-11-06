@@ -24,12 +24,14 @@ A partir de este conjunto de datos, se examinan variables clave como institucion
 
 ## Objetivos del Proyecto
 
-* **Objetivo General:** Analizar los procesos de compras y licitaciones públicas durante enero de 2025 para describir dinámicas de adjudicación y detectar patrones de concentración o sesgo.
+Los objetivos se definen en `F1/F1_Definicion.ipynb`; esta sección los resume.
+
+* **Objetivo General:** Analizar los procesos de compras y licitaciones públicas registrados en ChileCompra durante enero de 2025 para describir las dinámicas de participación y adjudicación, caracterizar el comportamiento de los montos ofertados e identificar eventuales patrones de concentración o valores atípicos.
 * **Objetivos Específicos:**
-  * Limpiar, estructurar y validar el dataset descargado de ChileCompra.
-  * Realizar un Análisis Exploratorio de Datos (EDA) sobre montos, rubros e instituciones públicas más activas.
-  * Estudiar la distribución de adjudicaciones a proveedores y detectar posibles concentraciones por mercado o sector.
-  * Evaluar el impacto de las variables temporales y geográficas en el éxito de las ofertas.
+  1. Estructurar, limpiar y validar el dataset de licitaciones públicas descargado desde ChileCompra, documentando el tratamiento de fechas, montos, monedas, valores nulos y categorías.
+  2. Realizar un Análisis Exploratorio de Datos (EDA) sobre montos ofertados, modalidades de licitación, rubros e instituciones públicas compradoras más activas.
+  3. Estudiar la distribución de ofertas y adjudicaciones según el tamaño del proveedor (Micro, Pequeña, Mediana, Grande, NoClasificado) y detectar posibles concentraciones por sector o rubro.
+  4. Evaluar el comportamiento de los plazos del proceso licitatorio y la presencia de valores extremos en los montos mediante el criterio del rango intercuartílico (IQR).
 
 -------------------------------------------------------------------------------------------
 
@@ -87,7 +89,7 @@ proyecto-grupo2-mcdi500/
 - `data/processed/`: carpeta destinada a almacenar los datos derivados y preparados para el análisis.
 - `docs/`: documentación compartida del proyecto.
 - `F1/`: reúne la definición del problema y el alcance en `F1/F1_Definicion.ipynb`, ideas iniciales en `F1/brainstorming/ideas-dataset.md` y el chequeo del entorno en `F1/test_verification.ipynb`.
-- `F2/`: contiene el cuaderno `F2/F2_Preprocesamiento.ipynb`, dedicado a la exploración y preprocesamiento de los datos.
+- `F2/`: el cuaderno oficial es `F2/F2_Preprocesamiento.ipynb`, dedicado a la exploración y preprocesamiento de los datos; su salida oficial es `data/processed/04LicitacionesEne_procesado.csv`. `F2/F2_Limpieza.ipynb` es complementario y no oficial: agrega columnas de revisión (fechas fuera de orden, montos negativos y atípicos) y, al ejecutarse, genera `data/processed/04LicitacionesEne_limpio.csv`, que no está incluido en el repositorio.
 - `F3/` y `F4/`: carpetas destinadas a los notebooks y entregables específicos de las etapas posteriores.
 
 Las carpetas de fase (`F1/` a `F4/`) no deben contener copias propias de `data/`, `docs/` ni `src/`. Si una fase genera un archivo reutilizable, se guarda en la ubicación compartida correspondiente; sus notebooks permanecen en la carpeta de la fase.
