@@ -84,6 +84,7 @@ proyecto-grupo2-mcdi500/
 
 - `README.md`: presenta el proyecto, su contexto, objetivos, fuente de datos y herramientas utilizadas.
 - `requirements.txt`: contiene las dependencias de Python necesarias para ejecutar el proyecto.
+- `src/utilidades.py`: módulo compartido con funciones reutilizables de normalización de nombres (`normalizar_nombre`, `normalizar_columnas`), carga de datos (`cargar_datos_crudos`, `cargar_datos_procesados`), conversión de fechas y montos, ordenamiento de categorías y detección de valores atípicos (IQR), además de la excepción `ProyectoError`.
 - `validar_dataset.py` y `src/validar_dataset.py`: scripts y módulos reutilizables para revisar y validar archivos de datos entre fases.
 - `data/raw/`: contiene los datos originales (`data/raw/04LicitacionesEne.csv`), almacenados en una única ubicación compartida.
 - `data/processed/`: carpeta destinada a almacenar los datos derivados y preparados para el análisis.
