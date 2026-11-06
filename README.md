@@ -105,7 +105,6 @@ Estos pasos se hacen **una vez por computador**, desde la terminal y en la raíz
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate        # macOS / Linux
-# .venv\Scripts\activate         # Windows
 ```
 
 Cuando el entorno está activo, la terminal muestra `(.venv)`. Para salir del entorno: `deactivate`.
@@ -127,14 +126,12 @@ python -m pip check              # debe indicar: No broken requirements found
 El archivo se generó con `pip freeze`, por lo que también lista las dependencias indirectas de esos paquetes (unos 120 en total). Si un integrante instala o elimina una librería, debe regenerarlo con el entorno activo y subirlo en el mismo *commit*:
 
 ```bash
-python -m pip install <paquete>          # o: python -m pip uninstall <paquete>
 python -m pip freeze > requirements.txt
-git diff requirements.txt                # revisar los cambios antes del commit
 ```
 
 ### 3. Registrar el kernel del proyecto
 
-Con el entorno activo:
+Con el entorno activo y en otra consola ejecutar:
 
 ```bash
 python -m ipykernel install --user --name grupo2_mcdi500 --display-name "Python (grupo2-mcdi500)"
@@ -170,6 +167,7 @@ En JupyterLab, abra `F1/test_verification.ipynb`, seleccione el kernel **Python 
 ## Validar el dataset
 
 Desde la raíz del repositorio:
+Siempre con el entorno activado `source .venv/bin/activate`
 
 ```bash
 python validar_dataset.py data/raw/04LicitacionesEne.csv --sep ";" --encoding latin-1
