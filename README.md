@@ -67,8 +67,7 @@ proyecto-grupo2-mcdi500/
 ├── F1/
 │   ├── brainstorming/
 │   │   └── ideas-dataset.md
-│   ├── F1_Definicion.ipynb
-│   └── test_verification.ipynb
+│   └── F1_Definicion.ipynb
 ├── F2/
 │   └── F2_Preprocesamiento.ipynb
 ├── F3/
@@ -88,7 +87,7 @@ proyecto-grupo2-mcdi500/
 - `data/raw/`: contiene los datos originales (`data/raw/04LicitacionesEne.csv`), almacenados en una única ubicación compartida.
 - `data/processed/`: carpeta destinada a almacenar los datos derivados y preparados para el análisis.
 - `docs/`: documentación compartida del proyecto.
-- `F1/`: reúne la definición del problema y el alcance en `F1/F1_Definicion.ipynb`, ideas iniciales en `F1/brainstorming/ideas-dataset.md` y el chequeo del entorno en `F1/test_verification.ipynb`.
+- `F1/`: reúne en `F1/F1_Definicion.ipynb` la definición del problema, el alcance y la verificación del entorno, además de las ideas iniciales en `F1/brainstorming/ideas-dataset.md`.
 - `F2/`: el cuaderno oficial es `F2/F2_Preprocesamiento.ipynb`, dedicado a la exploración y preprocesamiento de los datos; su salida oficial es `data/processed/04LicitacionesEne_procesado.csv`.
 - `F3/` y `F4/`: carpetas destinadas a los notebooks y entregables específicos de las etapas posteriores.
 
@@ -153,10 +152,12 @@ La terminal queda ocupada mientras JupyterLab esté abierto. Para seguir usando 
 
 ### 5. Verificar el entorno
 
-En JupyterLab, abra `F1/test_verification.ipynb`, seleccione el kernel **Python (grupo2-mcdi500)** y ejecútelo. Debe cumplirse que:
+En JupyterLab, abra `F1/F1_Definicion.ipynb`, seleccione el kernel **Python (grupo2-mcdi500)** y ejecute todas las celdas (*Run → Run All Cells*). En la sección 8 (*Verificación del Entorno*) debe cumplirse que:
 
-- la ruta del intérprete contiene `.venv`;
-- `numpy`, `pandas`, `matplotlib` y `sklearn` muestran su versión (ninguno aparece como `NO DISPONIBLE`).
+- el entorno virtual aparece como `[OK] activo` y la ruta del intérprete contiene `.venv`;
+- `numpy`, `pandas`, `matplotlib`, `seaborn` y `sklearn` aparecen con `[OK]` y su versión (ninguna como `[FALTA]`).
+
+Si alguna de estas condiciones no se cumple, el cuaderno se detiene en el PASO 5.
 
 | Si ocurre | Causa probable | Qué hacer |
 | --- | --- | --- |
@@ -208,10 +209,10 @@ Dentro de **VS Code**, al abrir cualquier cuaderno (`.ipynb`), hacer clic en **S
 
 ### 5. Verificar el entorno en VS Code
 
-Abrir `F1/test_verification.ipynb` en VS Code, seleccionar el kernel **Python (grupo2-mcdi500)** y ejecutar la celda. Debe comprobarse que:
+Abrir `F1/F1_Definicion.ipynb` en VS Code, seleccionar el kernel **Python (grupo2-mcdi500)** y ejecutar todas las celdas (*Run All*). En la sección 8 (*Verificación del Entorno*) debe comprobarse que:
 
-- la ruta del intérprete apunte al entorno configurado;
-- `numpy`, `pandas`, `matplotlib` y `sklearn` muestren su versión instalada (ninguno aparece como `NO DISPONIBLE`).
+- el entorno virtual aparezca como `[OK] activo` y la ruta del intérprete apunte al entorno configurado;
+- `numpy`, `pandas`, `matplotlib`, `seaborn` y `sklearn` aparezcan con `[OK]` y su versión instalada (ninguna como `[FALTA]`).
 
 | Si ocurre | Causa probable | Qué hacer |
 | --- | --- | --- |
