@@ -1,0 +1,75 @@
+﻿Columna;Tipo;Origen;Transformación
+NroLicitacion;str;04LicitacionesEne.csv;Se conserva
+NombreLicitacion;str;04LicitacionesEne.csv;Se conserva
+TipoLicitacion;str;04LicitacionesEne.csv;Se conserva
+Descripcion;str;04LicitacionesEne.csv;Se conserva
+MonedaLicitacion;str;04LicitacionesEne.csv;Se conserva
+MontoEstimadoLicitacion;int64;04LicitacionesEne.csv;Se conserva
+MontoEstimadoVisible;str;04LicitacionesEne.csv;Se conserva
+BaseEstimacionMontoLicitacion;str;04LicitacionesEne.csv;Se conserva
+FuenteFinanciamiento;str;04LicitacionesEne.csv;Se conserva
+JustificacionMontoEstimado;str;04LicitacionesEne.csv;Se conserva
+FechaPublicacion;datetime64[us];04LicitacionesEne.csv;Conversión de fecha y hora
+FechaInicioPreguntas;str;04LicitacionesEne.csv;Se conserva
+FechaFinalPreguntas;str;04LicitacionesEne.csv;Se conserva
+FechaPublicacionRespuestas;str;04LicitacionesEne.csv;Se conserva
+FechaActoAperturaTecnica;str;04LicitacionesEne.csv;Se conserva
+FechaActoAperturaEconomica;str;04LicitacionesEne.csv;Se conserva
+FechaCierre;datetime64[us];04LicitacionesEne.csv;Conversión de fecha y hora
+FechaAdjudicacion;datetime64[us];04LicitacionesEne.csv;Conversión de fecha y hora
+FechaEntregaEnSoporteFisico;str;04LicitacionesEne.csv;Se conserva
+FechaEstimadaEvaluacionOfertas;str;04LicitacionesEne.csv;Se conserva
+UnidadTiempoEvaluacion;str;04LicitacionesEne.csv;Se conserva
+EstadoLicitacion;str;04LicitacionesEne.csv;Se conserva
+ContemplaObrasPublicas;str;04LicitacionesEne.csv;Se conserva
+LicitacionInformada;str;04LicitacionesEne.csv;Se conserva
+LicitacionBaseTipo;float64;04LicitacionesEne.csv;Se conserva
+TipoAdjudicacion;str;04LicitacionesEne.csv;Se conserva
+TipoAprobacionAdjudicacion;str;04LicitacionesEne.csv;Se conserva
+NumeroActaAprobacion;str;04LicitacionesEne.csv;Se conserva
+FechaActaAprobacion;str;04LicitacionesEne.csv;Se conserva
+TipoConvocatoria;str;04LicitacionesEne.csv;Se conserva
+NroEtapasLicitacion;str;04LicitacionesEne.csv;Se conserva
+SubContratacion;str;04LicitacionesEne.csv;Se conserva
+ProhibicionSubContratacion;str;04LicitacionesEne.csv;Se conserva
+TomaRazonContraloria;str;04LicitacionesEne.csv;Se conserva
+PublicidadOfertasTecnicas;str;04LicitacionesEne.csv;Se conserva
+RazonPublicidadOfertasTecnicas;str;04LicitacionesEne.csv;Se conserva
+Contrato;str;04LicitacionesEne.csv;Se conserva
+TiempoDuracionContrato;int64;04LicitacionesEne.csv;Se conserva
+UnidadTiempoDuracionContrato;str;04LicitacionesEne.csv;Se conserva
+ContratoRenovable;float64;04LicitacionesEne.csv;Se conserva
+ValorTiempoRenovacion;int64;04LicitacionesEne.csv;Se conserva
+UnidadTiempoRenovacion;float64;04LicitacionesEne.csv;Se conserva
+FechaEstimadaFirmaContrato;str;04LicitacionesEne.csv;Se conserva
+TipoEjecucion;str;04LicitacionesEne.csv;Se conserva
+PlazoPagoContrato;str;04LicitacionesEne.csv;Se conserva
+TipoPago;str;04LicitacionesEne.csv;Se conserva
+ObservacionContrato;str;04LicitacionesEne.csv;Se conserva
+ExtensionPlazo;str;04LicitacionesEne.csv;Se conserva
+UnidadCompra;str;04LicitacionesEne.csv;Se conserva
+UnidadCompraRUT;str;04LicitacionesEne.csv;Se conserva
+entCode;int64;04LicitacionesEne.csv;Se conserva
+Institucion;str;04LicitacionesEne.csv;Se conserva
+Sector;str;04LicitacionesEne.csv;Se conserva
+RubroN1;str;04LicitacionesEne.csv;Se conserva
+RubroN2;str;04LicitacionesEne.csv;Se conserva
+RubroN3;str;04LicitacionesEne.csv;Se conserva
+CodigoProductoONU;int64;04LicitacionesEne.csv;Se conserva
+ONUProducto;str;04LicitacionesEne.csv;Se conserva
+NombreItem;str;04LicitacionesEne.csv;Se conserva
+DescripcionItem;str;04LicitacionesEne.csv;Se conserva
+UnidadMedida;str;04LicitacionesEne.csv;Se conserva
+CantidadItem;int64;04LicitacionesEne.csv;Se conserva
+Proveedor;str;04LicitacionesEne.csv;Se conserva
+ProveedorRUT;str;04LicitacionesEne.csv;Se conserva
+ActividadProveedor;str;04LicitacionesEne.csv;Se conserva
+TamanoProveedor;category;04LicitacionesEne.csv;Orden lógico de tamaño de proveedor
+NombreOferta;str;04LicitacionesEne.csv;Se conserva
+EspecificacionesProveedor;str;04LicitacionesEne.csv;Se conserva
+EstadoOferta;str;04LicitacionesEne.csv;Se conserva
+CantidadOferta;int64;04LicitacionesEne.csv;Se conserva
+MonedaOferta;str;04LicitacionesEne.csv;Se conserva
+MontoNetoOferta;Float64;04LicitacionesEne.csv;Conversión numérica con coma decimal
+MontoTotalOferta;Float64;04LicitacionesEne.csv;Conversión numérica con coma decimal
+ResultadoOferta;str;04LicitacionesEne.csv;Se conserva
