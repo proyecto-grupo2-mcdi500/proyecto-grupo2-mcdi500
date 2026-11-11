@@ -54,6 +54,10 @@ proyecto-grupo2-mcdi500/
 ├── data/
 │   ├── processed/
 │   │   ├── 04LicitacionesEne_procesado.csv
+│   │   ├── diccionario_f3.csv
+│   │   ├── entrenamiento_f3.csv
+│   │   ├── parametros_f3.csv
+│   │   ├── prueba_f3.csv
 │   │   └── README.md
 │   └── raw/
 │       ├── 04LicitacionesEne.csv
@@ -61,6 +65,8 @@ proyecto-grupo2-mcdi500/
 ├── docs/
 │   └── README.md
 ├── src/
+│   ├── medicion.py
+│   ├── pipeline_licitaciones.py
 │   ├── README.md
 │   ├── utilidades.py
 │   └── validar_dataset.py
@@ -71,6 +77,7 @@ proyecto-grupo2-mcdi500/
 ├── F2/
 │   └── F2_Preprocesamiento.ipynb
 ├── F3/
+│   ├── F3_Nucleo_Algoritmico.ipynb
 │   └── README.md
 ├── F4/
 │   └── README.md
