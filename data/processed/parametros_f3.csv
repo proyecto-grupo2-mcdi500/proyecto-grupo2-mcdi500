@@ -1,0 +1,7 @@
+﻿Paso;Parámetro;Valor;Origen
+ConversorFechas;formato;%d-%m-%Y %H:%M;Fijo
+ConversorMontos;regla;Recortar espacios y sustituir coma por punto;Fijo
+OrdenadorTamano;orden;Micro | Pequeña | Mediana | Grande | NoClasificado;Fijo
+División;grupo;NroLicitacion;Fijo
+División;semilla;42;Fijo
+División;fracción de prueba por grupos;0.2;Fijo
