@@ -53,14 +53,10 @@ El análisis está implementado principalmente en **Python**:
 proyecto-grupo2-mcdi500/
 ├── data/
 │   ├── processed/
-│   │   ├── 04LicitacionesEne_procesado.csv
 │   │   ├── diccionario_f3.csv
-│   │   ├── entrenamiento_f3.csv
 │   │   ├── parametros_f3.csv
-│   │   ├── prueba_f3.csv
 │   │   └── README.md
 │   └── raw/
-│       ├── 04LicitacionesEne.csv
 │       └── README.md
 ├── docs/
 │   └── README.md
