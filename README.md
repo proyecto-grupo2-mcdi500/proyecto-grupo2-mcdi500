@@ -91,7 +91,7 @@ proyecto-grupo2-mcdi500/
 - `requirements.txt`: contiene las dependencias de Python necesarias para ejecutar el proyecto.
 - `src/utilidades.py`: módulo compartido con funciones reutilizables de normalización de nombres (`normalizar_nombre`, `normalizar_columnas`), carga de datos (`cargar_datos_crudos`, `cargar_datos_procesados`), conversión de fechas y montos, ordenamiento de categorías y detección de valores atípicos (IQR), además de la excepción `ProyectoError`.
 - `validar_dataset.py` y `src/validar_dataset.py`: scripts y módulos reutilizables para revisar y validar archivos de datos entre fases.
-- `data/raw/`: contiene los datos originales (`data/raw/04LicitacionesEne.csv`), almacenados en una única ubicación compartida.
+- `data/raw/`: ubicación local de los datos originales (`data/raw/04LicitacionesEne.csv`). El archivo no se versiona porque contiene datos personales; ver *Obtener los datos*.
 - `data/processed/`: carpeta destinada a almacenar los datos derivados y preparados para el análisis.
 - `docs/`: documentación compartida del proyecto.
 - `F1/`: reúne en `F1/F1_Definicion.ipynb` la definición del problema, el alcance y la verificación del entorno, además de las ideas iniciales en `F1/brainstorming/ideas-dataset.md`.
@@ -226,6 +226,18 @@ Abrir `F1/F1_Definicion.ipynb` en VS Code, seleccionar el kernel **Python (grupo
 | VS Code pide seleccionar un kernel | Primera vez que se abre el cuaderno | Hacer clic en *Select Kernel* → *Python (grupo2-mcdi500)* |
 | `ModuleNotFoundError` al ejecutar una celda | Librerías instaladas en otro intérprete o kernel sin reiniciar | Ejecutar los pasos 2 y 3 en Git Bash y presionar *Restart* en la barra superior del notebook |
 | Falla `pip install -r requirements.txt` en Windows | Paquetes exclusivos de macOS (`appnope`, `ptyprocess`) | Instalar los paquetes principales con `python -m pip install pandas numpy matplotlib seaborn scikit-learn scipy ipykernel` |
+
+-------------------------------------------------------------------------------------------
+
+## Obtener los datos
+
+El archivo original `data/raw/04LicitacionesEne.csv` **no está en el repositorio**: contiene el nombre y el RUT de los proveedores, por lo que está excluido en `.gitignore`. Cada integrante lo descarga una vez, después de configurar el entorno:
+
+1. Descarga [04LicitacionesEne.zip desde OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQC4FsRVSA7FQZ_vVtA7HW9gAXYbDcGX6o_MVfe2-Uywd70?e=cu6AXI) con tu cuenta UNAB (acceso solo para el grupo y el docente).
+2. Descomprímelo y deja el CSV en `data/raw/04LicitacionesEne.csv`.
+3. Verifica su SHA-256 como se indica en [`data/raw/README.md`](data/raw/README.md).
+
+No abras ni guardes el CSV con Excel: lo reescribe con otro formato y altera el contenido.
 
 -------------------------------------------------------------------------------------------
 
