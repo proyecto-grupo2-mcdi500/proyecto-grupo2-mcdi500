@@ -219,6 +219,11 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# Macbook files
+*.DS_Store
+
+
 # Datos originales con RUT: no se versionan (ver data/raw/README.md)
 data/raw/*.csv
 data/raw/*.zip
+

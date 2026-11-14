@@ -227,9 +227,9 @@ Abrir `F1/F1_Definicion.ipynb` en VS Code, seleccionar el kernel **Python (grupo
 
 ## Obtener los datos
 
-El archivo original `data/raw/04LicitacionesEne.csv` **no está en el repositorio**: contiene el nombre y el RUT de los proveedores, por lo que está excluido en `.gitignore`. Cada integrante lo descarga una vez, después de configurar el entorno:
+El archivo de entrada `data/raw/04LicitacionesEne.csv` no está en el repositorio (está excluido en `.gitignore`). Cada integrante lo descarga una vez, después de configurar el entorno:
 
-1. Descarga [04LicitacionesEne.zip desde OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQC4FsRVSA7FQZ_vVtA7HW9gAXYbDcGX6o_MVfe2-Uywd70?e=cu6AXI) con tu cuenta UNAB (acceso solo para el grupo y el docente).
+1. Descarga [04LicitacionesEne.zip desde OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7) con tu cuenta UNAB (acceso solo para el grupo y el docente).
 2. Descomprímelo y deja el CSV en `data/raw/04LicitacionesEne.csv`.
 3. Verifica su SHA-256 como se indica en [`data/raw/README.md`](data/raw/README.md).
 
