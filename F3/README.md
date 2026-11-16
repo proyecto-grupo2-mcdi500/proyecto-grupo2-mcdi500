@@ -6,7 +6,7 @@ Ubicación para los notebooks y entregables propios de la Fase 3. Los datos y m�
 ## Licitaciones públicas de ChileCompra · MCDI500 · Grupo 2
 
 ### 1. ¿Qué contiene esta carpeta?
-La carpeta `F3/` alberga el notebook analítico y técnico de la tercera fase del proyecto (`F3_Preprocesamiento.ipynb`), diseñado para estructurar el preprocesamiento de datos bajo un paradigma de Programación Orientada a Objetos (POO), evaluar el rendimiento algorítmico y garantizar robustez frente a casos límite y excepciones.
+La carpeta `F3/` alberga el notebook analítico y técnico de la tercera fase del proyecto (`F3_Nucleo_Algoritmico.ipynb`), diseñado para estructurar el preprocesamiento de datos bajo un paradigma de Programación Orientada a Objetos (POO), evaluar el rendimiento algorítmico y garantizar robustez frente a casos límite y excepciones.
 
 ### 2. Módulos de `src/` utilizados por el notebook
 El notebook de F3 importa y coordina directamente los siguientes componentes desarrollados en la carpeta raíz `src/`:
