@@ -292,24 +292,37 @@ def calcular_brecha(datos: pd.DataFrame) -> pd.DataFrame:
 def validar_procesado(
     ofertas: pd.DataFrame, licitaciones: pd.DataFrame, filas_originales: int,
     limites: LimitesIQR | None,
-) -> None:
-    """Comprueba cardinalidad, columnas permitidas y consistencia de los indicadores exportados."""
+) -> list[str]:
+    """Comprueba cardinalidad, columnas permitidas y consistencia de los indicadores exportados.
+
+    Lanza AssertionError en la primera comprobación que falla. Si todas pasan,
+    devuelve su descripción, para dejar evidencia en el notebook.
+    """
+    aprobadas = []
     assert len(ofertas) == filas_originales, "Cambió la cantidad de filas de ofertas."
+    aprobadas.append(f"Ofertas: se conservan las {filas_originales:,} filas de entrada")
     permitidas = set(MOTIVOS) | {
         "EsDuplicadoPotencial", "TamanoProveedorOrdinal", "EsExtremoLogIQR_CLP",
     }
     assert set(ofertas.columns) <= permitidas, "Hay columnas fuera del conjunto autorizado."
+    aprobadas.append(f"Ofertas: las {ofertas.shape[1]} columnas pertenecen al conjunto autorizado")
     ids = normalizar_codigo(ofertas["NroLicitacion"]).dropna()
     assert licitaciones["NroLicitacion"].is_unique, "Se repiten licitaciones."
     assert set(licitaciones["NroLicitacion"]) == set(ids), "Faltan licitaciones con código."
+    aprobadas.append(f"Licitaciones: {len(licitaciones):,} códigos únicos, los mismos de las ofertas")
     ordinal = ofertas["TamanoProveedorOrdinal"]
     assert ordinal.cat.ordered and tuple(ordinal.cat.categories) == ORDEN_TAMANO
     sin_clasificar = normalizar_codigo(ofertas["TamanoProveedor"]).eq("NOCLASIFICADO").fillna(False)
     assert ordinal[sin_clasificar].isna().all(), "NoClasificado tiene rango."
+    aprobadas.append("Tamaño: escala " + " < ".join(ORDEN_TAMANO) + "; NoClasificado sin rango")
     comparable = licitaciones["EstadoBrecha"].eq("Calculada")
     assert np.array_equal(licitaciones["BrechaMonto"].notna(), comparable)
+    aprobadas.append("Brecha: existe solo en las licitaciones con estado Calculada")
     validas = licitaciones.loc[comparable]
     assert validas["MontoTotalGanadoras"].gt(0).all() and validas["MontoEstimadoLicitacion"].gt(0).all()
     assert validas["OfertasGanadoras"].gt(0).all() and not validas["GanadoraMonedaDistinta"].any()
+    aprobadas.append("Brecha: montos ganadores y estimados positivos, en la misma moneda")
     evaluadas = ofertas_clp_validas(ofertas) if limites is not None else pd.Series(False, index=ofertas.index)
     assert np.array_equal(ofertas["EsExtremoLogIQR_CLP"].notna(), evaluadas)
+    aprobadas.append("Extremos: la bandera existe solo en ofertas CLP con monto positivo")
+    return aprobadas
