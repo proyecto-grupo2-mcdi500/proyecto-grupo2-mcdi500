@@ -10,13 +10,15 @@ class ProyectoError(Exception):
     """Excepción personalizada para errores de validación y procesamiento del proyecto."""
 
 
+# Escala ordinal del tamaño de proveedor. "NoClasificado" no es un tamaño:
+# se reconoce como valor válido, pero queda fuera de la escala (NaN).
 ORDEN_TAMANO_PROVEEDOR = [
     "Micro",
     "Pequeña",
     "Mediana",
     "Grande",
-    "NoClasificado",
 ]
+TAMANO_SIN_CLASIFICAR = "NoClasificado"
 
 COLUMNAS_FECHA_PRINCIPALES = [
     "FechaPublicacion",
@@ -160,10 +162,21 @@ def ordenar_tamano_proveedor(
     columna: str = "TamanoProveedor",
     orden: list[str] | None = None,
 ) -> pd.DataFrame:
-    """Convierte la columna TamanoProveedor en una categoría ordenada."""
+    """Convierte la columna TamanoProveedor en una categoría ordenada.
+
+    "NoClasificado" queda como faltante (NaN), porque no tiene rango en la escala.
+    Lanza ProyectoError si aparece una categoría desconocida, en lugar de
+    convertirla en faltante sin aviso.
+    """
     df_out = df.copy()
     if columna in df_out.columns:
         categorias = orden or ORDEN_TAMANO_PROVEEDOR
+        presentes = set(df_out[columna].dropna().unique())
+        desconocidas = presentes - set(categorias) - {TAMANO_SIN_CLASIFICAR}
+        if desconocidas:
+            raise ProyectoError(
+                f"Categorías desconocidas en {columna}: {sorted(map(str, desconocidas))}"
+            )
         tipo_cat = pd.CategoricalDtype(categories=categorias, ordered=True)
         df_out[columna] = df_out[columna].astype(tipo_cat)
     return df_out

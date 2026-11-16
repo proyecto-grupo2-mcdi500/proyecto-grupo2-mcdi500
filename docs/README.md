@@ -1,6 +1,6 @@
 # Documentación Compartida: Metadatos y Diccionario de Variables
 
-Esta carpeta reúne la documentación técnica compartida del proyecto **Análisis de Licitaciones Públicas en Chile (Enero 2025 — MCDI-500, Grupo 2)**, incluyendo los metadatos del conjunto de datos, las reglas y hallazgos del preprocesamiento (Fase 2) y el diccionario completo de las **74 variables** de la base.
+Esta carpeta reúne la documentación técnica compartida del proyecto **Análisis de Licitaciones Públicas en Chile (Enero 2025 — MCDI-500, Grupo 2)**, incluyendo los metadatos del conjunto de datos, las reglas y hallazgos del preprocesamiento (Fase 2) y el diccionario completo de las **72 variables** de la base.
 
 ---
 
@@ -10,14 +10,14 @@ Esta carpeta reúne la documentación técnica compartida del proyecto **Anális
 | :--- | :--- |
 | **Fuente oficial** | [ChileCompra — Portal de Datos Abiertos](https://datos-abiertos.chilecompra.cl/descargas/ordenes-y-licitaciones) |
 | **Periodo cubierto** | Enero de 2025 (procesos publicados/cerrados en el periodo e historial asociado) |
-| **Archivo original (`raw`)** | `data/raw/04LicitacionesEne.csv` |
+| **Archivo de entrada (`raw`)** | `data/raw/04LicitacionesEne.csv` (local, no versionado; descarga en `data/raw/README.md`) |
 | **Formato y codificación original** | Texto plano CSV delimitado por punto y coma (`;`), codificación `latin-1` (ISO-8859-1) |
 | **Archivo procesado (`processed`)** | `data/processed/04LicitacionesEne_procesado.csv` |
 | **Formato y codificación procesada** | CSV delimitado por punto y coma (`;`), codificación `utf-8-sig` (UTF-8 con BOM) |
 | **Cantidad de registros (filas)** | **45.741** filas |
-| **Cantidad de variables (columnas)** | **74** columnas |
+| **Cantidad de variables (columnas)** | **72** columnas |
 | **Filas completamente duplicadas** | **0** duplicados exactos |
-| **Unidad de análisis (granularidad)** | Cada fila representa la **oferta de un proveedor (`ProveedorRUT`) para un ítem o línea de producto específico (`CodigoProductoONU` / `NombreItem`) dentro de una licitación (`NroLicitacion`)**. |
+| **Unidad de análisis (granularidad)** | Cada fila representa la **oferta de un proveedor para un ítem o línea de producto específico (`CodigoProductoONU` / `NombreItem`) dentro de una licitación (`NroLicitacion`)**. |
 
 ---
 
@@ -52,7 +52,6 @@ Los montos están expresados en 4 unidades monetarias distintas que **no deben m
 ### 2.4. Estandarización y ordenamiento de variables categóricas
 - **Revisión de nombres equivalentes (`.str.strip().str.upper()`):**
   - `TamanoProveedor`, `Institucion`, `UnidadMedida` y `NombreItem`: **0 diferencias** entre valores originales y normalizados.
-  - `Proveedor`: 4.700 nombres originales vs. 4.699 normalizados (**1 variante** por mayúsculas/minúsculas). Además, se verificó que **0 RUTs (`ProveedorRUT`)** tienen más de un nombre de proveedor asociado.
   - `UnidadCompra`: 419 nombres originales vs. 368 normalizados (**51 variantes** por diferencias de mayúsculas/minúsculas o espacios).
 - **Ordenamiento lógico de `TamanoProveedor` (`CategoricalDtype`):**
   Se transformó `TamanoProveedor` en una categoría ordenada (`ordered=True`) con la siguiente jerarquía y distribución:
@@ -78,7 +77,7 @@ Los montos están expresados en 4 unidades monetarias distintas que **no deben m
 
 ---
 
-## 3. Diccionario Completo de Variables (74 Columnas)
+## 3. Diccionario Completo de Variables (72 Columnas)
 
 ### 3.1. Identificación, Clasificación y Montos Estimados de la Licitación (Columnas 1 a 10)
 
@@ -167,19 +166,17 @@ Los montos están expresados en 4 unidades monetarias distintas que **no deben m
 | 61 | `UnidadMedida` | `str` | `str` | 0 | 0,00% | 47 | Unidad de medida del ítem requerido (Unidad, Global, Mes, Caja, Litro, etc.). |
 | 62 | `CantidadItem` | `int64` | `int64` | 0 | 0,00% | 358 | Cantidad de unidades solicitadas por el organismo comprador en esa línea de ítem. |
 
-### 3.6. Proveedor y Detalle de la Oferta Presentada (Columnas 63 a 74)
+### 3.6. Proveedor y Detalle de la Oferta Presentada (Columnas 63 a 72)
 
 | # | Variable | Tipo Original | Tipo Procesado | Nulos | % Nulos | Valores Distintos | Descripción |
 | :---: | :--- | :---: | :---: | ---: | ---: | ---: | :--- |
-| 63 | `Proveedor` | `str` | `str` | 0 | 0,00% | 4.700 | Razón social o nombre del proveedor oferente *(4.699 tras normalizar mayúsculas/espacios)*. |
-| 64 | `ProveedorRUT` | `str` | `str` | 0 | 0,00% | 4.701 | Rol Único Tributario (RUT) del proveedor oferente. |
-| 65 | `ActividadProveedor` | `str` | `str` | 10.155 | 22,20% | 2.374 | Giro o actividad económica declarada por el proveedor. |
-| 66 | `TamanoProveedor` | `str` | `category (ordered)` | 0 | 0,00% | 5 | Tamaño de empresa ordenado en Paso 27: `Micro` < `Pequeña` < `Mediana` < `Grande` < `NoClasificado`. |
-| 67 | `NombreOferta` | `str` | `str` | 0 | 0,00% | 8.003 | Título dado por el proveedor a su propuesta comercial. |
-| 68 | `EspecificacionesProveedor` | `str` | `str` | 0 | 0,00% | 34.028 | Detalle técnico de lo ofertado por el proveedor para ese ítem específico. |
-| 69 | `EstadoOferta` | `str` | `str` | 0 | 0,00% | 2 | Admisibilidad de la oferta en el acto de apertura (`Aceptada`: 41.860, `Rechazada`: 3.881). |
-| 70 | `CantidadOferta` | `int64` | `int64` | 0 | 0,00% | 358 | Cantidad de unidades ofertadas por el proveedor para el ítem. |
-| 71 | `MonedaOferta` | `str` | `str` | 0 | 0,00% | 4 | Moneda de la oferta (`CLP`: 45.604, `CLF`: 105, `USD`: 23, `UTM`: 9). |
-| 72 | `MontoNetoOferta` | `str` | `Float64` | 0 | 0,00% | 16.765 | Precio unitario neto ofertado por el proveedor *(limpiado de coma decimal y convertido en Paso 18)*. |
-| 73 | `MontoTotalOferta` | `str` | `Float64` | 0 | 0,00% | 21.376 | Monto total neto de la línea ofertada *(limpiado de coma decimal y convertido en Paso 18)*. |
-| 74 | `ResultadoOferta` | `str` | `str` | 0 | 0,00% | 2 | Resultado final de la línea ofertada (`Ganadora`: 19.888 [43,48%], `Perdedora`: 25.853 [56,52%]). |
+| 63 | `ActividadProveedor` | `str` | `str` | 10.155 | 22,20% | 2.374 | Giro o actividad económica declarada por el proveedor. |
+| 64 | `TamanoProveedor` | `str` | `category (ordered)` | 0 | 0,00% | 5 | Tamaño de empresa ordenado en Paso 27: `Micro` < `Pequeña` < `Mediana` < `Grande` < `NoClasificado`. |
+| 65 | `NombreOferta` | `str` | `str` | 0 | 0,00% | 8.003 | Título dado por el proveedor a su propuesta comercial. |
+| 66 | `EspecificacionesProveedor` | `str` | `str` | 0 | 0,00% | 34.028 | Detalle técnico de lo ofertado por el proveedor para ese ítem específico. |
+| 67 | `EstadoOferta` | `str` | `str` | 0 | 0,00% | 2 | Admisibilidad de la oferta en el acto de apertura (`Aceptada`: 41.860, `Rechazada`: 3.881). |
+| 68 | `CantidadOferta` | `int64` | `int64` | 0 | 0,00% | 358 | Cantidad de unidades ofertadas por el proveedor para el ítem. |
+| 69 | `MonedaOferta` | `str` | `str` | 0 | 0,00% | 4 | Moneda de la oferta (`CLP`: 45.604, `CLF`: 105, `USD`: 23, `UTM`: 9). |
+| 70 | `MontoNetoOferta` | `str` | `Float64` | 0 | 0,00% | 16.765 | Precio unitario neto ofertado por el proveedor *(limpiado de coma decimal y convertido en Paso 18)*. |
+| 71 | `MontoTotalOferta` | `str` | `Float64` | 0 | 0,00% | 21.376 | Monto total neto de la línea ofertada *(limpiado de coma decimal y convertido en Paso 18)*. |
+| 72 | `ResultadoOferta` | `str` | `str` | 0 | 0,00% | 2 | Resultado final de la línea ofertada (`Ganadora`: 19.888 [43,48%], `Perdedora`: 25.853 [56,52%]). |
