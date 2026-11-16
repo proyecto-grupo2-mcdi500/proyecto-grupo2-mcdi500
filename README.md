@@ -90,16 +90,21 @@ proyecto-grupo2-mcdi500/
 
 - `README.md`: presenta el proyecto, su contexto, objetivos, fuente de datos y herramientas utilizadas.
 - `requirements.txt`: contiene las dependencias de Python necesarias para ejecutar el proyecto.
-- `src/`: módulos compartidos. `preprocesamiento.py` contiene las reglas de F2 (carga, conversión, faltantes, duplicados, brecha, IQR y validación); `pipeline_licitaciones.py`, el pipeline orientado a objetos de F3; `medicion.py`, la comparación de implementaciones; `utilidades.py`, utilidades generales (raíz del proyecto, nombres de columnas y `ProyectoError`). El detalle está en [`src/README.md`](src/README.md).
+- `src/`: módulos compartidos organizados para la Fase 3:
+  - `preprocesamiento.py`: reglas de F2 y funciones base de transformación.
+  - `pipeline_licitaciones.py`: clases del núcleo algorítmico y orquestación POO (`Transformador`, `Pipeline`, `Bitacora`, `ExtremosLogIQR`).
+  - `medicion.py`: utilidades de medición de tiempo y memoria (`timeit` / `tracemalloc`).
+  - `pruebas_preprocesamiento.py`: validador de reglas de F2.
+  - `utilidades.py` y `validar_dataset.py`: soporte y validación general.
 - `validar_dataset.py` y `src/validar_dataset.py`: scripts y módulos reutilizables para revisar y validar archivos de datos entre fases.
 - `data/raw/`: ubicación local de los datos originales (`data/raw/04LicitacionesEne.csv`). El archivo no se versiona porque contiene datos personales; ver *Obtener los datos*.
 - `data/processed/`: carpeta destinada a almacenar los datos derivados y preparados para el análisis.
 - `docs/`: documentación compartida del proyecto.
-- `F1/`: reúne en `F1/F1_Definicion.ipynb` la definición del problema, el alcance y la verificación del entorno, además de las ideas iniciales en `F1/brainstorming/ideas-dataset.md`.
-- `F2/`: el cuaderno oficial es `F2/F2_Preprocesamiento.ipynb`, dedicado a la exploración y preprocesamiento de los datos; su salida oficial es `data/processed/04LicitacionesEne_procesado.csv`.
-- `F3/` y `F4/`: carpetas destinadas a los notebooks y entregables específicos de las etapas posteriores.
+- `F1/`: reúne en `F1/F1_Definicion.ipynb` la definición del problema, el alcance y la verificación del entorno.
+- `F2/`: el cuaderno oficial es `F2/F2_Preprocesamiento.ipynb`.
+- `F3/`: contiene `F3/F3_Nucleo_Algoritmico.ipynb` y su respectivo `README.md`.
 
-Las carpetas de fase (`F1/` a `F4/`) no deben contener copias propias de `data/`, `docs/` ni `src/`. Si una fase genera un archivo reutilizable, se guarda en la ubicación compartida correspondiente; sus notebooks permanecen en la carpeta de la fase.
+Las carpetas de fase (`F1/` a `F4/`) no deben contener copias propias de `data/`, `docs/` ni `src/`.
 
 -------------------------------------------------------------------------------------------
 
@@ -107,7 +112,7 @@ Las carpetas de fase (`F1/` a `F4/`) no deben contener copias propias de `data/`
 -------------------------------------------------------------------------------------------
 ### macOS / Linux
 
-Estos pasos se hacen **una vez por computador**, desde la terminal y en la raíz del repositorio (en la rama de trabajo). El entorno no se crea desde los cuadernos: los cuadernos solo verifican que se esté usando el entorno correcto.
+Estos pasos se hacen **una vez por computador**, desde la terminal y en la raíz del repositorio (en la rama de trabajo).
 
 ### 1. Crear y activar el entorno virtual
 
@@ -116,8 +121,6 @@ python3 -m venv .venv
 source .venv/bin/activate        # macOS / Linux
 ```
 
-Cuando el entorno está activo, la terminal muestra `(.venv)`. Para salir del entorno: `deactivate`.
-
 ### 2. Instalar las dependencias
 
 ```bash
@@ -126,22 +129,11 @@ python -m pip install -r requirements.txt
 python -m pip check              # debe indicar: No broken requirements found
 ```
 
-`requirements.txt` declara solo las dependencias directas del proyecto, con versión fija:
-
-- Análisis: `numpy`, `pandas` (las que importan `src/` y los notebooks)
-- Ejecución de los notebooks: `ipykernel`, `jupyterlab`
-
-`pip` instala las dependencias indirectas de cada una. Si el código empieza a importar una librería nueva, se agrega a `requirements.txt` con su versión (`paquete==versión`, la que muestra `python -m pip show paquete`) en el mismo *commit*, y se añade a `LIBRERIAS_PROYECTO` en la sección 8 de `F1/F1_Definicion.ipynb`.
-
 ### 3. Registrar el kernel del proyecto
-
-Con el entorno activo y en otra consola ejecutar:
 
 ```bash
 python -m ipykernel install --user --name grupo2_mcdi500 --display-name "Python (grupo2-mcdi500)"
 ```
-
-`--name` es el identificador interno; `--display-name` es el nombre que aparece en JupyterLab. Los cuadernos del proyecto usan este kernel.
 
 ### 4. Abrir JupyterLab
 
@@ -149,27 +141,10 @@ python -m ipykernel install --user --name grupo2_mcdi500 --display-name "Python 
 python -m jupyter lab
 ```
 
-La terminal queda ocupada mientras JupyterLab esté abierto. Para seguir usando la terminal, abra una segunda ventana, vuelva a la carpeta del proyecto y active el entorno con `source .venv/bin/activate`.
-
-### 5. Verificar el entorno
-
-En JupyterLab, abra `F1/F1_Definicion.ipynb`, seleccione el kernel **Python (grupo2-mcdi500)** y ejecute todas las celdas (*Run → Run All Cells*). En la sección 8 (*Verificación del Entorno*) debe cumplirse que:
-
-- el entorno virtual aparece como `[OK] activo` y la ruta del intérprete contiene `.venv`;
-- `numpy` y `pandas` aparecen con `[OK]` y su versión (ninguna como `[FALTA]`).
-
-Si alguna de estas condiciones no se cumple, el cuaderno se detiene en el PASO 5.
-
-| Si ocurre | Causa probable | Qué hacer |
-| --- | --- | --- |
-| El intérprete no contiene `.venv` | Kernel equivocado | *Kernel → Change Kernel* → Python (grupo2-mcdi500) |
-| `ModuleNotFoundError` con un paquete instalado | Se instaló fuera del entorno o falta el paso 3 | Activar `.venv` y repetir los pasos 2 y 3 |
-| Falla `pip install -r requirements.txt` | Versión de Python distinta | Usar Python 3.12 |
-
 -------------------------------------------------------------------------------------------
 ### Windows
 
-Estos pasos se realizan desde **Git Bash** (o la terminal integrada de **VS Code** con Git Bash) ubicados en la raíz del repositorio:
+Estos pasos se realizan desde **Git Bash** o la terminal integrada de **VS Code**:
 
 ### 1. Crear y activar el entorno virtual
 
@@ -178,8 +153,6 @@ python -m venv .venv
 source .venv/Scripts/activate    # Windows (Git Bash)
 ```
 
-Cuando el entorno está activo, la terminal de Git Bash muestra `(.venv)`. Para salir del entorno: `deactivate`.
-
 ### 2. Instalar las dependencias
 
 ```bash
@@ -190,52 +163,39 @@ python -m pip check              # debe indicar: No broken requirements found
 
 ### 3. Registrar el kernel del proyecto
 
-Con el entorno activo en Git Bash, ejecutar:
-
 ```bash
 python -m ipykernel install --user --name grupo2_mcdi500 --display-name "Python (grupo2-mcdi500)"
 ```
 
-### 4. Abrir el proyecto en VS Code
+-------------------------------------------------------------------------------------------
 
-Desde Git Bash en la raíz del repositorio:
+## Ejecutar los notebooks
 
-```bash
-code .
-```
+El proyecto se ejecuta de forma secuencial a través de tres fases metodológicas. Asegúrate de activar tu entorno virtual (`.venv`) y utilizar el kernel correspondiente en Jupyter (`Python (grupo2-mcdi500)`).
 
-Dentro de **VS Code**, al abrir cualquier cuaderno (`.ipynb`), hacer clic en **Select Kernel** (esquina superior derecha) → **Jupyter Kernel...** (o **Python Environments...**) y seleccionar **Python (grupo2-mcdi500)**.
+| Fase y Notebook | Qué genera / Objetivo | Tiempo aproximado |
+| :--- | :--- | :--- |
+| **F1** (`F1/F1_Definicion.ipynb`) | Análisis exploratorio inicial, definición del problema, validación del entorno y diagnóstico de calidad de datos. | ~2 - 3 minutos |
+| **F2** (`F2/F2_Preprocesamiento.ipynb`) | Limpieza de datos, tipado, reglas funcionales de transformación y exportación de las dos salidas oficiales en `data/processed/`. | ~3 - 5 minutos |
+| **F3** (`F3/F3_Nucleo_Algoritmico.ipynb`) | Núcleo algorítmico orientado a objetos (`src/`), pipeline con patrón Observer, medición de eficiencia (tiempo/memoria) y pruebas unitarias. | ~2 - 4 minutos |
 
-### 5. Verificar el entorno en VS Code
-
-Abrir `F1/F1_Definicion.ipynb` en VS Code, seleccionar el kernel **Python (grupo2-mcdi500)** y ejecutar todas las celdas (*Run All*). En la sección 8 (*Verificación del Entorno*) debe comprobarse que:
-
-- el entorno virtual aparezca como `[OK] activo` y la ruta del intérprete apunte al entorno configurado;
-- `numpy` y `pandas` aparezcan con `[OK]` y su versión instalada (ninguna como `[FALTA]`).
-
-| Si ocurre | Causa probable | Qué hacer |
-| --- | --- | --- |
-| VS Code pide seleccionar un kernel | Primera vez que se abre el cuaderno | Hacer clic en *Select Kernel* → *Python (grupo2-mcdi500)* |
-| `ModuleNotFoundError` al ejecutar una celda | Librerías instaladas en otro intérprete o kernel sin reiniciar | Ejecutar los pasos 2 y 3 en Git Bash y presionar *Restart* en la barra superior del notebook |
-| Falla `pip install -r requirements.txt` | Versión de Python distinta | Usar Python 3.12 |
+> **Nota:** Recuerda colocar el archivo de entrada original en `data/raw/04LicitacionesEne.csv` antes de iniciar la ejecución de F1 y F2.
 
 -------------------------------------------------------------------------------------------
 
 ## Obtener los datos
 
-El archivo de entrada `data/raw/04LicitacionesEne.csv` no está en el repositorio (está excluido en `.gitignore`). Cada integrante lo descarga una vez, después de configurar el entorno:
+El archivo de entrada `data/raw/04LicitacionesEne.csv` no está en el repositorio. Cada integrante lo descarga una vez:
 
-1. Descarga [04LicitacionesEne.zip desde OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7) con tu cuenta UNAB (acceso solo para el grupo y el docente).
+1. Descarga [04LicitacionesEne.zip desde OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7) con tu cuenta UNAB.
 2. Descomprímelo y deja el CSV en `data/raw/04LicitacionesEne.csv`.
 3. Verifica su SHA-256 como se indica en [`data/raw/README.md`](data/raw/README.md).
-
-No abras ni guardes el CSV con Excel: lo reescribe con otro formato y altera el contenido.
 
 -------------------------------------------------------------------------------------------
 
 ## Validar el dataset
 
-Desde la raíz del repositorio, siempre con el entorno activado (`source .venv/bin/activate` en macOS/Linux o `source .venv/Scripts/activate` en Git Bash para Windows):
+Desde la raíz del repositorio, con el entorno activado:
 
 ```bash
 python validar_dataset.py data/raw/04LicitacionesEne.csv --sep ";" --encoding latin-1
