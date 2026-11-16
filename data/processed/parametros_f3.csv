@@ -1,7 +1,9 @@
 ﻿Paso;Parámetro;Valor;Origen
-ConversorFechas;formato;%d-%m-%Y %H:%M;Fijo
-ConversorMontos;regla;Recortar espacios y sustituir coma por punto;Fijo
-OrdenadorTamano;orden;Micro | Pequeña | Mediana | Grande | NoClasificado;Fijo
-División;grupo;NroLicitacion;Fijo
-División;semilla;42;Fijo
-División;fracción de prueba por grupos;0.2;Fijo
+Tamaño ordinal;categorías;Micro | Pequeña | Mediana | Grande;Fijo
+Brecha;tolerancia absoluta de coincidencia;1e-08;Fijo
+IQR CLP;multiplicador;1.5;Fijo
+IQR CLP;ofertas_validas;45603;Ajustado sobre montos positivos en CLP
+IQR CLP;q1_log;10.683179267211248;Ajustado sobre montos positivos en CLP
+IQR CLP;q3_log;14.4043239123557;Ajustado sobre montos positivos en CLP
+IQR CLP;inferior_log;5.101462299494569;Ajustado sobre montos positivos en CLP
+IQR CLP;superior_log;19.98604088007238;Ajustado sobre montos positivos en CLP

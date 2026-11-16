@@ -32,9 +32,13 @@ def es_columna_privada(columna: str) -> bool:
 
 
 def cargar_csv(ruta: Path) -> pd.DataFrame:
-    """Lee el CSV local sin identificadores directos y devuelve las filas con esquema validado."""
+    """Lee el CSV local sin identificadores directos y devuelve las filas con esquema validado.
+
+    Declara el separador `;` en vez de detectarlo: la medición de F3 (sección 4.3)
+    mostró que entrega el mismo resultado con menos tiempo y memoria.
+    """
     datos = pd.read_csv(
-        ruta, sep=None, engine="python", encoding="latin-1",
+        ruta, sep=";", encoding="latin-1",
         usecols=lambda columna: not es_columna_privada(columna),
         dtype={"NroLicitacion": "string"},
     )

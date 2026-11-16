@@ -1,120 +1,157 @@
-"""Carga, transformación y controles de las licitaciones de ChileCompra."""
+"""Pipeline de la Fase 3: reglas del preprocesamiento de F2 organizadas como objetos."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass
+from pathlib import Path
 
 import pandas as pd
 
-FECHAS = ("FechaPublicacion", "FechaCierre", "FechaAdjudicacion")
-MONTOS = ("MontoNetoOferta", "MontoTotalOferta")
-TAMANO = "TamanoProveedor"
-ORDEN = ("Micro", "Pequeña", "Mediana", "Grande", "NoClasificado")
+from .funciones_f2_revision import (
+    FECHAS, MOTIVOS, LimitesIQR, aplicar_bandera_atipicos, calcular_brecha,
+    calcular_limites_iqr, cargar_csv, convertir_tipos, marcar_duplicados,
+    ordenar_tamano, tratar_faltantes, validar_procesado,
+)
 
 
-def cargar_licitaciones(ruta):
-    """Lee el CSV con las mismas opciones que Fase 2."""
-    return pd.read_csv(ruta, sep=None, engine="python", encoding="latin-1")
+@dataclass
+class ResultadoF3:
+    """Tablas analíticas y parámetros calculados a partir de la entrada."""
+
+    ofertas: pd.DataFrame
+    licitaciones: pd.DataFrame
+    limites_iqr: LimitesIQR | None
 
 
 class Transformador(ABC):
-    """Valida columnas y expone la interfaz común de cada transformación."""
+    """Contrato común para las operaciones sobre filas de oferta.
 
-    def __init__(self, columnas):
-        self._columnas = tuple(columnas)
+    Cada paso declara un nombre, que el pipeline informa a sus observadores,
+    y una transformación que recibe y devuelve las ofertas.
+    """
 
-    def transformar(self, datos):
-        faltantes = set(self._columnas) - set(datos.columns)
-        if faltantes:
-            raise ValueError(f"Faltan columnas para {type(self).__name__}: {sorted(faltantes)}")
-        return self._aplicar(datos)
+    nombre: str
 
     @abstractmethod
-    def _aplicar(self, datos):
-        """Devuelve un DataFrame y las observaciones sobre su conversión."""
+    def transformar(self, datos: pd.DataFrame) -> pd.DataFrame:
+        """Devuelve las ofertas después de aplicar la regla del paso."""
 
 
-def _control(columna, original, convertido):
-    return {
-        "Columna": columna,
-        "Nulos originales": int(original.isna().sum()),
-        "Fallos de conversión": int((original.notna() & convertido.isna()).sum()),
-    }
+class TransformacionFija(Transformador):
+    """Adapta una regla funcional de F2 a la interfaz del pipeline."""
+
+    def __init__(self, nombre: str, regla: Callable[[pd.DataFrame], pd.DataFrame]):
+        self._nombre = nombre
+        self._regla = regla
+
+    @property
+    def nombre(self) -> str:
+        return self._nombre
+
+    def transformar(self, datos: pd.DataFrame) -> pd.DataFrame:
+        return self._regla(datos)
 
 
-class ConversorFechas(Transformador):
-    def __init__(self, formato="%d-%m-%Y %H:%M"):
-        super().__init__(FECHAS)
-        self._formato = formato
+class ExtremosLogIQR(Transformador):
+    """Ajusta límites en CLP y los reutiliza al transformar otras ofertas."""
 
-    def _aplicar(self, datos):
-        salida = datos.copy()
-        controles = []
-        for columna in self._columnas:
-            original = datos[columna]
-            salida[columna] = pd.to_datetime(original, format=self._formato, errors="coerce")
-            controles.append(_control(columna, original, salida[columna]))
-        return salida, controles
+    nombre = "Marcar valores extremos CLP"
 
-
-class ConversorMontos(Transformador):
     def __init__(self):
-        super().__init__(MONTOS)
+        self._limites: LimitesIQR | None = None
+        self._ajustado = False
 
-    def _aplicar(self, datos):
-        salida = datos.copy()
-        controles = []
-        for columna in self._columnas:
-            original = datos[columna].astype("string").str.strip()
-            texto = original.str.replace(",", ".", regex=False)
-            salida[columna] = pd.to_numeric(texto, errors="coerce")
-            controles.append(_control(columna, original, salida[columna]))
-        return salida, controles
+    @property
+    def limites(self) -> LimitesIQR | None:
+        return None if self._limites is None else dict(self._limites)
 
+    def ajustar(self, datos: pd.DataFrame) -> None:
+        self._limites = calcular_limites_iqr(datos)
+        self._ajustado = True
 
-class OrdenadorTamano(Transformador):
-    def __init__(self, orden=ORDEN):
-        super().__init__((TAMANO,))
-        self._orden = tuple(orden)
-
-    def _aplicar(self, datos):
-        no_incluidos = set(datos[TAMANO].dropna().unique()) - set(self._orden)
-        if no_incluidos:
-            return datos, [{"Columna": TAMANO, "Detalle": f"Se conservó el tipo original: {sorted(no_incluidos)}"}]
-        tipo = pd.CategoricalDtype(categories=self._orden, ordered=True)
-        salida = datos.assign(**{TAMANO: datos[TAMANO].astype(tipo)})
-        return salida, [{"Columna": TAMANO, "Detalle": "Categoría ordenada"}]
+    def transformar(self, datos: pd.DataFrame) -> pd.DataFrame:
+        if not self._ajustado:
+            raise RuntimeError("Ejecuta ajustar antes de aplicar los límites IQR.")
+        return aplicar_bandera_atipicos(datos, self._limites)
 
 
 class Bitacora:
-    """Recibe los resultados de cada paso y los convierte en evidencia tabular."""
+    """Observador que conserva conteos por paso y evita registrar valores originales."""
 
     def __init__(self):
-        self._registros = []
+        self._eventos: list[dict[str, str | int]] = []
 
-    def registrar(self, evento):
-        self._registros.append(evento.copy())
+    def registrar(self, paso: str, filas_entrada: int, filas_salida: int) -> None:
+        self._eventos.append({
+            "Paso": paso, "Filas de entrada": filas_entrada, "Filas de salida": filas_salida,
+        })
 
-    def tabla(self):
-        return pd.DataFrame(self._registros)
+    def tabla(self) -> pd.DataFrame:
+        return pd.DataFrame(self._eventos)
 
 
 class Pipeline:
-    """Ejecuta los transformadores en orden y notifica a los observadores."""
+    """Ejecuta las operaciones en orden y notifica a los observadores suscritos."""
 
-    def __init__(self, pasos):
+    def __init__(self, pasos: Sequence[Transformador]):
         self._pasos = tuple(pasos)
-        self._observadores = []
+        self._extremos = ExtremosLogIQR()
+        self._observadores: list[Callable[[str, int, int], None]] = []
 
-    def suscribir(self, observador):
+    def suscribir(self, observador: Callable[[str, int, int], None]) -> None:
         self._observadores.append(observador)
 
-    def transformar(self, datos):
-        salida = datos
+    def _notificar(self, paso: str, entrada: int, salida: int) -> None:
+        for observador in self._observadores:
+            observador(paso, entrada, salida)
+
+    def ejecutar(self, ruta: Path) -> ResultadoF3:
+        """Lee un CSV y devuelve ambas tablas validadas para el análisis descriptivo."""
+        datos = cargar_csv(ruta)
+        filas_originales = len(datos)
+        self._notificar("Cargar CSV", filas_originales, filas_originales)
         for paso in self._pasos:
-            filas_entrada = len(salida)
-            salida, controles = paso.transformar(salida)
-            for control in controles:
-                evento = {"Paso": type(paso).__name__, "Filas entrada": filas_entrada,
-                          "Filas salida": len(salida), **control}
-                for observador in self._observadores:
-                    observador(evento)
-        return salida
+            entrada = len(datos)
+            datos = paso.transformar(datos)
+            self._notificar(paso.nombre, entrada, len(datos))
+
+        licitaciones = calcular_brecha(datos)
+        self._notificar("Calcular brecha por licitación", len(datos), len(licitaciones))
+        self._extremos.ajustar(datos)
+        datos = self._extremos.transformar(datos)
+        self._notificar(self._extremos.nombre, len(datos), len(datos))
+
+        columnas = [columna for columna in MOTIVOS if columna in datos]
+        columnas += ["EsDuplicadoPotencial", "TamanoProveedorOrdinal", "EsExtremoLogIQR_CLP"]
+        ofertas = datos[columnas]
+        limites = self._extremos.limites
+        validar_procesado(ofertas, licitaciones, filas_originales, limites)
+        self._notificar("Validar ofertas", len(ofertas), len(ofertas))
+        self._notificar("Validar licitaciones", len(licitaciones), len(licitaciones))
+        return ResultadoF3(ofertas, licitaciones, limites)
+
+
+def construir_pipeline() -> Pipeline:
+    """Ordena las reglas de F2, desde duplicados potenciales hasta el tamaño ordinal."""
+    return Pipeline([
+        TransformacionFija("Marcar duplicados potenciales", lambda d: marcar_duplicados(d)[0]),
+        TransformacionFija("Convertir fechas y montos", lambda d: convertir_tipos(d)[0]),
+        TransformacionFija("Normalizar faltantes", lambda d: tratar_faltantes(d, d.isna().sum())[0]),
+        TransformacionFija("Ordenar tamaño de proveedor", ordenar_tamano),
+    ])
+
+
+def control_iterativo(datos: pd.DataFrame) -> pd.Series:
+    """Marca cierres o adjudicaciones fuera de secuencia, recorriendo cada fila."""
+    marcas = []
+    for publicacion, cierre, adjudicacion in datos[list(FECHAS)].itertuples(index=False, name=None):
+        cierre_anticipado = pd.notna(publicacion) and pd.notna(cierre) and cierre < publicacion
+        adjudicacion_anticipada = pd.notna(cierre) and pd.notna(adjudicacion) and adjudicacion < cierre
+        marcas.append(cierre_anticipado or adjudicacion_anticipada)
+    return pd.Series(marcas, index=datos.index, dtype=bool)
+
+
+def control_vectorizado(datos: pd.DataFrame) -> pd.Series:
+    """Marca las mismas alertas mediante comparaciones por columna."""
+    publicacion, cierre, adjudicacion = (datos[columna] for columna in FECHAS)
+    return (cierre < publicacion) | (adjudicacion < cierre)
