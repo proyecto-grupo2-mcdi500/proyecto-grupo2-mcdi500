@@ -54,6 +54,8 @@ El análisis está implementado principalmente en **Python**:
 proyecto-grupo2-mcdi500/
 ├── data/
 │   ├── processed/
+│   │   ├── 04LicitacionesEne_brecha_por_licitacion.csv
+│   │   ├── 04LicitacionesEne_procesado.csv
 │   │   ├── diccionario_f3.csv
 │   │   ├── parametros_f3.csv
 │   │   └── README.md
