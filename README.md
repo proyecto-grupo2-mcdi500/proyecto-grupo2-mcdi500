@@ -54,6 +54,8 @@ El análisis está implementado principalmente en **Python**:
 proyecto-grupo2-mcdi500/
 ├── data/
 │   ├── processed/
+│   │   ├── 04LicitacionesEne_brecha_por_licitacion.csv
+│   │   ├── 04LicitacionesEne_procesado.csv
 │   │   ├── diccionario_f3.csv
 │   │   ├── parametros_f3.csv
 │   │   └── README.md
@@ -62,10 +64,10 @@ proyecto-grupo2-mcdi500/
 ├── docs/
 │   └── README.md
 ├── src/
-│   ├── funciones_f2_revision.py
 │   ├── medicion.py
 │   ├── pipeline_licitaciones.py
-│   ├── pruebas_f2.py
+│   ├── preprocesamiento.py
+│   ├── pruebas_preprocesamiento.py
 │   ├── README.md
 │   ├── utilidades.py
 │   └── validar_dataset.py
@@ -88,7 +90,7 @@ proyecto-grupo2-mcdi500/
 
 - `README.md`: presenta el proyecto, su contexto, objetivos, fuente de datos y herramientas utilizadas.
 - `requirements.txt`: contiene las dependencias de Python necesarias para ejecutar el proyecto.
-- `src/utilidades.py`: módulo compartido con funciones reutilizables de normalización de nombres (`normalizar_nombre`, `normalizar_columnas`), carga de datos (`cargar_datos_crudos`, `cargar_datos_procesados`), conversión de fechas y montos, ordenamiento de categorías y detección de valores atípicos (IQR), además de la excepción `ProyectoError`.
+- `src/`: módulos compartidos. `preprocesamiento.py` contiene las reglas de F2 (carga, conversión, faltantes, duplicados, brecha, IQR y validación); `pipeline_licitaciones.py`, el pipeline orientado a objetos de F3; `medicion.py`, la comparación de implementaciones; `utilidades.py`, utilidades generales (raíz del proyecto, nombres de columnas y `ProyectoError`). El detalle está en [`src/README.md`](src/README.md).
 - `validar_dataset.py` y `src/validar_dataset.py`: scripts y módulos reutilizables para revisar y validar archivos de datos entre fases.
 - `data/raw/`: ubicación local de los datos originales (`data/raw/04LicitacionesEne.csv`). El archivo no se versiona porque contiene datos personales; ver *Obtener los datos*.
 - `data/processed/`: carpeta destinada a almacenar los datos derivados y preparados para el análisis.

@@ -1,4 +1,4 @@
-"""Funciones de exploración y preprocesamiento de la Fase 2."""
+"""Reglas del preprocesamiento de licitaciones (Fase 2), reutilizadas por el pipeline de F3."""
 
 from pathlib import Path
 from typing import TypedDict

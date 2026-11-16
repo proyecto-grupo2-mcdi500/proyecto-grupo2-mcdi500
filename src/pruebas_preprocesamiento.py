@@ -5,13 +5,13 @@ from tempfile import TemporaryDirectory
 
 import pandas as pd
 
-from .funciones_f2_revision import (
+from .preprocesamiento import (
     aplicar_bandera_atipicos, calcular_brecha, calcular_limites_iqr, cargar_csv,
     marcar_duplicados, ordenar_tamano,
 )
 
 
-def ejecutar_pruebas_f2() -> None:
+def ejecutar_pruebas_preprocesamiento() -> None:
     """Construye datos ficticios y comprueba los casos normales, límite y de error."""
     filas = pd.DataFrame([
         ("A", "Ganadora", 120, 100, "CLP", "CLP"),

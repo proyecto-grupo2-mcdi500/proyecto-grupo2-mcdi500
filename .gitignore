@@ -227,3 +227,10 @@ __marimo__/
 data/raw/*.csv
 data/raw/*.zip
 
+# Datos procesados: solo se versionan los archivos revisados (ver data/processed/README.md)
+data/processed/*.csv
+!data/processed/04LicitacionesEne_procesado.csv
+!data/processed/04LicitacionesEne_brecha_por_licitacion.csv
+!data/processed/diccionario_f3.csv
+!data/processed/parametros_f3.csv
+
