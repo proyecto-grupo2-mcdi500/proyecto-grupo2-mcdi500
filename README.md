@@ -39,9 +39,8 @@ Los objetivos se definen en `F1/F1_Definicion.ipynb`; esta sección los resume.
 
 El análisis está implementado principalmente en **Python**:
 
-* **Entorno:** JupyterLab / Python 3.12 (versión con la que se generó `requirements.txt`)
+* **Entorno:** JupyterLab / Python 3.12 (versión con la que se fijó `requirements.txt`)
 * **Procesamiento y Análisis:** `pandas`, `numpy`
-* **Visualización:** `matplotlib`, `seaborn`
 * **Entorno de desarrollo:** Git, GitHub, VS Code
 
 -------------------------------------------------------------------------------------------
@@ -121,17 +120,12 @@ python -m pip install -r requirements.txt
 python -m pip check              # debe indicar: No broken requirements found
 ```
 
-`requirements.txt` fija la versión exacta de cada paquete. Incluye la base de trabajo con la que se configuró el proyecto:
+`requirements.txt` declara solo las dependencias directas del proyecto, con versión fija:
 
-- Jupyter: `jupyterlab`, `notebook`, `ipykernel`
-- Análisis: `numpy`, `pandas`, `matplotlib`, `seaborn`, `scikit-learn`
-- Integración con Git: `jupyterlab-git`, `jupytext`, `nbstripout`
+- Análisis: `numpy`, `pandas` (las que importan `src/` y los notebooks)
+- Ejecución de los notebooks: `ipykernel`, `jupyterlab`
 
-El archivo se generó con `pip freeze`, por lo que también lista las dependencias indirectas de esos paquetes (unos 120 en total). Si un integrante instala o elimina una librería, debe regenerarlo con el entorno activo y subirlo en el mismo *commit*:
-
-```bash
-python -m pip freeze > requirements.txt
-```
+`pip` instala las dependencias indirectas de cada una. Si el código empieza a importar una librería nueva, se agrega a `requirements.txt` con su versión (`paquete==versión`, la que muestra `python -m pip show paquete`) en el mismo *commit*, y se añade a `LIBRERIAS_PROYECTO` en la sección 8 de `F1/F1_Definicion.ipynb`.
 
 ### 3. Registrar el kernel del proyecto
 
@@ -151,14 +145,12 @@ python -m jupyter lab
 
 La terminal queda ocupada mientras JupyterLab esté abierto. Para seguir usando la terminal, abra una segunda ventana, vuelva a la carpeta del proyecto y active el entorno con `source .venv/bin/activate`.
 
-> **Nota sobre `nbstripout`:** está instalado, pero **no** debe activarse en el repositorio (`nbstripout --install`), porque borraría las salidas de los cuadernos al hacer *commit* y los entregables deben quedar ejecutados.
-
 ### 5. Verificar el entorno
 
 En JupyterLab, abra `F1/F1_Definicion.ipynb`, seleccione el kernel **Python (grupo2-mcdi500)** y ejecute todas las celdas (*Run → Run All Cells*). En la sección 8 (*Verificación del Entorno*) debe cumplirse que:
 
 - el entorno virtual aparece como `[OK] activo` y la ruta del intérprete contiene `.venv`;
-- `numpy`, `pandas`, `matplotlib`, `seaborn` y `sklearn` aparecen con `[OK]` y su versión (ninguna como `[FALTA]`).
+- `numpy` y `pandas` aparecen con `[OK]` y su versión (ninguna como `[FALTA]`).
 
 Si alguna de estas condiciones no se cumple, el cuaderno se detiene en el PASO 5.
 
@@ -186,11 +178,9 @@ Cuando el entorno está activo, la terminal de Git Bash muestra `(.venv)`. Para 
 
 ```bash
 python -m pip install --upgrade pip
-python -m pip install pandas numpy matplotlib seaborn scikit-learn scipy ipykernel
+python -m pip install -r requirements.txt
 python -m pip check              # debe indicar: No broken requirements found
 ```
-
-> **Nota para Windows:** Como `requirements.txt` fue generado con `pip freeze` en macOS, contiene dependencias exclusivas de sistemas Unix (`appnope`, `pexpect`, `ptyprocess`). Por ello, en Windows se instalan directamente las librerías principales de análisis y el kernel de Jupyter con el comando anterior.
 
 ### 3. Registrar el kernel del proyecto
 
@@ -215,13 +205,13 @@ Dentro de **VS Code**, al abrir cualquier cuaderno (`.ipynb`), hacer clic en **S
 Abrir `F1/F1_Definicion.ipynb` en VS Code, seleccionar el kernel **Python (grupo2-mcdi500)** y ejecutar todas las celdas (*Run All*). En la sección 8 (*Verificación del Entorno*) debe comprobarse que:
 
 - el entorno virtual aparezca como `[OK] activo` y la ruta del intérprete apunte al entorno configurado;
-- `numpy`, `pandas`, `matplotlib`, `seaborn` y `sklearn` aparezcan con `[OK]` y su versión instalada (ninguna como `[FALTA]`).
+- `numpy` y `pandas` aparezcan con `[OK]` y su versión instalada (ninguna como `[FALTA]`).
 
 | Si ocurre | Causa probable | Qué hacer |
 | --- | --- | --- |
 | VS Code pide seleccionar un kernel | Primera vez que se abre el cuaderno | Hacer clic en *Select Kernel* → *Python (grupo2-mcdi500)* |
 | `ModuleNotFoundError` al ejecutar una celda | Librerías instaladas en otro intérprete o kernel sin reiniciar | Ejecutar los pasos 2 y 3 en Git Bash y presionar *Restart* en la barra superior del notebook |
-| Falla `pip install -r requirements.txt` en Windows | Paquetes exclusivos de macOS (`appnope`, `ptyprocess`) | Instalar los paquetes principales con `python -m pip install pandas numpy matplotlib seaborn scikit-learn scipy ipykernel` |
+| Falla `pip install -r requirements.txt` | Versión de Python distinta | Usar Python 3.12 |
 
 -------------------------------------------------------------------------------------------
 
@@ -239,8 +229,7 @@ No abras ni guardes el CSV con Excel: lo reescribe con otro formato y altera el 
 
 ## Validar el dataset
 
-Desde la raíz del repositorio:
-Siempre con el entorno activado (`source .venv/bin/activate` en macOS/Linux o `source .venv/Scripts/activate` en Git Bash para Windows):
+Desde la raíz del repositorio, siempre con el entorno activado (`source .venv/bin/activate` en macOS/Linux o `source .venv/Scripts/activate` en Git Bash para Windows):
 
 ```bash
 python validar_dataset.py data/raw/04LicitacionesEne.csv --sep ";" --encoding latin-1
