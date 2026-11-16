@@ -60,8 +60,10 @@ proyecto-grupo2-mcdi500/
 ├── docs/
 │   └── README.md
 ├── src/
+│   ├── funciones_f2_revision.py
 │   ├── medicion.py
 │   ├── pipeline_licitaciones.py
+│   ├── pruebas_f2.py
 │   ├── README.md
 │   ├── utilidades.py
 │   └── validar_dataset.py
