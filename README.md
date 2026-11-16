@@ -18,7 +18,7 @@ Las licitaciones públicas permiten a las instituciones adquirir bienes y servic
 En este proyecto se analizan los registros de licitaciones de compras públicas correspondientes a **enero de 2025**, obtenidos desde el portal oficial de datos abiertos:
 * **Fuente:** [ChileCompra — Datos Abiertos](https://datos-abiertos.chilecompra.cl/descargas/ordenes-y-licitaciones)
 
-A partir de este conjunto de datos, se examinan variables clave como instituciones compradoras, montos asignados, tipología de licitación, oferentes adjudicados y dispersión de las ofertas. El propósito es identificar patrones sistemáticos y eventuales señales de concentración o sesgo, manteniendo un enfoque exploratorio riguroso donde cualquier hallazgo se evalúe dentro del alcance y las limitaciones intrínsecas de los datos.
+El proyecto mide con qué frecuencia el monto estimado registrado de cada licitación coincide con la suma de sus ofertas ganadoras, cuantifica la brecha cuando difieren (dentro de una misma moneda) y examina si ambas cambian según el tamaño del proveedor ganador. El enfoque es descriptivo y cada hallazgo se interpreta dentro de las restricciones de los datos.
 
 -------------------------------------------------------------------------------------------
 
@@ -26,12 +26,14 @@ A partir de este conjunto de datos, se examinan variables clave como institucion
 
 Los objetivos se definen en `F1/F1_Definicion.ipynb`; esta sección los resume.
 
-* **Objetivo General:** Analizar los procesos de compras y licitaciones públicas registrados en ChileCompra durante enero de 2025 para describir las dinámicas de participación y adjudicación, caracterizar el comportamiento de los montos ofertados e identificar eventuales patrones de concentración o valores atípicos.
+* **Problema:** En las licitaciones de ChileCompra de enero de 2025, se desconoce con qué frecuencia el monto estimado registrado coincide con la suma de las ofertas ganadoras. El proyecto mide esa coincidencia y, cuando los montos difieren, cuantifica la brecha por licitación en los casos en que ambos están expresados en la misma moneda, y examina si ambas cambian según el tamaño del proveedor ganador.
+* **Objetivo General:** Analizar la diferencia entre el monto estimado registrado y el total de las ofertas ganadoras en las licitaciones de ChileCompra de enero de 2025, y su relación con el tamaño del proveedor ganador.
 * **Objetivos Específicos:**
-  1. Estructurar, limpiar y validar el dataset de licitaciones públicas descargado desde ChileCompra, documentando el tratamiento de fechas, montos, monedas, valores nulos y categorías.
-  2. Realizar un Análisis Exploratorio de Datos (EDA) sobre montos ofertados, modalidades de licitación, rubros e instituciones públicas compradoras más activas.
-  3. Estudiar la distribución de ofertas y adjudicaciones según el tamaño del proveedor (Micro, Pequeña, Mediana, Grande, NoClasificado) y detectar posibles concentraciones por sector o rubro.
-  4. Evaluar el comportamiento de los plazos del proceso licitatorio y la presencia de valores extremos en los montos mediante el criterio del rango intercuartílico (IQR).
+  1. Determinar en qué proporción de las licitaciones comparables el monto estimado registrado coincide con el total de las ofertas ganadoras.
+  2. Describir la magnitud y el sentido de la brecha por licitación cuando ambos montos difieren, separando por moneda.
+  3. Comparar la coincidencia y la brecha según el tamaño del proveedor ganador.
+
+Las preguntas de investigación y las restricciones de los datos están en las secciones 3 y 6 de `F1/F1_Definicion.ipynb`.
 
 -------------------------------------------------------------------------------------------
 
