@@ -1,42 +1,42 @@
-﻿Tabla;Columna;Tipo en Python;Unidad de análisis;Regla
-ofertas;NroLicitacion;string;Oferta por ítem;Campo de entrada o control de la agregación de F2
-ofertas;FechaPublicacion;datetime64[us];Oferta por ítem;Conversión de fecha y hora desde el CSV
-ofertas;FechaCierre;datetime64[us];Oferta por ítem;Conversión de fecha y hora desde el CSV
-ofertas;FechaAdjudicacion;datetime64[us];Oferta por ítem;Conversión de fecha y hora desde el CSV
-ofertas;MontoEstimadoLicitacion;Float64;Oferta por ítem;Conversión numérica con coma decimal
-ofertas;MontoTotalOferta;Float64;Oferta por ítem;Conversión numérica con coma decimal
-ofertas;MontoNetoOferta;Float64;Oferta por ítem;Conversión numérica con coma decimal
-ofertas;CantidadOferta;int64;Oferta por ítem;Campo de entrada o control de la agregación de F2
-ofertas;MonedaLicitacion;str;Oferta por ítem;Campo de entrada o control de la agregación de F2
-ofertas;MonedaOferta;str;Oferta por ítem;Campo de entrada o control de la agregación de F2
-ofertas;ResultadoOferta;str;Oferta por ítem;Campo de entrada o control de la agregación de F2
-ofertas;TamanoProveedor;str;Oferta por ítem;Campo de entrada o control de la agregación de F2
-ofertas;CodigoProductoONU;int64;Oferta por ítem;Campo de entrada o control de la agregación de F2
-ofertas;MontoEstimadoVisible;str;Oferta por ítem;Campo de entrada o control de la agregación de F2
-ofertas;EsDuplicadoPotencial;bool;Oferta por ítem;Coincidencia exacta entre filas tras excluir identificadores
-ofertas;TamanoProveedorOrdinal;category;Oferta por ítem;Orden: Micro | Pequeña | Mediana | Grande
-ofertas;EsExtremoLogIQR_CLP;boolean;Oferta por ítem;IQR sobre logaritmos de montos positivos en CLP
-licitaciones;NroLicitacion;string;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;FilasOferta;Int64;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;OfertasGanadoras;Int64;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;MontoEstimadoLicitacion;Float64;Licitación;Conversión numérica con coma decimal
-licitaciones;MonedaLicitacion;string;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;EstimadosDistintos;int64;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;MonedasEstimadasDistintas;int64;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;EstimadoInvalido;boolean;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;MonedaEstimadaFaltante;bool;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;ResultadoFaltante;bool;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;GanadoraInvalida;boolean;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;GanadoraMonedaDistinta;boolean;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;GanadoraDuplicada;boolean;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;MontoTotalGanadoras;Float64;Licitación;Suma de montos ganadores en licitaciones comparables
-licitaciones;BrechaMonto;Float64;Licitación;Monto total ganador menos monto estimado registrado
-licitaciones;EstadoBrecha;string;Licitación;Estado de comparación o motivo principal de exclusión
-licitaciones;CoincideConEstimado;boolean;Licitación;Brecha absoluta menor o igual a 0,00000001
-licitaciones;VisibilidadEstimado;string;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;BaseEstimacionMontoLicitacion_Informada;bool;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;BaseEstimacionMontoLicitacion_MencionaAdjudicacion;boolean;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;BaseEstimacionMontoLicitacion_MencionaPresupuesto;boolean;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;JustificacionMontoEstimado_Informada;bool;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;JustificacionMontoEstimado_MencionaAdjudicacion;boolean;Licitación;Campo de entrada o control de la agregación de F2
-licitaciones;JustificacionMontoEstimado_MencionaPresupuesto;boolean;Licitación;Campo de entrada o control de la agregación de F2
+﻿Archivo;Tabla;Columna;Tipo en Python;Unidad de análisis;Regla
+04LicitacionesEne_procesado.csv;ofertas;NroLicitacion;string;Oferta por ítem;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_procesado.csv;ofertas;FechaPublicacion;datetime64[us];Oferta por ítem;Conversión de fecha y hora desde el CSV
+04LicitacionesEne_procesado.csv;ofertas;FechaCierre;datetime64[us];Oferta por ítem;Conversión de fecha y hora desde el CSV
+04LicitacionesEne_procesado.csv;ofertas;FechaAdjudicacion;datetime64[us];Oferta por ítem;Conversión de fecha y hora desde el CSV
+04LicitacionesEne_procesado.csv;ofertas;MontoEstimadoLicitacion;Float64;Oferta por ítem;Conversión numérica con coma decimal
+04LicitacionesEne_procesado.csv;ofertas;MontoTotalOferta;Float64;Oferta por ítem;Conversión numérica con coma decimal
+04LicitacionesEne_procesado.csv;ofertas;MontoNetoOferta;Float64;Oferta por ítem;Conversión numérica con coma decimal
+04LicitacionesEne_procesado.csv;ofertas;CantidadOferta;int64;Oferta por ítem;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_procesado.csv;ofertas;MonedaLicitacion;str;Oferta por ítem;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_procesado.csv;ofertas;MonedaOferta;str;Oferta por ítem;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_procesado.csv;ofertas;ResultadoOferta;str;Oferta por ítem;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_procesado.csv;ofertas;TamanoProveedor;str;Oferta por ítem;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_procesado.csv;ofertas;CodigoProductoONU;int64;Oferta por ítem;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_procesado.csv;ofertas;MontoEstimadoVisible;str;Oferta por ítem;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_procesado.csv;ofertas;EsDuplicadoPotencial;bool;Oferta por ítem;Coincidencia exacta entre filas tras excluir identificadores
+04LicitacionesEne_procesado.csv;ofertas;TamanoProveedorOrdinal;category;Oferta por ítem;Orden: Micro | Pequeña | Mediana | Grande
+04LicitacionesEne_procesado.csv;ofertas;EsExtremoLogIQR_CLP;boolean;Oferta por ítem;IQR sobre logaritmos de montos positivos en CLP
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;NroLicitacion;string;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;FilasOferta;Int64;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;OfertasGanadoras;Int64;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;MontoEstimadoLicitacion;Float64;Licitación;Conversión numérica con coma decimal
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;MonedaLicitacion;string;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;EstimadosDistintos;int64;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;MonedasEstimadasDistintas;int64;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;EstimadoInvalido;boolean;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;MonedaEstimadaFaltante;bool;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;ResultadoFaltante;bool;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;GanadoraInvalida;boolean;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;GanadoraMonedaDistinta;boolean;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;GanadoraDuplicada;boolean;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;MontoTotalGanadoras;Float64;Licitación;Suma de montos ganadores en licitaciones comparables
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;BrechaMonto;Float64;Licitación;Monto total ganador menos monto estimado registrado
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;EstadoBrecha;string;Licitación;Estado de comparación o motivo principal de exclusión
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;CoincideConEstimado;boolean;Licitación;Brecha absoluta menor o igual a 0,00000001
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;VisibilidadEstimado;string;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;BaseEstimacionMontoLicitacion_Informada;bool;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;BaseEstimacionMontoLicitacion_MencionaAdjudicacion;boolean;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;BaseEstimacionMontoLicitacion_MencionaPresupuesto;boolean;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;JustificacionMontoEstimado_Informada;bool;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;JustificacionMontoEstimado_MencionaAdjudicacion;boolean;Licitación;Campo de entrada o control de la agregación de F2
+04LicitacionesEne_brecha_por_licitacion.csv;licitaciones;JustificacionMontoEstimado_MencionaPresupuesto;boolean;Licitación;Campo de entrada o control de la agregación de F2

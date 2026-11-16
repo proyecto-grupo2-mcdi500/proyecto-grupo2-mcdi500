@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .funciones_f2_revision import (
+from .preprocesamiento import (
     FECHAS, MOTIVOS, LimitesIQR, aplicar_bandera_atipicos, calcular_brecha,
     calcular_limites_iqr, cargar_csv, convertir_tipos, marcar_duplicados,
     ordenar_tamano, tratar_faltantes, validar_procesado,
