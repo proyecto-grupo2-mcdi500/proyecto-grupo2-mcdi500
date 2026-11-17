@@ -30,12 +30,12 @@ La estructura separa explícitamente **cuatro capas** para evitar notebooks mono
 
 ```mermaid
 flowchart LR
-    RAW["data/raw/\n(04LicitacionesEne.csv local)"] --> PRE["src/preprocesamiento.py\n(reglas puras + privacidad)"]
-    PRE --> F2["F2/F2_Preprocesamiento.ipynb\n(exploración y exportación)"]
-    PRE --> POO["src/pipeline_licitaciones.py\n(Transformador, Pipeline, Bitacora)"]
-    MED["src/medicion.py\n(timeit + tracemalloc + igualdad)"] --> F3["F3/F3_Nucleo_Algoritmico.ipynb\n(POO, benchmarks y pruebas)"]
+    RAW["data/raw/<br>(04LicitacionesEne.csv local)"] --> PRE["src/preprocesamiento.py<br>(reglas puras + privacidad)"]
+    PRE --> F2["F2/F2_Preprocesamiento.ipynb<br>(exploración y exportación)"]
+    PRE --> POO["src/pipeline_licitaciones.py<br>(Transformador, Pipeline, Bitacora)"]
+    MED["src/medicion.py<br>(timeit + tracemalloc + igualdad)"] --> F3["F3/F3_Nucleo_Algoritmico.ipynb<br>(POO, benchmarks y pruebas)"]
     POO --> F3
-    F2 --> PROC["data/processed/\n(ofertas + brecha por licitación)"]
+    F2 --> PROC["data/processed/<br>(ofertas + brecha por licitación)"]
     F3 --> DOC["docs/ + diccionario_f3.csv + parametros_f3.csv"]
 ```
 
@@ -72,7 +72,7 @@ flowchart LR
 ## 4. Escalabilidad y Extensibilidad
 
 1. **Crecimiento en volumen de datos:**
-   - **Lectura eficiente:** Al fijar `sep=";"`, `cargar_csv()` usa el motor C de `pandas` en $O(n \cdot m)$ (evitando el motor Python), reduciendo tiempo (`2,4×`) y memoria (`4,6×`). Para etapas analíticas posteriores (F4) que requieran solo ciertas columnas, el uso de `usecols` reduce un `2,1×` adicional en tiempo y `4,4×` en memoria pico (`11,037 MB` frente a `48,779 MB` sobre `45.741` filas).
+   - **Lectura eficiente:** Al fijar `sep=";"`, `cargar_csv()` usa el motor C de `pandas` en $O(n \cdot m)$ (evitando el motor Python), reduciendo tiempo (`2,4×`) y memoria (`4,6×`). Cuando un análisis requiere solo ciertas columnas, el uso de `usecols` reduce un `2,1×` adicional en tiempo y `4,4×` en memoria pico (`11,037 MB` frente a `48,779 MB` sobre `45.741` filas).
    - **Operaciones vectorizadas:** Los controles por fila operan sobre columnas completas en código compilado ($O(n)$ con constante mínima), lo que permite escalar linealmente sin explosión de objetos en Python. Si el horizonte crece de un mes a un año completo (~`500.000`–`1.000.000` filas), la separación entre `cargar_csv`, reglas por bloque/columna y persistencia permite adaptar la lectura por lotes (`chunksize`) manteniendo intacta la interfaz de `Pipeline`.
 2. **Extensibilidad funcional:**
    - Agregar una nueva transformación con o sin estado requiere únicamente definir una subclase de `Transformador` e insertarla en `construir_pipeline()`, heredando automáticamente validación de columnas requeridas, copia defensiva y guarda de `_ajustado`.
@@ -86,7 +86,7 @@ El diseño evolucionó de forma incremental desde prototipos en cuadernos hasta 
 
 1. **Etapa inicial (F2 en cuaderno):** Las inspecciones, conversiones y cálculos exploratorios nacieron directamente en `F2/F2_Preprocesamiento.ipynb`.
 2. **Extracción funcional y resguardo de privacidad (hito [`47d4589`](../src/preprocesamiento.py)):** Se retiraron datos con identificadores de proveedores del repositorio, se redujo la entrada a `72` columnas documentadas y se consolidaron reglas reutilizables en un módulo compartido (`funciones_f2_revision.py`) con pruebas sintéticas (`pruebas_f2.py`).
-3. **Introducción del núcleo algorítmico F3 y medición empírica ([`ea80f40`](../F3/F3_Nucleo_Algoritmico.ipynb), [`a6dc350`](../F3/F3_Nucleo_Algoritmico.ipynb)):** Se encapsuló el flujo en `src/pipeline_licitaciones.py`, se incorporó `src/medicion.py` y se sustituyeron `control_iterativo` (observando `344×` más costo) y `sep=None` (observando `2,4×` más costo) por alternativas medidas.
+3. **Introducción del núcleo algorítmico F3 y medición empírica ([`ea80f40`](../F3/F3_Nucleo_Algoritmico.ipynb), [`a6dc350`](../F3/F3_Nucleo_Algoritmico.ipynb)):** Se encapsuló el flujo en `src/pipeline_licitaciones.py`, se incorporó `src/medicion.py` y, a partir de las mediciones, se adoptaron `control_vectorizado` en lugar de `control_iterativo` (`344×` más costo; este último se conserva solo como referencia para verificar el resultado) y `sep=";"` en lugar de `sep=None` (`2,4×` más costo).
 4. **Alineación modular por responsabilidad ([`f1640ea`](../src/README.md)):** Se renombraron `src/preprocesamiento.py` y `src/pruebas_preprocesamiento.py` para separar utilidades de F1 (`src/utilidades.py`), reglas de F2 y pipeline de F3, además de versionar las salidas oficiales de F2 (`0c2298b`).
 5. **Validación sistemática de casos normal, límite y excepción ([`1fd6e12`](../F3/F3_Nucleo_Algoritmico.ipynb), [`92cb884`](../F3/F3_Nucleo_Algoritmico.ipynb)):** Se añadió `ejecutar_pruebas_pipeline()` en la Sección 7 de `F3_Nucleo_Algoritmico.ipynb` verificando escenarios reales y sintéticos (`1` sola fila, `0` ofertas CLP, columnas sin nulos, errores de esquema y archivo inexistente).
 6. **Consolidación POO con herencia real y ajuste uniforme ([`23f3a5a`](../src/pipeline_licitaciones.py)):** Se concentró en `Transformador` el control de `_ajustado`, la validación de `columnas_requeridas` y la copia defensiva; `TratamientoFaltantes` pasó a ser transformador ajustable (aprende columnas `> 90 %` y las excluye al aplicar); y `ExtremosLogIQR` ingresó a la secuencia única de pasos de `Pipeline`, preservando equivalencia exacta (`check_exact=True`) con las dos salidas de F2.

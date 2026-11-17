@@ -7,7 +7,7 @@ Este registro documenta de forma ordenada las decisiones técnicas, metodológic
 ## 1. Declarar `sep=";"` (motor C) y usar `usecols` en lecturas selectivas (`cargar_csv`)
 
 - **Problema:** `cargar_csv()` utilizaba `pd.read_csv(..., sep=None, engine="python")` para inferir el separador, obligando a `pandas` a procesar los ~`57 MB` del archivo línea por línea en Python.
-- **Decisión:** Declarar explícitamente `sep=";"` en `cargar_csv()` (`src/preprocesamiento.py`) para activar el motor C de `pandas`, y utilizar `usecols` en etapas posteriores (como F4) cuando solo se requieran las columnas analíticas.
+- **Decisión:** Declarar explícitamente `sep=";"` en `cargar_csv()` (`src/preprocesamiento.py`) para activar el motor C de `pandas`, y utilizar `usecols` cuando un análisis solo requiera las columnas analíticas.
 - **Justificación:** El delimitador `;` es conocido y estable desde la Fase 1. No existe beneficio al inferirlo en cada corrida.
 - **Fuente / Evidencia:** [`src/preprocesamiento.py`](../src/preprocesamiento.py) (`cargar_csv`) y [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (Sección `4.3`, celdas `f3-lectura-code` y `f3-lectura-interpretacion`).
 - **Impacto medido:**
@@ -42,7 +42,7 @@ Este registro documenta de forma ordenada las decisiones técnicas, metodológic
 - **Decisión:** Ejecutar el estudio principal sobre el **universo completo del corte mensual** (`45.741` ofertas y `2.292` licitaciones) sin partición `train/test`, pero diseñar los transformadores con estado (`TratamientoFaltantes`, `ExtremosLogIQR`) con interfaz explícita `ajustar()` / `transformar()`.
 - **Justificación:** El objetivo y alcance del proyecto son descriptivos (cuantificar coincidencia y brecha entre monto estimado y ofertas ganadoras), no predictivos ni de *machine learning*. Separar la interfaz en ajuste y aplicación permite reutilizar límites aprendidos sobre datos nuevos sin fuga de información (*data leakage*) si el proyecto se extiende en el futuro.
 - **Fuente / Evidencia:** [`F1/F1_Definicion.ipynb`](../F1/F1_Definicion.ipynb) (alcance), [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (Secciones `2`, `5` y `7`) y [`src/pipeline_licitaciones.py`](../src/pipeline_licitaciones.py).
-- **Impacto medido:** Cobertura del `100 %` de los registros del mes (`2.257` de `2.292` licitaciones comparables, `98,5 %`) y verificación explícita de no-fuga en pruebas unitarias de `ExtremosLogIQR` y `TratamientoFaltantes`.
+- **Impacto medido:** Se analizan las `45.741` ofertas del mes; `2.257` de `2.292` licitaciones (`98,5 %`) son comparables y verificación explícita de no-fuga en pruebas unitarias de `ExtremosLogIQR` y `TratamientoFaltantes`.
 
 ---
 
@@ -91,12 +91,12 @@ Este registro documenta de forma ordenada las decisiones técnicas, metodológic
 - **Problema:** Inicialmente la clase base `Transformador` solo declaraba el método `transformar()`, `ExtremosLogIQR` se ejecutaba fuera de la lista de pasos de `Pipeline` como caso especial y los faltantes eran una regla fija sin ajuste; además, la trazabilidad de ejecución requería evitar duplicación y no acoplarse a `print()`.
 - **Decisión:**
   1. Concentrar en `Transformador(ABC)` el control de `_ajustado`, la validación de `columnas_requeridas` y la copia defensiva (`datos.copy()`).
-  2. Convertir los faltantes en `TratamientoFaltantes(Transformador)` (aprende qué columnas superan el `90 %` de faltantes en `ajustar()` y las excluye en `transformar()`).
+  2. Convertir los faltantes en `TratamientoFaltantes(Transformador)` (aprende qué columnas superan el `90 %` de faltantes en `ajustar()` y las excluye en `transformar()`, sin excluir nunca las variables del análisis de `MOTIVOS`).
   3. Integrar `ExtremosLogIQR` y `TratamientoFaltantes` en la lista única `pasos` para que `Pipeline.ejecutar()` ejecute polimórficamente `paso.ajustar(datos)` y `paso.transformar(datos)` sobre todos los pasos.
   4. Mantener el patrón Observer (`Pipeline.suscribir` + `Bitacora`).
 - **Justificación:** Elimina código repetido en subclases, materializa herencia, polimorfismo y encapsulamiento reales (Rúbrica III.a / comentario Sumativa 1) y desacopla la auditoría de conteos.
 - **Fuente / Evidencia:** Commit `23f3a5a`, [`src/pipeline_licitaciones.py`](../src/pipeline_licitaciones.py) y [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (Secciones `2`, `3` y `7`).
-- **Impacto medido:** `100 %` de clases y métodos públicos con docstring, **`16/16` pruebas aprobadas** en `ejecutar_pruebas_pipeline()` (`5` normales, `7` límite, `4` de excepción), `9` eventos uniformes en `Bitacora` y equivalencia exacta (`check_exact=True`) con F2 (`45.741 × 17` en `ofertas` y `2.292 × 24` en `licitaciones`).
+- **Impacto medido:** `100 %` de clases y métodos públicos con docstring, **`17/17` pruebas aprobadas** en `ejecutar_pruebas_pipeline()` (`5` normales, `8` límite, `4` de excepción), `9` eventos uniformes en `Bitacora` y equivalencia exacta (`check_exact=True`) con F2 (`45.741 × 17` en `ofertas` y `2.292 × 24` en `licitaciones`).
 
 ---
 

@@ -193,6 +193,17 @@ def ejecutar_pruebas_pipeline(mostrar_log: bool = True) -> pd.DataFrame:
         assert list(salida.columns) == list(df_sin_nulos.columns)
         return f"{len(df_sin_nulos.columns)} columnas con 0 nulos: 0 excluidas tras ajustar y transformar"
 
+    def p_faltantes_variable_analitica() -> str:
+        tf = TratamientoFaltantes(umbral_pct=90.0)
+        datos = pd.DataFrame({
+            "FechaAdjudicacion": [pd.NA] * 10 + ["10-01-2025 10:00"],
+            "ColAdministrativa": [pd.NA] * 10 + ["x"],
+        })
+        salida = tf.ajustar(datos).transformar(datos)
+        assert tf.columnas_excluidas == ("ColAdministrativa",)
+        assert list(salida.columns) == ["FechaAdjudicacion"]
+        return "FechaAdjudicacion (variable del análisis) se conserva con 91 % de faltantes; ColAdministrativa se excluye"
+
     def p_pipeline_sin_observadores() -> str:
         with TemporaryDirectory() as carpeta:
             ruta = _escribir_csv_temporal(carpeta, _filas_ficticias(cantidad=2))
@@ -354,6 +365,12 @@ def ejecutar_pruebas_pipeline(mostrar_log: bool = True) -> pd.DataFrame:
             "Límite",
             "Columna sin nulos (0 nulos antes y después, 0 excluidas)",
             p_columna_sin_nulos,
+        ),
+        (
+            "TratamientoFaltantes",
+            "Límite",
+            "Variable del análisis con más del 90 % de faltantes se conserva",
+            p_faltantes_variable_analitica,
         ),
         (
             "Pipeline",

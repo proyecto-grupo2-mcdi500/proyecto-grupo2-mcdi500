@@ -26,7 +26,7 @@ Esta carpeta reúne la documentación técnica compartida del proyecto **Anális
 
 ## 2. Resumen de Metadatos y Reglas de Preprocesamiento (Fase 2)
 
-En el cuaderno `F2/F2_Preprocesamiento.ipynb` se aplicaron transformaciones controladas sobre la copia de trabajo `df_trabajo` (manteniendo intacto el archivo original en `data/raw/`):
+Las reglas viven en `src/preprocesamiento.py`: `F2/F2_Preprocesamiento.ipynb` las aplica y `F3/F3_Nucleo_Algoritmico.ipynb` las reproduce con el pipeline orientado a objetos. El archivo original en `data/raw/` no se modifica:
 
 ### 2.1. Conversión de variables temporales (`datetime64[ns]`)
 - **Columnas transformadas:** `FechaPublicacion`, `FechaCierre` y `FechaAdjudicacion`.
@@ -56,23 +56,20 @@ Los montos están expresados en 4 unidades monetarias distintas que **no deben m
 - **Revisión de nombres equivalentes (`.str.strip().str.upper()`):**
   - `TamanoProveedor`, `Institucion`, `UnidadMedida` y `NombreItem`: **0 diferencias** entre valores originales y normalizados.
   - `UnidadCompra`: 419 nombres originales vs. 368 normalizados (**51 variantes** por diferencias de mayúsculas/minúsculas o espacios).
-- **Ordenamiento lógico de `TamanoProveedor` (`CategoricalDtype`):**
-  Se transformó `TamanoProveedor` en una categoría ordenada (`ordered=True`) con la siguiente jerarquía y distribución:
+- **Escala ordinal del tamaño (`TamanoProveedorOrdinal`, `CategoricalDtype` con `ordered=True`):**
+  `ordenar_tamano()` crea una categoría ordenada de cuatro niveles. `NoClasificado` queda sin rango (`pd.NA`), porque indica ausencia de clasificación y no un tamaño; una categoría desconocida detiene la ejecución con `ValueError`:
   1. `Micro`: **6.539** ofertas (14,30%)
   2. `Pequeña`: **13.510** ofertas (29,54%)
   3. `Mediana`: **8.570** ofertas (18,74%)
   4. `Grande`: **11.848** ofertas (25,90%)
-  5. `NoClasificado`: **5.274** ofertas (11,53%)
+  - `NoClasificado`: **5.274** ofertas (11,53%), sin rango en la escala.
 
-### 2.5. Detección de valores anómalos y atípicos (Criterio IQR en CLP)
-- **Valores negativos o cero:** Se identificó **1 oferta con monto negativo (`-1,0` en CLP)** tanto en `MontoNetoOferta` como en `MontoTotalOferta` y **0 ofertas con monto igual a cero**.
-- **Rango Intercuartílico (IQR) para `MontoTotalOferta` en `CLP` ($n = 45.604$):**
-  - Primer cuartil ($Q_1$, 25%): **$43.600,00**
-  - Tercer cuartil ($Q_3$, 75%): **$1.801.754,50**
-  - Rango intercuartílico ($\text{IQR} = Q_3 - Q_1$): **$1.758.154,50**
-  - Límite inferior ($Q_1 - 1,5 \times \text{IQR}$): **-$2.593.631,75**
-  - Límite superior ($Q_3 + 1,5 \times \text{IQR}$): **$4.438.986,25**
-  - **Valores atípicos detectados:** **7.636 ofertas (16,74% de las ofertas en CLP)**. No se eliminan automáticamente ya que en compras públicas coexisten licitaciones menores (`L1`, `< 100 UTM`) con grandes licitaciones de obras y equipamiento (`LP`, `LQ`, `LR`, `> 1.000 UTM`).
+### 2.5. Detección de valores extremos (IQR sobre el logaritmo de los montos en CLP)
+- **Valores negativos o cero:** hay **1 oferta con monto negativo (`-1,0` en CLP)** en `MontoNetoOferta` y `MontoTotalOferta`, y **0 ofertas con monto igual a cero**.
+- **Método:** `calcular_limites_iqr()` aplica el rango intercuartílico al logaritmo natural de `MontoTotalOferta`, solo en ofertas en `CLP` con monto positivo ($n = 45.603$). Los montos en CLP son muy asimétricos: sobre la escala lineal el límite inferior resultaba negativo y se marcaban como atípicas 7.636 ofertas (16,74 %), en su mayoría licitaciones grandes legítimas. Por eso se cambió al logaritmo, que mide distancias proporcionales.
+  - $Q_1$ y $Q_3$ del logaritmo: **10,6832** y **14,4043**.
+  - Límites ($Q_1 - 1,5 \times \text{IQR}$ y $Q_3 + 1,5 \times \text{IQR}$): **5,1015** y **19,9860** en escala logarítmica, equivalentes a unos **$164** y **$478.439.766** en pesos.
+- **Resultado:** **887 ofertas** quedan marcadas como valor extremo en `EsExtremoLogIQR_CLP` (810 inferiores y 77 superiores), 44.716 dentro de los límites y 138 sin evaluar (`<NA>`: ofertas en otra moneda o con monto no positivo). No se elimina ninguna fila: la bandera indica un valor que requiere contexto. Los parámetros ajustados se guardan en `data/processed/parametros_f3.csv`.
 
 ### 2.6. Columnas vacías (100% nulos) y columnas constantes (1 solo valor)
 - **Columnas con 100% de valores nulos (3 columnas):** `LicitacionBaseTipo`, `ContratoRenovable` y `UnidadTiempoRenovacion`.
@@ -91,7 +88,7 @@ Los montos están expresados en 4 unidades monetarias distintas que **no deben m
 | 3 | `TipoLicitacion` | `str` | `str` | 0 | 0,00% | 9 | Modalidad y tramo en UTM de la licitación (`L1`, `LE`, `LP`, `LQ`, `LR`, `LS` o privada). |
 | 4 | `Descripcion` | `str` | `str` | 0 | 0,00% | 2.222 | Descripción general del requerimiento o alcance de la licitación. |
 | 5 | `MonedaLicitacion` | `str` | `str` | 0 | 0,00% | 4 | Moneda en la que se define el presupuesto de la licitación (`CLP`, `CLF`, `USD`, `UTM`). |
-| 6 | `MontoEstimadoLicitacion` | `int64` | `int64` | 0 | 0,00% | 1.786 | Presupuesto o monto total estimado para la licitación completa. |
+| 6 | `MontoEstimadoLicitacion` | `int64` | `Float64` | 0 | 0,00% | 1.786 | Presupuesto o monto total estimado para la licitación completa. |
 | 7 | `MontoEstimadoVisible` | `str` | `str` | 0 | 0,00% | 2 | Indica si el monto estimado fue visible para los oferentes (`Si` / `No`). |
 | 8 | `BaseEstimacionMontoLicitacion` | `str` | `str` | 0 | 0,00% | 3 | Criterio empleado para estimar el monto (ej. `Precio Referencial`, `Presupuesto Disponible`). |
 | 9 | `FuenteFinanciamiento` | `str` | `str` | 20.012 | 43,75% | 609 | Origen de los fondos con que se financia la compra pública. |
@@ -101,14 +98,14 @@ Los montos están expresados en 4 unidades monetarias distintas que **no deben m
 
 | # | Variable | Tipo Original | Tipo Procesado | Nulos | % Nulos | Valores Distintos | Descripción |
 | :---: | :--- | :---: | :---: | ---: | ---: | ---: | :--- |
-| 11 | `FechaPublicacion` | `str` | `datetime64[ns]` | 0 | 0,00% | 2.015 | Fecha y hora de publicación del llamado a licitación *(convertida en Paso 14)*. |
+| 11 | `FechaPublicacion` | `str` | `datetime64[ns]` | 0 | 0,00% | 2.015 | Fecha y hora de publicación del llamado a licitación *(convertida con `convertir_tipos`)*. |
 | 12 | `FechaInicioPreguntas` | `str` | `str` | 0 | 0,00% | 1.715 | Fecha y hora de apertura del foro de consultas de los proveedores. |
 | 13 | `FechaFinalPreguntas` | `str` | `str` | 0 | 0,00% | 1.232 | Fecha y hora de cierre para la recepción de preguntas. |
 | 14 | `FechaPublicacionRespuestas` | `str` | `str` | 0 | 0,00% | 1.125 | Fecha y hora comprometida para publicar el acta de respuestas y aclaraciones. |
 | 15 | `FechaActoAperturaTecnica` | `str` | `str` | 0 | 0,00% | 1.100 | Fecha y hora de apertura de las ofertas técnicas. |
 | 16 | `FechaActoAperturaEconomica` | `str` | `str` | 0 | 0,00% | 1.104 | Fecha y hora de apertura de las ofertas económicas. |
-| 17 | `FechaCierre` | `str` | `datetime64[ns]` | 0 | 0,00% | 810 | Fecha y hora límite para presentar ofertas en la licitación *(convertida en Paso 14)*. |
-| 18 | `FechaAdjudicacion` | `str` | `datetime64[ns]` | 91 | 0,20% | 2.144 | Fecha y hora efectiva de adjudicación de la licitación; vacía en 91 filas de licitaciones `Cerrada` *(convertida en Paso 14)*. |
+| 17 | `FechaCierre` | `str` | `datetime64[ns]` | 0 | 0,00% | 810 | Fecha y hora límite para presentar ofertas en la licitación *(convertida con `convertir_tipos`)*. |
+| 18 | `FechaAdjudicacion` | `str` | `datetime64[ns]` | 91 | 0,20% | 2.144 | Fecha y hora efectiva de adjudicación de la licitación; vacía en 91 filas de licitaciones `Cerrada` *(convertida con `convertir_tipos`)*. |
 | 19 | `FechaEntregaEnSoporteFisico` | `str` | `str` | 45.457 | 99,38% | 22 | Fecha límite de entrega de antecedentes físicos (cuando aplica). |
 | 20 | `FechaEstimadaEvaluacionOfertas` | `str` | `str` | 43.489 | 95,08% | 22 | Fecha estimada de evaluación de las ofertas recibidas. |
 | 21 | `UnidadTiempoEvaluacion` | `str` | `str` | 88 | 0,19% | 3 | Unidad de medida del plazo de evaluación (ej. horas, días). |
@@ -174,12 +171,12 @@ Los montos están expresados en 4 unidades monetarias distintas que **no deben m
 | # | Variable | Tipo Original | Tipo Procesado | Nulos | % Nulos | Valores Distintos | Descripción |
 | :---: | :--- | :---: | :---: | ---: | ---: | ---: | :--- |
 | 63 | `ActividadProveedor` | `str` | `str` | 10.155 | 22,20% | 2.374 | Giro o actividad económica declarada por el proveedor. |
-| 64 | `TamanoProveedor` | `str` | `category (ordered)` | 0 | 0,00% | 5 | Tamaño de empresa ordenado en Paso 27: `Micro` < `Pequeña` < `Mediana` < `Grande` < `NoClasificado`. |
+| 64 | `TamanoProveedor` | `str` | `category (ordered)` | 0 | 0,00% | 5 | Tamaño de empresa. `TamanoProveedorOrdinal` lo ordena como `Micro` < `Pequeña` < `Mediana` < `Grande`; `NoClasificado` queda sin rango. |
 | 65 | `NombreOferta` | `str` | `str` | 0 | 0,00% | 8.003 | Título dado por el proveedor a su propuesta comercial. |
 | 66 | `EspecificacionesProveedor` | `str` | `str` | 0 | 0,00% | 34.028 | Detalle técnico de lo ofertado por el proveedor para ese ítem específico. |
 | 67 | `EstadoOferta` | `str` | `str` | 0 | 0,00% | 2 | Admisibilidad de la oferta en el acto de apertura (`Aceptada`: 41.860, `Rechazada`: 3.881). |
 | 68 | `CantidadOferta` | `int64` | `int64` | 0 | 0,00% | 358 | Cantidad de unidades ofertadas por el proveedor para el ítem. |
 | 69 | `MonedaOferta` | `str` | `str` | 0 | 0,00% | 4 | Moneda de la oferta (`CLP`: 45.604, `CLF`: 105, `USD`: 23, `UTM`: 9). |
-| 70 | `MontoNetoOferta` | `str` | `Float64` | 0 | 0,00% | 16.765 | Precio unitario neto ofertado por el proveedor *(limpiado de coma decimal y convertido en Paso 18)*. |
-| 71 | `MontoTotalOferta` | `str` | `Float64` | 0 | 0,00% | 21.376 | Monto total neto de la línea ofertada *(limpiado de coma decimal y convertido en Paso 18)*. |
+| 70 | `MontoNetoOferta` | `str` | `Float64` | 0 | 0,00% | 16.765 | Precio unitario neto ofertado por el proveedor *(coma decimal a punto y convertido con `convertir_tipos`)*. |
+| 71 | `MontoTotalOferta` | `str` | `Float64` | 0 | 0,00% | 21.376 | Monto total neto de la línea ofertada *(coma decimal a punto y convertido con `convertir_tipos`)*. |
 | 72 | `ResultadoOferta` | `str` | `str` | 0 | 0,00% | 2 | Resultado final de la línea ofertada (`Ganadora`: 19.888 [43,48%], `Perdedora`: 25.853 [56,52%]). |
