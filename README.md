@@ -85,6 +85,7 @@ proyecto-grupo2-mcdi500/
 │   └── README.md
 ├── F4/
 │   └── README.md
+├── .mailmap
 ├── README.md
 ├── requirements.txt
 └── validar_dataset.py
