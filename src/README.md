@@ -13,7 +13,7 @@ Esta carpeta contiene los módulos y funciones reutilizables por más de una fas
   - `calcular_limites_iqr()` y `aplicar_bandera_atipicos()`: valores extremos en CLP con IQR sobre logaritmos.
   - `validar_procesado()`: comprobaciones finales antes de exportar.
 - **`pruebas_preprocesamiento.py`**: `ejecutar_pruebas_preprocesamiento()` prueba las reglas anteriores con datos ficticios (casos normal, límite y de error).
-- **`pipeline_licitaciones.py`**: Pipeline orientado a objetos de la Fase 3: `Transformador` (clase base), `TransformacionFija`, `ExtremosLogIQR` (ajusta y reutiliza los límites IQR), `Pipeline` con observadores y `Bitacora`; además, `control_iterativo()` y `control_vectorizado()` para el control temporal.
+- **`pipeline_licitaciones.py`**: Pipeline orientado a objetos de la Fase 3: `Transformador` (clase base), `TransformacionFija`, `TratamientoFaltantes` (aprende qué columnas superan el 90 % de faltantes), `ExtremosLogIQR` (ajusta y reutiliza los límites IQR), `Pipeline` con observadores y `Bitacora`; además, `control_iterativo()` y `control_vectorizado()` para el control temporal.
 - **`pruebas_pipeline.py`**: `ejecutar_pruebas_pipeline()` valida las clases de `pipeline_licitaciones.py` (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`, `Bitacora`, `Pipeline` y `ResultadoF3`) y las invariantes de `validar_procesado()` con datos ficticios (16 casos: normales, límite y excepción).
 - **`medicion.py`**: Comparación de implementaciones de un mismo cálculo (Fase 3):
   - `medir_tiempo(funcion, repeticiones)`: menor tiempo de varias ejecuciones con `timeit`.
