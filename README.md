@@ -92,9 +92,10 @@ proyecto-grupo2-mcdi500/
 - `requirements.txt`: contiene las dependencias de Python necesarias para ejecutar el proyecto.
 - `src/`: módulos compartidos (detalle en [`src/README.md`](src/README.md)):
   - `preprocesamiento.py`: reglas de F2 (carga, conversión de tipos, faltantes, duplicados, brecha, IQR y validación).
-  - `pipeline_licitaciones.py`: clases del núcleo algorítmico de F3 (`Transformador`, `TransformacionFija`, `ExtremosLogIQR`, `Pipeline` y `Bitacora`).
+  - `pipeline_licitaciones.py`: clases del núcleo algorítmico de F3 (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`, `Pipeline` y `Bitacora`).
   - `medicion.py`: medición de tiempo (`timeit`) y memoria (`tracemalloc`) para comparar implementaciones.
   - `pruebas_preprocesamiento.py`: pruebas de las reglas de F2 con datos ficticios.
+  - `pruebas_pipeline.py`: pruebas de las clases de F3 con datos ficticios.
   - `utilidades.py`: utilidades generales (raíz del proyecto, nombres de columnas y `ProyectoError`).
 - `validar_dataset.py` y `src/validar_dataset.py`: scripts y módulos reutilizables para revisar y validar archivos de datos entre fases.
 - `data/raw/`: ubicación local de los datos originales (`data/raw/04LicitacionesEne.csv`). El archivo no se versiona porque contiene datos personales; ver *Obtener los datos*.
