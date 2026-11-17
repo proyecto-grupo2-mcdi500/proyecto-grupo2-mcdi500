@@ -18,9 +18,10 @@ F3 escribe `data/processed/diccionario_f3.csv` y `data/processed/parametros_f3.c
 * **`src/pipeline_licitaciones.py`**: núcleo algorítmico orientado a objetos: la clase abstracta `Transformador`, la envoltura `TransformacionFija`, el detector ajustable de valores extremos `ExtremosLogIQR`, el orquestador `Pipeline` y la `Bitacora` del patrón Observer.
 * **`src/medicion.py`**: medición del tiempo mínimo de ejecución (`timeit`) y de la memoria pico (`tracemalloc`).
 * **`src/pruebas_preprocesamiento.py`**: pruebas automáticas de las reglas de preprocesamiento con datos ficticios.
+* **`src/pruebas_pipeline.py`**: pruebas automáticas de las clases del pipeline POO (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`, `Bitacora`, `Pipeline` y `ResultadoF3`) y de `validar_procesado()` con datos ficticios (16 casos: normales, límite y de excepción).
 
 ### 4. Mejoras respecto de la Fase 2
 * **Arquitectura modular y POO:** las reglas pasan de celdas y funciones sueltas a clases con un contrato común (`transformar`; `ajustar` en las que aprenden de los datos) y con los parámetros aprendidos encapsulados.
 * **Patrón de diseño Observer:** la bitácora registra la cantidad de filas tras cada paso del pipeline sin que el pipeline sepa quién la escucha.
 * **Optimización del rendimiento:** la medición mostró que el control de fechas vectorizado es más rápido que el iterativo y que leer con `sep=";"` (motor C) es más rápido y usa menos memoria que detectar el separador. `usecols` reduce aún más el costo cuando se necesitan pocas columnas.
-* **Trazabilidad y pruebas:** la sección 7 prueba las clases en escenarios normales, casos límite (una fila, conjuntos vacíos, sin ofertas en CLP) y excepciones (transformar antes de ajustar, columna ausente, archivo inexistente).
+* **Trazabilidad y pruebas:** la sección 7 ejecuta `src/pruebas_pipeline.py` para probar las clases en escenarios normales, casos límite (una fila, conjuntos vacíos, sin ofertas en CLP) y excepciones (transformar antes de ajustar, columna ausente, archivo inexistente).
