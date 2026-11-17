@@ -2,6 +2,9 @@
 
 Esta carpeta reúne la documentación técnica compartida del proyecto **Análisis de Licitaciones Públicas en Chile (Enero 2025 — MCDI-500, Grupo 2)**, incluyendo los metadatos del conjunto de datos, las reglas y hallazgos del preprocesamiento (Fase 2) y el diccionario completo de las **72 variables** de la base.
 
+- **Arquitectura del sistema:** [arquitectura.md](./arquitectura.md) (componentes, responsabilidades, patrones de diseño, escalabilidad, evolución desde F2 y decisión de división funcional vs. recursividad).
+- **Registro de decisiones técnicas:** [decisiones.md](./decisiones.md) (problema, decisión, justificación, fuente e impacto medido de cada criterio técnico y metodológico).
+
 ---
 
 ## 1. Metadatos del Conjunto de Datos
