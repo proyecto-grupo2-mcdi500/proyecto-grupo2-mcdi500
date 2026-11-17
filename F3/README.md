@@ -18,7 +18,7 @@ F3 escribe `data/processed/diccionario_f3.csv` y `data/processed/parametros_f3.c
 * **`src/pipeline_licitaciones.py`**: núcleo algorítmico orientado a objetos: la clase abstracta `Transformador`, la envoltura `TransformacionFija`, el tratamiento ajustable de faltantes `TratamientoFaltantes`, el detector ajustable de valores extremos `ExtremosLogIQR`, el orquestador `Pipeline` y la `Bitacora` del patrón Observer.
 * **`src/medicion.py`**: medición del tiempo mínimo de ejecución (`timeit`) y de la memoria pico (`tracemalloc`).
 * **`src/pruebas_preprocesamiento.py`**: pruebas automáticas de las reglas de preprocesamiento con datos ficticios.
-* **`src/pruebas_pipeline.py`**: pruebas automáticas de las clases del pipeline POO (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`, `Bitacora`, `Pipeline` y `ResultadoF3`) y de `validar_procesado()` con datos ficticios (16 casos: normales, límite y de excepción).
+* **`src/pruebas_pipeline.py`**: pruebas automáticas de las clases del pipeline POO (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`, `Bitacora`, `Pipeline` y `ResultadoF3`) y de `validar_procesado()` con datos ficticios (17 casos: normales, límite y de excepción).
 
 ### 4. Mejoras respecto de la Fase 2
 * **Arquitectura modular y POO:** las reglas pasan de celdas y funciones sueltas a clases con un contrato común (`ajustar` y luego `transformar` en todos los pasos) y con los parámetros aprendidos encapsulados.

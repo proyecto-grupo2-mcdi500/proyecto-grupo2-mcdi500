@@ -162,7 +162,11 @@ class TransformacionFija(Transformador):
 
 
 class TratamientoFaltantes(Transformador):
-    """Aprende qué columnas superan un umbral de valores faltantes y las excluye al transformar."""
+    """Aprende qué columnas superan un umbral de valores faltantes y las excluye al transformar.
+
+    Las variables del análisis (``MOTIVOS``) nunca se excluyen: F2 conserva sus faltantes
+    sin imputar, aunque superen el umbral.
+    """
 
     nombre = "Tratar faltantes (>90 %)"
 
@@ -208,11 +212,13 @@ class TratamientoFaltantes(Transformador):
         return None if self._resumen_faltantes is None else self._resumen_faltantes.copy()
 
     def _ajustar_en(self, datos: pd.DataFrame) -> None:
-        """Normaliza blancos e identifica las columnas con más de ``umbral_pct`` de faltantes."""
+        """Normaliza blancos e identifica las columnas fuera del análisis con más de ``umbral_pct`` de faltantes."""
         _, control = tratar_faltantes(datos, datos.isna().sum())
         self._resumen_faltantes = control
         self._columnas_excluidas = tuple(
-            control.index[control["% faltantes"].gt(self._umbral_pct)]
+            columna
+            for columna in control.index[control["% faltantes"].gt(self._umbral_pct)]
+            if columna not in MOTIVOS
         )
 
     def _aplicar(self, datos: pd.DataFrame) -> pd.DataFrame:

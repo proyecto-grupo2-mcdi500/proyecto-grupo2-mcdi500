@@ -62,11 +62,14 @@ proyecto-grupo2-mcdi500/
 │   └── raw/
 │       └── README.md
 ├── docs/
+│   ├── arquitectura.md
+│   ├── decisiones.md
 │   └── README.md
 ├── src/
 │   ├── medicion.py
 │   ├── pipeline_licitaciones.py
 │   ├── preprocesamiento.py
+│   ├── pruebas_pipeline.py
 │   ├── pruebas_preprocesamiento.py
 │   ├── README.md
 │   ├── utilidades.py
