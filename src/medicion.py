@@ -54,21 +54,28 @@ def verificar_iguales(referencia: Any, candidato: Any, nombre: str) -> None:
 
 
 def comparar(
-    implementaciones: dict[str, Callable[[], Any]], repeticiones: int = 7
+    implementaciones: dict[str, Callable[[], Any]], repeticiones: int = 7,
+    *, repeticiones_memoria: int = 1,
 ) -> pd.DataFrame:
     """Mide tiempo y memoria de cada implementación y verifica que coincidan.
 
     Recibe un diccionario {nombre: función sin argumentos}. La primera
     implementación es la referencia: todas las demás deben entregar exactamente
     el mismo resultado; si no, se detiene con AssertionError antes de reportar.
+    Para memoria conserva el menor pico de las ejecuciones independientes.
     """
     if len(implementaciones) < 2:
         raise ValueError("Se necesitan al menos dos implementaciones para comparar.")
+    if repeticiones_memoria < 1:
+        raise ValueError("Se necesita al menos una repetición para medir memoria.")
 
     filas = []
     referencia = None
     for posicion, (nombre, funcion) in enumerate(implementaciones.items()):
         resultado, memoria_mb = medir_memoria(funcion)
+        for _ in range(repeticiones_memoria - 1):
+            _, pico = medir_memoria(funcion)
+            memoria_mb = min(memoria_mb, pico)
         if posicion == 0:
             referencia = resultado
         else:
@@ -85,3 +92,24 @@ def comparar(
     )
     tabla["Repeticiones"] = repeticiones
     return tabla.round(3)
+
+
+def medir_contraste(
+    iterativa: Callable[[], pd.DataFrame], vectorizada: Callable[[], pd.DataFrame],
+    repeticiones: int = 7,
+) -> dict[str, float]:
+    """Resume el contraste con el mismo número de repeticiones de tiempo y memoria."""
+    tabla = comparar(
+        {"Iterativa": iterativa, "Vectorizada": vectorizada},
+        repeticiones=repeticiones, repeticiones_memoria=repeticiones,
+    ).set_index("Implementación")
+    return {
+        "Iterativa (ms)": tabla.loc["Iterativa", "Tiempo mínimo (ms)"],
+        "Vectorizada (ms)": tabla.loc["Vectorizada", "Tiempo mínimo (ms)"],
+        "Iterativa (MiB)": tabla.loc["Iterativa", "Memoria pico (MB)"],
+        "Vectorizada (MiB)": tabla.loc["Vectorizada", "Memoria pico (MB)"],
+        "Tiempo iterativa / vectorizada": (
+            tabla.loc["Iterativa", "Veces el tiempo de la más rápida"]
+            / tabla.loc["Vectorizada", "Veces el tiempo de la más rápida"]
+        ),
+    }
