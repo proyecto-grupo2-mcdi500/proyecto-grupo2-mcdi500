@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import TypedDict
+import hashlib
 import re
 import unicodedata
 
@@ -16,6 +17,49 @@ REQUERIDAS = {
     *FECHAS, *MONTOS, "NroLicitacion", "MonedaLicitacion",
     "MonedaOferta", "TamanoProveedor", "ResultadoOferta",
 }
+SHA256_RAW_LF = "ec308de2f2785fea3cf3304b200e350b8e9b9a92f3bd828d9bf0e152c7a041bf"
+URL_PORTAL_PUBLICO = "https://datos-abiertos.chilecompra.cl/descargas/ordenes-y-licitaciones"
+
+
+def _mensaje_instrucciones_raw(motivo: str) -> str:
+    """Construye un mensaje uniforme con los pasos de descarga pública y verificación SHA-256."""
+    return (
+        f"{motivo}\n"
+        "Instrucciones de descarga reproducible:\n"
+        f"1. Descarga el archivo desde el portal público de ChileCompra ({URL_PORTAL_PUBLICO}): "
+        "apartado Licitaciones, año 2025, mes Enero (sector Municipalidades, 04LicitacionesEne.zip).\n"
+        "   (Alternativa institucional con cuenta UNAB en data/raw/README.md).\n"
+        "2. Descomprime y ubica el CSV en data/raw/04LicitacionesEne.csv sin abrirlo ni guardarlo con Excel.\n"
+        f"3. Verifica que su SHA-256 sin '\\r' (LF) sea {SHA256_RAW_LF} (ver data/raw/README.md)."
+    )
+
+
+def calcular_sha256_sin_cr(ruta: Path, tamano_bloque: int = 1024 * 1024) -> str:
+    """Calcula el SHA-256 del archivo ignorando bytes ``\\r`` para equiparar CRLF y LF."""
+    destino = Path(ruta)
+    if not destino.is_file():
+        raise FileNotFoundError(
+            _mensaje_instrucciones_raw(f"No se encontró el archivo de entrada: {destino}")
+        )
+    digest = hashlib.sha256()
+    with destino.open("rb") as archivo:
+        while bloque := archivo.read(tamano_bloque):
+            digest.update(bloque.replace(b"\r", b""))
+    return digest.hexdigest()
+
+
+def verificar_hash_raw(ruta: Path, hash_esperado: str = SHA256_RAW_LF) -> str:
+    """Verifica que ``ruta`` exista y su SHA-256 (sin ``\\r``) coincida con ``hash_esperado``."""
+    esperado = hash_esperado.strip().lower()
+    actual = calcular_sha256_sin_cr(ruta)
+    if actual != esperado:
+        raise ValueError(
+            _mensaje_instrucciones_raw(
+                f"El SHA-256 sin '\\r' de {ruta} ({actual}) no coincide con el esperado ({esperado}). "
+                "Posible archivo alterado (por ejemplo, guardado en Excel) o versión distinta."
+            )
+        )
+    return actual
 
 
 def es_columna_privada(columna: str) -> bool:
@@ -31,12 +75,15 @@ def es_columna_privada(columna: str) -> bool:
     )
 
 
-def cargar_csv(ruta: Path) -> pd.DataFrame:
+def cargar_csv(ruta: Path, verificar_hash: bool = False) -> pd.DataFrame:
     """Lee el CSV local sin identificadores directos y devuelve las filas con esquema validado.
 
     Declara el separador `;` en vez de detectarlo: la medición de F3 (sección 4.3)
-    mostró que entrega el mismo resultado con menos tiempo y memoria.
+    mostró que entrega el mismo resultado con menos tiempo y memoria. Si ``verificar_hash``
+    es ``True``, comprueba previamente el SHA-256 sin ``\\r`` mediante ``verificar_hash_raw()``.
     """
+    if verificar_hash:
+        verificar_hash_raw(ruta)
     datos = pd.read_csv(
         ruta, sep=";", encoding="latin-1",
         usecols=lambda columna: not es_columna_privada(columna),

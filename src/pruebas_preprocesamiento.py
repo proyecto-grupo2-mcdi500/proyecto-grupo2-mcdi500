@@ -6,8 +6,9 @@ from tempfile import TemporaryDirectory
 import pandas as pd
 
 from .preprocesamiento import (
-    aplicar_bandera_atipicos, calcular_brecha, calcular_limites_iqr, cargar_csv,
-    marcar_duplicados, ordenar_tamano,
+    SHA256_RAW_LF, aplicar_bandera_atipicos, calcular_brecha, calcular_limites_iqr,
+    calcular_sha256_sin_cr, cargar_csv, marcar_duplicados, ordenar_tamano,
+    verificar_hash_raw,
 )
 
 
@@ -73,3 +74,27 @@ def ejecutar_pruebas_preprocesamiento() -> None:
     bandera = aplicar_bandera_atipicos(ofertas, limites)["EsExtremoLogIQR_CLP"]
     assert bandera.iloc[:6].tolist() == [True, False, False, False, False, True]
     assert bandera.iloc[6:].isna().all()
+
+    with TemporaryDirectory() as carpeta:
+        ruta_crlf = Path(carpeta) / "crlf.csv"
+        ruta_lf = Path(carpeta) / "lf.csv"
+        ruta_crlf.write_bytes(b"a;b\r\n1;2\r\n")
+        ruta_lf.write_bytes(b"a;b\n1;2\n")
+        hash_crlf = calcular_sha256_sin_cr(ruta_crlf)
+        hash_lf = calcular_sha256_sin_cr(ruta_lf)
+        assert hash_crlf == hash_lf
+        assert verificar_hash_raw(ruta_crlf, hash_esperado=hash_lf) == hash_lf
+
+        try:
+            verificar_hash_raw(Path(carpeta) / "no_existe.csv")
+        except FileNotFoundError as error:
+            assert "ChileCompra" in str(error) and SHA256_RAW_LF in str(error)
+        else:
+            raise AssertionError("Faltó lanzar FileNotFoundError con instrucciones.")
+
+        try:
+            verificar_hash_raw(ruta_lf)
+        except ValueError as error:
+            assert SHA256_RAW_LF in str(error) and "data/raw/README.md" in str(error)
+        else:
+            raise AssertionError("Faltó rechazar un SHA-256 distinto al esperado.")

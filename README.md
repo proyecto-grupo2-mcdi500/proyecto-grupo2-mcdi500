@@ -234,11 +234,11 @@ Abrir `F1/F1_Definicion.ipynb` en VS Code, seleccionar el kernel **Python (grupo
 
 ## Obtener los datos
 
-El archivo de entrada `data/raw/04LicitacionesEne.csv` no está en el repositorio (está excluido en `.gitignore`). Cada integrante lo descarga una vez, después de configurar el entorno:
+El archivo de entrada `data/raw/04LicitacionesEne.csv` no está en el repositorio (está excluido en `.gitignore`). Cada persona puede obtenerlo de forma reproducible sin cuenta institucional:
 
-1. Descarga [04LicitacionesEne.zip desde OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7) con tu cuenta UNAB (acceso solo para el grupo y el docente).
+1. Descarga el archivo desde el portal público [ChileCompra — Datos Abiertos (`ordenes-y-licitaciones`)](https://datos-abiertos.chilecompra.cl/descargas/ordenes-y-licitaciones) (apartado *Licitaciones*, año `2025`, mes `Enero`, sector *Municipalidades*). Como espejo alternativo para integrantes y docente UNAB también está [04LicitacionesEne.zip en OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7).
 2. Descomprímelo y deja el CSV en `data/raw/04LicitacionesEne.csv`.
-3. Verifica su SHA-256 como se indica en [`data/raw/README.md`](data/raw/README.md).
+3. Verifica su SHA-256 (ver [`data/raw/README.md`](data/raw/README.md)) o en Python mediante `verificar_hash_raw()` de `src/preprocesamiento.py` (compara automáticamente contra `ec308de2...` ignorando `\r`).
 
 No abras ni guardes el CSV con Excel: lo reescribe con otro formato y altera el contenido.
 
