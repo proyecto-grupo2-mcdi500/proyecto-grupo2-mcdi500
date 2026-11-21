@@ -366,6 +366,31 @@ def asignar_tamano_ganador(licitaciones: pd.DataFrame, ofertas: pd.DataFrame) ->
     )
 
 
+def asignar_tamano_ganador_iterativo(
+    licitaciones: pd.DataFrame, ofertas: pd.DataFrame,
+) -> pd.DataFrame:
+    """Referencia de F4 que reúne tamaños y asigna etiquetas fila por fila."""
+    filas = zip(
+        normalizar_codigo(ofertas["NroLicitacion"]),
+        normalizar_codigo(ofertas["ResultadoOferta"]),
+        ofertas["TamanoProveedor"].astype("string").str.strip(),
+    )
+    tamanos_por_codigo: dict[str, set[str]] = {}
+    for codigo, resultado, tamano in filas:
+        if pd.notna(codigo) and pd.notna(resultado) and resultado == "GANADORA" and pd.notna(tamano):
+            tamanos_por_codigo.setdefault(codigo, set()).add(tamano)
+
+    etiquetas = []
+    for codigo in normalizar_codigo(licitaciones["NroLicitacion"]):
+        tamanos = tamanos_por_codigo.get(codigo, ())
+        etiquetas.append("Múltiple" if len(tamanos) > 1 else next(iter(tamanos), "Sin ganadora"))
+    asignadas = pd.Series(np.asarray(etiquetas, dtype=object), index=licitaciones.index)
+    return licitaciones.assign(
+        TamanoGanador=asignadas,
+        TamanoGanadorOrdinal=pd.Categorical(asignadas, categories=ORDEN_TAMANO, ordered=True),
+    )
+
+
 def resumen_sentido_por_moneda(comparables: pd.DataFrame, z: float = 1.96) -> pd.DataFrame:
     """Resume conteos y porcentajes de ``SentidoBrecha`` e IC Wilson de coincidencia por moneda."""
     _validar_columnas(
