@@ -1,0 +1,149 @@
+{
+  "fase": "F4",
+  "etapa": "Contrato de artefactos, verificación contra data/raw y copia para graficar",
+  "entorno": {
+    "python": "3.15.2",
+    "sistema": "Windows",
+    "entorno_virtual_activo": true,
+    "paquetes": {
+      "pandas": {
+        "instalada": "3.1.0",
+        "declarada": "3.1.0",
+        "coincide": true
+      },
+      "numpy": {
+        "instalada": "2.5.4",
+        "declarada": "2.5.4",
+        "coincide": true
+      },
+      "matplotlib": {
+        "instalada": "3.11.2",
+        "declarada": "3.11.2",
+        "coincide": true
+      }
+    },
+    "estilo_figuras_rcparams": {
+      "figure.dpi": 120,
+      "savefig.dpi": 150,
+      "font.size": 10,
+      "axes.titlesize": 11,
+      "axes.labelsize": 10,
+      "axes.spines.top": false,
+      "axes.spines.right": false,
+      "axes.grid": true,
+      "grid.linestyle": "--",
+      "grid.alpha": 0.35,
+      "legend.frameon": true
+    }
+  },
+  "artefactos": {
+    "separador": ";",
+    "ofertas": {
+      "filas": 45741,
+      "columnas_archivo": 17,
+      "usecols": [
+        "NroLicitacion",
+        "MonedaOferta",
+        "MontoTotalOferta",
+        "ResultadoOferta",
+        "TamanoProveedor",
+        "TamanoProveedorOrdinal",
+        "EsExtremoLogIQR_CLP"
+      ]
+    },
+    "licitaciones": {
+      "filas": 2292,
+      "columnas_archivo": 24,
+      "usecols": [
+        "NroLicitacion",
+        "FilasOferta",
+        "OfertasGanadoras",
+        "MontoEstimadoLicitacion",
+        "MonedaLicitacion",
+        "GanadoraDuplicada",
+        "MontoTotalGanadoras",
+        "BrechaMonto",
+        "EstadoBrecha",
+        "CoincideConEstimado",
+        "VisibilidadEstimado"
+      ]
+    },
+    "diccionario_filas": 41,
+    "parametros_filas": 8,
+    "contrato_aprobado": true
+  },
+  "verificacion_raw": {
+    "disponible": true,
+    "filas_crudo": 45741,
+    "licitaciones_unicas_crudo": 2292,
+    "muestra_licitaciones": 7,
+    "max_diferencia_abs": 0.0,
+    "estado": "APROBADA"
+  },
+  "copia_graficar": {
+    "filas_comparables": 2257,
+    "columnas_agregadas": [
+      "RazonMonto",
+      "LogRazonMonto",
+      "SentidoBrecha",
+      "TamanoGanador",
+      "TamanoGanadorOrdinal",
+      "EtiquetaCoincidencia",
+      "BrechaRelativaPct",
+      "TramoEstimado"
+    ],
+    "eje_ordinal": [
+      "Micro",
+      "Pequeña",
+      "Mediana",
+      "Grande"
+    ],
+    "fuera_del_eje_ordinal": [
+      "NoClasificado",
+      "Múltiple"
+    ],
+    "conteos_por_moneda": {
+      "CLP": 2230,
+      "CLF": 20,
+      "UTM": 4,
+      "USD": 3
+    },
+    "conteos_por_tramo": {
+      "Hasta 1 M CLP": 350,
+      "1 a 10 M CLP": 739,
+      "10 a 50 M CLP": 783,
+      "Más de 50 M CLP": 358,
+      "Otra moneda (no CLP)": 27
+    }
+  },
+  "vinculacion_objetivos": [
+    {
+      "objetivo": "Objetivo específico 1 (proporción de coincidencia)",
+      "pregunta": "P1 (parte 1): proporción comparable en que estimado == total ganador",
+      "figura": "01_coincidencia_y_sentido.png",
+      "funciones_comunicacion": [
+        "intervalo_wilson",
+        "resumen_sentido_por_moneda",
+        "graficar_coincidencia_y_sentido"
+      ]
+    },
+    {
+      "objetivo": "Objetivo específico 2 (magnitud y sentido por moneda)",
+      "pregunta": "P1 (parte 2): magnitud y sentido de la brecha separando por moneda",
+      "figura": "01_coincidencia_y_sentido.png / 02_distribucion_log_razon_clp.png",
+      "funciones_comunicacion": [
+        "resumen_magnitud_por_moneda",
+        "graficar_distribucion_brecha"
+      ]
+    },
+    {
+      "objetivo": "Objetivo específico 3 (comparación por tamaño ganador)",
+      "pregunta": "P2: cambio de coincidencia y brecha según tamaño del proveedor ganador",
+      "figura": "03_resultados_por_tamano_clp.png",
+      "funciones_comunicacion": [
+        "tabla_resumen_por_tamano",
+        "graficar_resultados_por_tamano"
+      ]
+    }
+  ]
+}
