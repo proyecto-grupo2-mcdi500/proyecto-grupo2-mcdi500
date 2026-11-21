@@ -15,32 +15,68 @@ Este documento describe la organización estructural del proyecto **Análisis de
 | **Pruebas unitarias de reglas F2** | Ejecuta casos normales, límite y de error sobre datos ficticios mediante `ejecutar_pruebas_preprocesamiento()` | [`src/pruebas_preprocesamiento.py`](../src/pruebas_preprocesamiento.py) |
 | **Núcleo POO y pipeline F3** | Jerarquía de transformadores ajustables (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`), observador `Bitacora`, orquestador `Pipeline`, contenedor `ResultadoF3`, constructor `construir_pipeline()` y controles temporales (`control_iterativo`, `control_vectorizado`) | [`src/pipeline_licitaciones.py`](../src/pipeline_licitaciones.py) |
 | **Instrumentación de eficiencia** | Mide tiempo mínimo con `timeit` (`medir_tiempo`), memoria pico separada con `tracemalloc` (`medir_memoria`) y compara equivalencia exacta (`comparar`) | [`src/medicion.py`](../src/medicion.py) |
-| **Indicadores y gráficos F4** | Carga selectiva (`usecols`, `sep=";"`) de los cuatro artefactos procesados, calcula razón/log-razón, sentido de la brecha, medianas/IQR, intervalos de Wilson, tabla por tamaño ganador y genera figuras exportables (`guardar_figura`) | [`src/comunicacion.py`](../src/comunicacion.py) |
+| **Indicadores y gráficos F4** | Carga selectiva (`usecols`, `sep=";"`) de los cuatro artefactos procesados, calcula razón/log-razón, sentido de la brecha, medianas/IQR, intervalos de Wilson, sensibilidad de IVA/duplicados, pruebas estadísticas y genera figuras exportables (`guardar_figura`) | [`src/comunicacion.py`](../src/comunicacion.py) |
+| **Pruebas del pipeline POO** | Valida clases de `pipeline_licitaciones.py` y `validar_procesado()` en `17` casos normal, límite y excepción (`ejecutar_pruebas_pipeline()`) | [`src/pruebas_pipeline.py`](../src/pruebas_pipeline.py) |
 | **Definición del problema (F1)** | Formaliza problemática, objetivos, preguntas, ficha técnica de roles, pruebas de `utilidades.py` y validación del entorno | [`F1/F1_Definicion.ipynb`](../F1/F1_Definicion.ipynb) |
 | **Preprocesamiento exploratorio (F2)** | Aplica y documenta las reglas de limpieza, perfilamiento, brechas e IQR generando las salidas oficiales en `data/processed/` | [`F2/F2_Preprocesamiento.ipynb`](../F2/F2_Preprocesamiento.ipynb) |
 | **Núcleo algorítmico y POO (F3)** | Orquesta el pipeline POO, verifica equivalencia exacta con F2, ejecuta mediciones de eficiencia, genera diccionario/parámetros y ejecuta `ejecutar_pruebas_pipeline()` | [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) |
-| **Datos de entrada** | Fuente cruda local (`04LicitacionesEne.csv`, no versionada por privacidad) y guía de descarga | [`data/raw/README.md`](../data/raw/README.md) |
+| **Visualización y comunicación (F4)** | Verifica contrato con `diccionario_f3.csv` y `data/raw`, construye copia interpretable, genera las 3 figuras por objetivo (`200 ppp`), controla confusión y exporta hallazgos | [`F4/F4_Visualizacion_Comunicacion.ipynb`](../F4/F4_Visualizacion_Comunicacion.ipynb) |
+| **Datos de entrada** | Fuente cruda local (`04LicitacionesEne.csv`, no versionada por privacidad) y guía de descarga pública con SHA-256 | [`data/raw/README.md`](../data/raw/README.md) |
 | **Datos procesados y metadatos** | Salidas versionadas sin identificadores (`04LicitacionesEne_procesado.csv`, `04LicitacionesEne_brecha_por_licitacion.csv`) y documentación de columnas/parámetros (`diccionario_f3.csv`, `parametros_f3.csv`) | [`data/processed/README.md`](../data/processed/README.md) |
-| **Documentación técnica compartida** | Metadatos y diccionario completo de 72 variables (`README.md`), arquitectura (`arquitectura.md`) y registro de decisiones (`decisiones.md`) | [`docs/README.md`](./README.md) |
+| **Documentación y hallazgos compartidos** | Diccionario completo (`README.md`), arquitectura (`arquitectura.md`), decisiones (`decisiones.md`), cifras trazables ([`hallazgos_f4.csv`](./hallazgos_f4.csv)) y metadatos ([`metadatos_f4.json`](./metadatos_f4.json)) | [`docs/README.md`](./README.md) |
 
 ---
 
-## 2. Por qué esta organización (Cohesión, Acoplamiento y Reproducibilidad)
+## 2. Diagrama de Componentes y Organización por Capas
 
-La estructura separa explícitamente **cuatro capas** para evitar notebooks monolíticos o código duplicado entre fases:
+La estructura separa explícitamente los **notebooks por fase (`F1`–`F4`)**, los **módulos compartidos (`src/`)** y los **artefactos de datos y documentación (`data/`, `docs/`, `F4/figuras/`)** para evitar notebooks monolíticos o código duplicado entre fases:
 
 ```mermaid
-flowchart LR
-    RAW["data/raw/<br>(04LicitacionesEne.csv local)"] --> PRE["src/preprocesamiento.py<br>(reglas puras + privacidad)"]
-    PRE --> F2["F2/F2_Preprocesamiento.ipynb<br>(exploración y exportación)"]
-    PRE --> POO["src/pipeline_licitaciones.py<br>(Transformador, Pipeline, Bitacora)"]
-    MED["src/medicion.py<br>(timeit + tracemalloc + igualdad)"] --> F3["F3/F3_Nucleo_Algoritmico.ipynb<br>(POO, benchmarks y pruebas)"]
+flowchart TB
+    subgraph NB["Notebooks (F1–F4)"]
+        F1["F1/F1_Definicion.ipynb"]
+        F2["F2/F2_Preprocesamiento.ipynb"]
+        F3["F3/F3_Nucleo_Algoritmico.ipynb"]
+        F4["F4/F4_Visualizacion_Comunicacion.ipynb"]
+    end
+
+    subgraph SRC["Módulos compartidos (src/)"]
+        VAL["src/validar_dataset.py<br>(+ validar_dataset.py CLI)"]
+        UTI["src/utilidades.py<br>(ProyectoError, raíz, normalización)"]
+        PRE["src/preprocesamiento.py<br>(SHA-256, cargar_csv, reglas F2)"]
+        PR_PRE["src/pruebas_preprocesamiento.py"]
+        POO["src/pipeline_licitaciones.py<br>(Transformador, Pipeline, Bitacora)"]
+        PR_PIP["src/pruebas_pipeline.py"]
+        MED["src/medicion.py<br>(timeit, tracemalloc, comparar)"]
+        COM["src/comunicacion.py<br>(usecols, Wilson, IVA, figuras)"]
+    end
+
+    subgraph ART["Artefactos (data/, docs/, figuras)"]
+        RAW["data/raw/04LicitacionesEne.csv<br>(CSV crudo local, SHA-256 LF)"]
+        PROC_DAT["data/processed/<br>procesado.csv + brecha_por_licitacion.csv"]
+        PROC_META["data/processed/<br>diccionario_f3.csv + parametros_f3.csv"]
+        DOCS["docs/<br>README.md, arquitectura.md, decisiones.md"]
+        F4_OUT["docs/hallazgos_f4.csv + metadatos_f4.json<br>+ F4/figuras/*.png (200 ppp)"]
+    end
+
+    RAW -->|verifica hash y lee sin RUT| PRE
+    UTI --> F1
+    UTI --> VAL
+    PRE --> F2
+    PRE --> POO
+    PRE --> COM
+    PR_PRE -.->|prueba| PRE
     POO --> F3
-    F2 --> PROC["data/processed/<br>(ofertas + brecha por licitación)"]
-    F3 --> DOC["docs/ + diccionario_f3.csv + parametros_f3.csv"]
-    PROC --> COM["src/comunicacion.py<br>(usecols + indicadores + gráficos)"]
-    DOC --> COM
-    COM --> F4["F4/<br>(notebook de visualización)"]
+    MED --> F3
+    PR_PIP -.->|prueba 17 casos| POO
+    F2 -->|exporta tablas| PROC_DAT
+    F3 -->|genera metadatos| PROC_META
+    PROC_DAT --> COM
+    PROC_META --> COM
+    RAW -.->|verificación independiente| F4
+    COM --> F4
+    F4 -->|exporta evidencia| F4_OUT
+    DOCS -.->|documenta contratos| F4
 ```
 
 1. **Reglas puras separadas de la orquestación (`preprocesamiento.py` vs. `pipeline_licitaciones.py`) y de la comunicación (`comunicacion.py`):** Las reglas de negocio de F2 son funciones deterministas que operan sobre `DataFrame` y pueden probarse de forma aislada (`pruebas_preprocesamiento.py`). La capa de F3 las envuelve en transformadores polimórficos sin duplicar lógica, y F4 delega el cálculo de indicadores (`intervalo_wilson`, `tasa_por_grupo`, razón, log-razón, medianas/IQR y resumen por tamaño) y la construcción/guardado de figuras a `src/comunicacion.py`.
@@ -50,9 +86,91 @@ flowchart LR
 
 ---
 
-## 3. Patrones de Diseño Aplicados
+## 3. Patrones de Diseño y Diagrama de Clases
 
-### 3.1. Patrón Observer (`Pipeline` y `Bitacora`)
+### 3.1. Diagrama de clases (`src/pipeline_licitaciones.py`)
+
+El núcleo orientado a objetos unifica todos los pasos de transformación bajo el contrato común de `Transformador`, los ejecuta de forma polimórfica desde `Pipeline` y desacopla el registro de auditoría mediante el contrato observador implementado por `Bitacora`:
+
+```mermaid
+classDiagram
+    class Transformador {
+        <<abstract>>
+        +nombre: str
+        +columnas_requeridas: tuple~str~
+        -_ajustado: bool
+        +ajustado() bool
+        +ajustar(datos: DataFrame) Transformador
+        +transformar(datos: DataFrame) DataFrame
+        #_validar_columnas(datos: DataFrame) None
+        #_ajustar_en(datos: DataFrame) None
+        #_aplicar(datos: DataFrame)* DataFrame
+    }
+
+    class TransformacionFija {
+        -_nombre: str
+        -_regla: Callable
+        +nombre() str
+        #_aplicar(datos: DataFrame) DataFrame
+    }
+
+    class TratamientoFaltantes {
+        +nombre: str
+        -_umbral_pct: float
+        -_columnas_excluidas: tuple~str~
+        -_resumen_faltantes: DataFrame
+        +umbral_pct() float
+        +columnas_excluidas() tuple~str~
+        +resumen() DataFrame
+        #_ajustar_en(datos: DataFrame) None
+        #_aplicar(datos: DataFrame) DataFrame
+    }
+
+    class ExtremosLogIQR {
+        +nombre: str
+        +columnas_requeridas: tuple~str~
+        -_limites: LimitesIQR
+        +limites() LimitesIQR
+        #_ajustar_en(datos: DataFrame) None
+        #_aplicar(datos: DataFrame) DataFrame
+    }
+
+    class ObservadorPipeline {
+        <<Callable / Observer>>
+        +__call__(paso: str, entrada: int, salida: int) None
+    }
+
+    class Bitacora {
+        -_eventos: list~dict~
+        +registrar(paso: str, filas_entrada: int, filas_salida: int) None
+        +tabla() DataFrame
+    }
+
+    class Pipeline {
+        -_pasos: tuple~Transformador~
+        -_observadores: list~ObservadorPipeline~
+        +suscribir(observador: ObservadorPipeline) None
+        -_notificar(paso: str, entrada: int, salida: int) None
+        +ejecutar(ruta: Path) ResultadoF3
+    }
+
+    class ResultadoF3 {
+        <<dataclass>>
+        +ofertas: DataFrame
+        +licitaciones: DataFrame
+        +limites_iqr: LimitesIQR
+    }
+
+    Transformador <|-- TransformacionFija : hereda
+    Transformador <|-- TratamientoFaltantes : hereda
+    Transformador <|-- ExtremosLogIQR : hereda
+    Pipeline o-- "1..*" Transformador : _pasos
+    Pipeline --> "0..*" ObservadorPipeline : _notificar()
+    Bitacora ..|> ObservadorPipeline : registrar()
+    Pipeline ..> ResultadoF3 : retorna
+```
+
+### 3.2. Patrón Observer (`Pipeline` y `Bitacora`)
 
 - **Implementación:** `Pipeline` expone `suscribir(observador)` y llama internamente a `_notificar(paso, entrada, salida)` después de cargar el CSV, ejecutar cada transformador, calcular la brecha y validar las tablas finales. `Bitacora` actúa como observador concreto mediante `registrar()`, consolidando el resumen en `tabla()` con únicamente `["Paso", "Filas de entrada", "Filas de salida"]`.
 - **Qué problema resuelve:**
@@ -63,7 +181,7 @@ flowchart LR
   - `Pipeline.ejecutar()` tendría que mezclar lógica de transformación con `print()`, acumuladores internos de historial o dependencias directas hacia el formato de salida del cuaderno, rompiendo el principio de responsabilidad única.
   - Cada nuevo requerimiento de monitoreo (enviar logs a archivo, validar conteos en múltiples destinos o suprimir trazas en pruebas unitarias) obligaría a modificar `Pipeline.ejecutar()` mediante condicionales acoplados.
 
-### 3.2. Otros Patrones Estructurales en `src/pipeline_licitaciones.py`
+### 3.3. Otros Patrones Estructurales en `src/pipeline_licitaciones.py`
 
 | Patrón | Dónde se aplica | Función en la arquitectura |
 | :--- | :--- | :--- |
