@@ -41,8 +41,8 @@ Las preguntas de investigación y las restricciones de los datos están en las s
 
 El análisis está implementado principalmente en **Python**:
 
-* **Entorno:** JupyterLab / Python 3.12 (versión con la que se fijó `requirements.txt`)
-* **Procesamiento y Análisis:** `pandas`, `numpy`
+* **Entorno:** Python en `.venv` y JupyterLab. La ejecución guardada de F4 usa Python 3.14.6.
+* **Procesamiento, estadística y visualización:** `pandas`, `numpy`, `scipy` y `matplotlib`
 * **Entorno de desarrollo:** Git, GitHub, VS Code
 
 -------------------------------------------------------------------------------------------
@@ -64,8 +64,11 @@ proyecto-grupo2-mcdi500/
 ├── docs/
 │   ├── arquitectura.md
 │   ├── decisiones.md
+│   ├── hallazgos_f4.csv
+│   ├── metadatos_f4.json
 │   └── README.md
 ├── src/
+│   ├── comunicacion.py
 │   ├── medicion.py
 │   ├── pipeline_licitaciones.py
 │   ├── preprocesamiento.py
@@ -84,7 +87,9 @@ proyecto-grupo2-mcdi500/
 │   ├── F3_Nucleo_Algoritmico.ipynb
 │   └── README.md
 ├── F4/
+│   ├── F4_Visualizacion_Comunicacion.ipynb
 │   └── README.md
+├── CHANGELOG.md
 ├── .mailmap
 ├── README.md
 ├── requirements.txt
@@ -98,6 +103,7 @@ proyecto-grupo2-mcdi500/
   - `preprocesamiento.py`: reglas de F2 (carga, conversión de tipos, faltantes, duplicados, brecha, IQR y validación).
   - `pipeline_licitaciones.py`: clases del núcleo algorítmico de F3 (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`, `Pipeline` y `Bitacora`).
   - `medicion.py`: medición de tiempo (`timeit`) y memoria (`tracemalloc`) para comparar implementaciones.
+  - `comunicacion.py`: carga de artefactos, indicadores y figuras de F4.
   - `pruebas_preprocesamiento.py`: pruebas de las reglas de F2 con datos ficticios.
   - `pruebas_pipeline.py`: pruebas de las clases de F3 con datos ficticios.
   - `utilidades.py`: utilidades generales (raíz del proyecto, nombres de columnas y `ProyectoError`).
@@ -108,7 +114,7 @@ proyecto-grupo2-mcdi500/
 - `F1/`: reúne en `F1/F1_Definicion.ipynb` la definición del problema, el alcance y la verificación del entorno, además de las ideas iniciales en `F1/brainstorming/ideas-dataset.md`.
 - `F2/`: el cuaderno oficial es `F2/F2_Preprocesamiento.ipynb`, dedicado al preprocesamiento de los datos; sus salidas son `data/processed/04LicitacionesEne_procesado.csv` y `data/processed/04LicitacionesEne_brecha_por_licitacion.csv`.
 - `F3/`: contiene `F3/F3_Nucleo_Algoritmico.ipynb` y su [`README.md`](F3/README.md), que describe la carpeta, los módulos que usa y cómo ejecutarlo.
-- `F4/`: carpeta destinada a los notebooks y entregables de la Fase 4.
+- `F4/`: contiene `F4/F4_Visualizacion_Comunicacion.ipynb` y la [guía de ejecución de F4](F4/README.md).
 
 Las carpetas de fase (`F1/` a `F4/`) no deben contener copias propias de `data/`, `docs/` ni `src/`. Si una fase genera un archivo reutilizable, se guarda en la ubicación compartida correspondiente; sus notebooks permanecen en la carpeta de la fase.
 
@@ -118,7 +124,7 @@ Las carpetas de fase (`F1/` a `F4/`) no deben contener copias propias de `data/`
 -------------------------------------------------------------------------------------------
 ### macOS / Linux
 
-Estos pasos se hacen **una vez por computador**, desde la terminal y en la raíz del repositorio (en la rama de trabajo). El entorno no se crea desde los cuadernos: los cuadernos solo verifican que se esté usando el entorno correcto.
+Ejecuta los comandos desde la **raíz del repositorio**, donde está `requirements.txt`. Usa Python 3.14 si necesitas reproducir el entorno de la ejecución guardada de F4.
 
 ### 1. Crear y activar el entorno virtual
 
@@ -139,14 +145,15 @@ python -m pip check              # debe indicar: No broken requirements found
 
 `requirements.txt` declara solo las dependencias directas del proyecto, con versión fija:
 
-- Análisis: `numpy`, `pandas` (las que importan `src/` y los notebooks)
+- Análisis, estadística y visualización: `numpy`, `pandas`, `scipy`, `matplotlib`
+- Pruebas: `pytest`
 - Ejecución de los notebooks: `ipykernel`, `jupyterlab`
 
 `pip` instala las dependencias indirectas de cada una. Si el código empieza a importar una librería nueva, se agrega a `requirements.txt` con su versión (`paquete==versión`, la que muestra `python -m pip show paquete`) en el mismo *commit*, y se añade a `LIBRERIAS_PROYECTO` en la sección 8 de `F1/F1_Definicion.ipynb`.
 
 ### 3. Registrar el kernel del proyecto
 
-Con el entorno activo y en otra consola ejecutar:
+Con el entorno activo en la misma terminal:
 
 ```bash
 python -m ipykernel install --user --name grupo2_mcdi500 --display-name "Python (grupo2-mcdi500)"
@@ -175,7 +182,7 @@ Si alguna de estas condiciones no se cumple, el cuaderno se detiene en el PASO 5
 | --- | --- | --- |
 | El intérprete no contiene `.venv` | Kernel equivocado | *Kernel → Change Kernel* → Python (grupo2-mcdi500) |
 | `ModuleNotFoundError` con un paquete instalado | Se instaló fuera del entorno o falta el paso 3 | Activar `.venv` y repetir los pasos 2 y 3 |
-| Falla `pip install -r requirements.txt` | Versión de Python distinta | Usar Python 3.12 |
+| Falla `pip install -r requirements.txt` | No hay una distribución compatible con el intérprete | Comprueba `python --version` y vuelve a crear `.venv` con Python 3.14 |
 
 -------------------------------------------------------------------------------------------
 ### Windows
@@ -228,7 +235,19 @@ Abrir `F1/F1_Definicion.ipynb` en VS Code, seleccionar el kernel **Python (grupo
 | --- | --- | --- |
 | VS Code pide seleccionar un kernel | Primera vez que se abre el cuaderno | Hacer clic en *Select Kernel* → *Python (grupo2-mcdi500)* |
 | `ModuleNotFoundError` al ejecutar una celda | Librerías instaladas en otro intérprete o kernel sin reiniciar | Ejecutar los pasos 2 y 3 en Git Bash y presionar *Restart* en la barra superior del notebook |
-| Falla `pip install -r requirements.txt` | Versión de Python distinta | Usar Python 3.12 |
+| Falla `pip install -r requirements.txt` | No hay una distribución compatible con el intérprete | Comprueba `python --version` y vuelve a crear `.venv` con Python 3.14 |
+
+### Windows con PowerShell
+
+Desde la raíz, puedes usar directamente el intérprete de `.venv`:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe -m ipykernel install --user --name grupo2_mcdi500 --display-name "Python (grupo2-mcdi500)"
+.\.venv\Scripts\python.exe -m jupyterlab
+```
 
 -------------------------------------------------------------------------------------------
 
@@ -248,21 +267,18 @@ No abras ni guardes el CSV con Excel: lo reescribe con otro formato y altera el 
 
 Los notebooks se ejecutan en este orden, con el entorno activado y el kernel **Python (grupo2-mcdi500)**, usando *Restart Kernel and Run All Cells*. Antes, descarga el archivo de entrada como se indica en *Obtener los datos*.
 
-| Orden | Notebook | Qué hace y qué genera | Tiempo medido |
-| :---: | :--- | :--- | :---: |
-| 1 | `F1/F1_Definicion.ipynb` | Definición del problema, objetivos y restricciones; verificación del entorno; ficha técnica y diccionario de las 72 variables. No genera archivos. | ~3 s |
-| 2 | `F2/F2_Preprocesamiento.ipynb` | Preprocesamiento: tipos, faltantes, duplicados, brecha por licitación, valores extremos en CLP y validación. Genera `04LicitacionesEne_procesado.csv` y `04LicitacionesEne_brecha_por_licitacion.csv` en `data/processed/`. | ~4 s |
-| 3 | `F3/F3_Nucleo_Algoritmico.ipynb` | Pipeline orientado a objetos y su equivalencia con F2, patrón Observer, medición de eficiencia (tiempo y memoria) y validación de las clases. Genera `diccionario_f3.csv` y `parametros_f3.csv` en `data/processed/`. | ~20 s |
-
-- F2 y F3 necesitan `data/raw/04LicitacionesEne.csv`. F1 solo lo usa, si está, para comprobar que su encabezado coincide con el diccionario.
-- F3 compara su resultado con las salidas de F2: ejecuta F2 antes que F3.
-- Los tiempos se midieron el 16 de noviembre de 2026 en macOS e incluyen el arranque del kernel; en otro equipo pueden variar.
+| Fase | Qué ejecutar | Entradas y salidas |
+| --- | --- | --- |
+| F1 | [F1_Definicion.ipynb](F1/F1_Definicion.ipynb) | Define el problema, los objetivos y las restricciones, y verifica el entorno. Si está disponible, consulta el CSV crudo para contrastar su encabezado. F2 usa la definición de F1 y no requiere archivos generados por esta fase. |
+| F2 | [F2_Preprocesamiento.ipynb](F2/F2_Preprocesamiento.ipynb) | Lee `data/raw/04LicitacionesEne.csv`. Genera `data/processed/04LicitacionesEne_procesado.csv` (ofertas por ítem) y `data/processed/04LicitacionesEne_brecha_por_licitacion.csv` (una fila por licitación), que usan F3 y F4. |
+| F3 | [F3_Nucleo_Algoritmico.ipynb](F3/F3_Nucleo_Algoritmico.ipynb) | Ejecuta el pipeline sobre el mismo CSV crudo y comprueba la igualdad con los dos CSV de F2. Genera `data/processed/diccionario_f3.csv` y `data/processed/parametros_f3.csv`, requeridos por F4. |
+| F4 | [F4_Visualizacion_Comunicacion.ipynb](F4/F4_Visualizacion_Comunicacion.ipynb) | Lee los cuatro CSV de F2 y F3. Si está disponible, usa el crudo para contrastar las cifras y evaluar duplicados. Guarda tres PNG en `F4/figuras/`, los hallazgos en `docs/hallazgos_f4.csv` y los metadatos en `docs/metadatos_f4.json`. Consulta la [guía de F4](F4/README.md). |
 
 -------------------------------------------------------------------------------------------
 
 ## Validar el dataset
 
-Desde la raíz del repositorio, siempre con el entorno activado (`source .venv/bin/activate` en macOS/Linux o `source .venv/Scripts/activate` en Git Bash para Windows):
+El script raíz `validar_dataset.py` ejecuta el validador de `src/validar_dataset.py`. Es una comprobación adicional del CSV que puedes ejecutar desde la raíz con el entorno activado:
 
 ```bash
 python validar_dataset.py data/raw/04LicitacionesEne.csv --sep ";" --encoding latin-1
