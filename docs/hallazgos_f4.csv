@@ -6,7 +6,7 @@ OE2_coincidencia_CLP;Sección 5.2;OE1 / OE2;Tasa de coincidencia por moneda;CLP;
 OE2_coincidencia_CLF;Sección 5.2;OE1 / OE2;Tasa de coincidencia por moneda;CLF;0.0;%;20;Bajo: 15, Coincide: 0, Sobre: 5
 OE2_coincidencia_UTM;Sección 5.2;OE1 / OE2;Tasa de coincidencia por moneda;UTM;0.0;%;4;Bajo: 3, Coincide: 0, Sobre: 1
 OE2_coincidencia_USD;Sección 5.2;OE1 / OE2;Tasa de coincidencia por moneda;USD;66.67;%;3;Bajo: 1, Coincide: 2, Sobre: 0
-OE2_razon_iva_1_19;Sección 5.2 (Figura 2);OE2;Licitaciones cercanas a razón 1/1,19;"RazonMonto en [0,835; 0,845]";234.0;licitaciones;539;43.41 % de las adjudicadas bajo el estimado (efecto IVA 19 %)
+OE2_razon_iva_1_19;Sección 5.2 (Figura 2);OE2;Licitaciones cercanas a razón 1/1,19;"RazonMonto en [0,835; 0,845]";234.0;licitaciones;539;43.41 % de las adjudicadas bajo el estimado (ventana compatible con IVA 19 %)
 OE3_coincidencia_Micro;Sección 5.1 (Figura 1);OE3;Tasa de coincidencia por tamaño;Micro;71.11;%;405;IC 95 % Wilson [66.51 %, 75.31 %]
 OE3_brecha_rel_Micro;Sección 5.3 (Figura 3);OE3;Mediana de brecha relativa;Micro;0.0;%;405;Q1=0.00 %, Q3=0.00 %, IQR=0.00 pp
 OE3_coincidencia_Pequeña;Sección 5.1 (Figura 1);OE3;Tasa de coincidencia por tamaño;Pequeña;62.32;%;690;IC 95 % Wilson [58.64 %, 65.86 %]

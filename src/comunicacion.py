@@ -9,8 +9,9 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.stats import chi2_contingency, spearmanr
 
-from .preprocesamiento import ORDEN_TAMANO, normalizar_codigo
+from .preprocesamiento import ORDEN_TAMANO, calcular_brecha, normalizar_codigo
 
 ARCHIVOS_PROCESADOS: dict[str, str] = {
     "ofertas": "04LicitacionesEne_procesado.csv",
@@ -27,6 +28,9 @@ COLUMNAS_OFERTAS_F4: tuple[str, ...] = (
     "TamanoProveedor",
     "TamanoProveedorOrdinal",
     "EsExtremoLogIQR_CLP",
+    "EsDuplicadoPotencial",
+    "MontoEstimadoLicitacion",
+    "MonedaLicitacion",
 )
 
 COLUMNAS_LICITACIONES_F4: tuple[str, ...] = (
@@ -666,8 +670,129 @@ def tabla_control_confusion(
                 "IC95_InfPct": fila["IC_InfPct"],
                 "IC95_SupPct": fila["IC_SupPct"],
                 "Brecha_Micro_vs_Grande_pp": brecha_pp,
+                "MedianaBrechaRelativaPct": sub_tramo.loc[
+                    sub_tramo["TamanoGanador"].eq(fila["TamanoGanador"]), "BrechaRelativaPct"
+                ].median() if "BrechaRelativaPct" in sub_tramo else math.nan,
             })
     return pd.DataFrame(filas)
+
+
+def comparar_muestras_feedback(
+    licitaciones: pd.DataFrame,
+    ofertas: pd.DataFrame,
+    copias_adicionales: pd.Series | None = None,
+) -> dict[str, pd.DataFrame]:
+    """Reconstruye los totales ganadores a partir de las filas conservadas."""
+    assert normalizar_codigo(licitaciones["NroLicitacion"]).is_unique
+    assert ofertas["EsDuplicadoPotencial"].notna().all()
+    marcas = ofertas["EsDuplicadoPotencial"]
+    exclusiones = {}
+    if copias_adicionales is not None:
+        assert copias_adicionales.index.equals(ofertas.index)
+        assert not (copias_adicionales & ~marcas).any()
+        exclusiones["Sin copias adicionales"] = copias_adicionales
+    exclusiones["Sin filas marcadas"] = marcas
+    muestras = {"Original": construir_copia_graficar(licitaciones, ofertas)}
+    for nombre, excluir in exclusiones.items():
+        limpias = ofertas.loc[~excluir]
+        muestras[nombre] = construir_copia_graficar(calcular_brecha(limpias), limpias)
+    return muestras
+
+
+def sensibilidad_iva(comparables: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Mide el pico y simula IVA solo en los casos CLP compatibles con redondeo a un peso."""
+    razon = comparables["RazonMonto"]
+    est = comparables["MontoEstimadoLicitacion"]
+    diferencia = comparables["MontoTotalGanadoras"] * 1.19 - est
+    centro = 1 / 1.19
+    ventana = razon.between(0.835, 0.845)
+    ajustables = ventana & diferencia.abs().le(1) & comparables["MonedaLicitacion"].eq("CLP")
+    evidencia = comparables.assign(
+        Ventana=ventana,
+        BandaInferior=razon.ge(0.825) & razon.lt(0.835),
+        BandaSuperior=razon.gt(0.845) & razon.le(0.855),
+        ErrorRazonMenor1e4=(razon - centro).abs().le(0.0001),
+        AjustablesCLP=ajustables,
+    ).groupby("MonedaLicitacion", observed=True).agg(
+        N=("RazonMonto", "size"),
+        CercaIVA=("Ventana", "sum"),
+        BandaInferior=("BandaInferior", "sum"),
+        BandaSuperior=("BandaSuperior", "sum"),
+        CercaIVAEstricta=("ErrorRazonMenor1e4", "sum"),
+        AjustablesCLP=("AjustablesCLP", "sum"),
+    )
+    evidencia["CercaIVAPct"] = 100 * evidencia["CercaIVA"] / evidencia["N"]
+    brecha = comparables["BrechaMonto"].mask(ajustables, diferencia)
+    coincide = comparables["CoincideConEstimado"].astype(bool) | ajustables
+    ajustada = razon.mask(ajustables, razon * 1.19)
+    return evidencia.reset_index(), comparables.assign(
+        RazonMonto=ajustada,
+        LogRazonMonto=np.log(ajustada),
+        BrechaMonto=brecha,
+        BrechaRelativaPct=100 * (ajustada - 1),
+        EtiquetaCoincidencia=coincide.map({True: "Coincide", False: "Difiere"}),
+        CoincideConEstimado=coincide,
+        SentidoBrecha=comparables["SentidoBrecha"].mask(ajustables, "Coincide"),
+    )
+
+
+def magnitud_por_sentido(comparables: pd.DataFrame) -> pd.DataFrame:
+    """Describe la brecha por moneda y sentido usando la moneda como denominador."""
+    filas = []
+    for moneda, sub in comparables.groupby("MonedaLicitacion", observed=True):
+        for sentido in ORDEN_SENTIDO:
+            grupo = sub.loc[sub["SentidoBrecha"].eq(sentido)]
+            fila = {"Moneda": moneda, "Sentido": sentido, "N": len(grupo),
+                    "PctMoneda": 100 * len(grupo) / len(sub)}
+            for columna in ("BrechaMonto", "RazonMonto", "LogRazonMonto"):
+                estadisticos = calcular_medianas_iqr(grupo[columna])
+                for medida in ("Mediana", "IQR"):
+                    fila[f"{medida}_{columna}"] = estadisticos[medida]
+            filas.append(fila)
+    return pd.DataFrame(filas)
+
+
+def tasas_exclusion_tamano(comparables: pd.DataFrame) -> pd.DataFrame:
+    """Da las tasas globales para las exclusiones individuales y conjuntas."""
+    tamano = comparables["TamanoGanador"]
+    escenarios = {
+        "Todas las comparables": tamano.notna(),
+        "Sin Múltiple": tamano.ne("Múltiple"),
+        "Sin NoClasificado": tamano.ne("NoClasificado"),
+        "Solo tamaños ordinales": tamano.isin(ORDEN_TAMANO),
+    }
+    filas = []
+    for escenario, incluir in escenarios.items():
+        grupo = comparables.loc[incluir, "CoincideConEstimado"].astype(bool)
+        tasa = 100 * grupo.mean()
+        filas.append({"Filtro": escenario, "N": len(grupo), "Excluidas": len(tamano) - len(grupo),
+                      "Coinciden": int(grupo.sum()), "TasaPct": tasa,
+                      "Diferencia_vs_55_6_pp": tasa - 55.6})
+    return pd.DataFrame(filas)
+
+
+def pruebas_por_tamano(comparables: pd.DataFrame) -> pd.DataFrame:
+    """Contrasta coincidencia y brecha relativa entre los cuatro tamaños ordinales."""
+    assert normalizar_codigo(comparables["NroLicitacion"]).is_unique
+    sub = comparables.loc[comparables["TamanoGanadorOrdinal"].notna()]
+    tabla = pd.crosstab(sub["TamanoGanadorOrdinal"], sub["CoincideConEstimado"])
+    esperado_minimo = estadistico = p_chi = math.nan
+    if tabla.shape == (len(ORDEN_TAMANO), 2):
+        chi = chi2_contingency(tabla, correction=False)
+        esperado_minimo = chi.expected_freq.min()
+        if esperado_minimo >= 5:
+            estadistico, p_chi = chi.statistic, chi.pvalue
+
+    ordinal = sub["TamanoGanadorOrdinal"].cat.codes
+    brecha = sub["BrechaRelativaPct"]
+    rho = p_spearman = math.nan
+    if len(sub) > 2 and ordinal.nunique() > 1 and brecha.nunique() > 1:
+        rho, p_spearman = spearmanr(ordinal, brecha)
+    return pd.DataFrame([
+        {"Prueba": "Chi-cuadrado de Pearson", "N": len(sub), "Estadístico": estadistico,
+         "p": p_chi, "Mínimo esperado": esperado_minimo},
+        {"Prueba": "Spearman", "N": len(sub), "Estadístico": rho, "p": p_spearman},
+    ])
 
 
 def graficar_coincidencia_por_tamano(
@@ -745,7 +870,7 @@ def graficar_razon_escala_log(
 
     ax.axvline(1.0, color="#1a202c", linestyle="-", linewidth=1.8, label=f"Razón = 1 (coincidencia exacta, n={n_exacto:,})")
     ax.axvline(marca_iva, color="#c53030", linestyle="--", linewidth=1.8,
-               label=f"Razón = 1/1,19 ≈ 0,840 (neto vs. IVA 19 %, n={n_iva:,} en [0,835; 0,845])")
+               label=f"Razón = 1/1,19 ≈ 0,840 (n={n_iva:,} en [0,835; 0,845])")
 
     y_max = ax.get_ylim()[1]
     ax.set_ylim(0, y_max * 1.15)
@@ -774,7 +899,7 @@ def graficar_razon_escala_log(
     ax.set_xlabel("Razón MontoTotalGanadoras / MontoEstimadoLicitacion (adimensional, escala logarítmica)")
     ax.set_ylabel("Cantidad de licitaciones (n)")
     ax.set_title(
-        "El pico se concentra en razón = 1 (55,6 %) y 234 licitaciones caen en 1/1,19 (efecto IVA 19 %)",
+        f"Coinciden {n_exacto:,} licitaciones y {n_iva:,} se concentran cerca de 1/1,19",
         fontsize=11.5,
         fontweight="bold",
         pad=10,
