@@ -1,6 +1,6 @@
 {
   "fase": "F4",
-  "etapa": "Contrato de artefactos, verificación contra data/raw y copia para graficar",
+  "etapa": "Figuras por objetivo (200 ppp), control de confusión y hallazgos_f4.csv",
   "entorno": {
     "python": "3.15.2",
     "sistema": "Windows",
@@ -116,34 +116,25 @@
       "Otra moneda (no CLP)": 27
     }
   },
-  "vinculacion_objetivos": [
-    {
-      "objetivo": "Objetivo específico 1 (proporción de coincidencia)",
-      "pregunta": "P1 (parte 1): proporción comparable en que estimado == total ganador",
-      "figura": "01_coincidencia_y_sentido.png",
-      "funciones_comunicacion": [
-        "intervalo_wilson",
-        "resumen_sentido_por_moneda",
-        "graficar_coincidencia_y_sentido"
-      ]
-    },
-    {
-      "objetivo": "Objetivo específico 2 (magnitud y sentido por moneda)",
-      "pregunta": "P1 (parte 2): magnitud y sentido de la brecha separando por moneda",
-      "figura": "01_coincidencia_y_sentido.png / 02_distribucion_log_razon_clp.png",
-      "funciones_comunicacion": [
-        "resumen_magnitud_por_moneda",
-        "graficar_distribucion_brecha"
-      ]
-    },
-    {
-      "objetivo": "Objetivo específico 3 (comparación por tamaño ganador)",
-      "pregunta": "P2: cambio de coincidencia y brecha según tamaño del proveedor ganador",
-      "figura": "03_resultados_por_tamano_clp.png",
-      "funciones_comunicacion": [
-        "tabla_resumen_por_tamano",
-        "graficar_resultados_por_tamano"
-      ]
+  "figuras_200ppp": {
+    "dpi": 200,
+    "versionadas_en_git": false,
+    "archivos_locales": [
+      "F4/figuras/01_coincidencia_por_tamano.png",
+      "F4/figuras/02_razon_ganador_estimado_log.png",
+      "F4/figuras/03_cajas_brecha_relativa_tamano.png"
+    ]
+  },
+  "control_confusion": {
+    "variable_confusora": "TramoEstimado (CLP)",
+    "licitaciones_evaluadas": 1710,
+    "brecha_micro_vs_grande_pp": {
+      "Hasta 1 M CLP": 41.52,
+      "1 a 10 M CLP": 19.55,
+      "10 a 50 M CLP": 14.92,
+      "Más de 50 M CLP": 13.47
     }
-  ]
+  },
+  "hallazgos_csv": "docs/hallazgos_f4.csv",
+  "hallazgos_filas": 24
 }

@@ -45,6 +45,14 @@ COLUMNAS_LICITACIONES_F4: tuple[str, ...] = (
 
 ORDEN_SENTIDO: tuple[str, ...] = ("Bajo el estimado", "Coincide", "Sobre el estimado")
 ORDEN_TAMANOS_TABLA: tuple[str, ...] = (*ORDEN_TAMANO, "NoClasificado", "Múltiple")
+ORDEN_TRAMOS_ESTIMADO: tuple[str, ...] = (
+    "Hasta 1 M CLP",
+    "1 a 10 M CLP",
+    "10 a 50 M CLP",
+    "Más de 50 M CLP",
+    "Otra moneda (no CLP)",
+)
+FUENTE_DATOS_F4: str = "Fuente: ChileCompra, datos abiertos, municipalidades, enero de 2025"
 
 
 @dataclass(frozen=True)
@@ -231,7 +239,7 @@ def tasa_por_grupo(
     return pd.DataFrame(filas)
 
 
-def guardar_figura(figura: Figure, ruta: Path | str, dpi: int = 150, cerrar: bool = True) -> Path:
+def guardar_figura(figura: Figure, ruta: Path | str, dpi: int = 200, cerrar: bool = True) -> Path:
     """Guarda una figura ``matplotlib`` creando directorios padres y devolviendo su ruta."""
     destino = Path(ruta)
     destino.parent.mkdir(parents=True, exist_ok=True)
@@ -239,6 +247,12 @@ def guardar_figura(figura: Figure, ruta: Path | str, dpi: int = 150, cerrar: boo
     if cerrar:
         plt.close(figura)
     return destino
+
+
+def _agregar_pie_fuente(figura: Figure, nota: str = "") -> None:
+    """Agrega la fuente oficial estandarizada (y una nota breve opcional) al pie de la figura."""
+    texto = FUENTE_DATOS_F4 if not nota else f"{FUENTE_DATOS_F4} · {nota}"
+    figura.text(0.01, -0.02, texto, fontsize=8.5, color="#4a5568", ha="left", va="top")
 
 
 def calcular_medianas_iqr(serie: pd.Series) -> dict[str, float | int]:
@@ -582,4 +596,259 @@ def graficar_resultados_por_tamano(tabla_tamano: pd.DataFrame, moneda: str = "CL
     ax_der.grid(axis="y", linestyle="--", alpha=0.35)
 
     fig.suptitle(f"Objetivo 3 · Coincidencia y magnitud relativa según tamaño ganador ({moneda})", fontsize=12)
+    return fig
+
+
+def construir_copia_graficar(licitaciones: pd.DataFrame, ofertas: pd.DataFrame) -> pd.DataFrame:
+    """Construye la copia interpretable para F4 sin revertir escalamiento ni codificación.
+
+    Agrega etiquetas legibles (``EtiquetaCoincidencia``), brecha relativa porcentual
+    (``BrechaRelativaPct``), tramos interpretables en CLP (``TramoEstimado``) y el tamaño
+    ganador por licitación manteniendo ``NoClasificado`` y ``Múltiple`` fuera de
+    ``TamanoGanadorOrdinal``.
+    """
+    comparables = asignar_tamano_ganador(preparar_comparables(licitaciones), ofertas)
+    etiqueta_coinc = comparables["CoincideConEstimado"].astype(bool).map({True: "Coincide", False: "Difiere"})
+    brecha_rel_pct = (comparables["RazonMonto"] - 1.0) * 100.0
+
+    es_clp = comparables["MonedaLicitacion"].eq("CLP")
+    tramos_clp = pd.cut(
+        comparables.loc[es_clp, "MontoEstimadoLicitacion"],
+        bins=[0.0, 1_000_000.0, 10_000_000.0, 50_000_000.0, float("inf")],
+        labels=ORDEN_TRAMOS_ESTIMADO[:4],
+    ).astype(str)
+    tramo_estimado = pd.Series("Otra moneda (no CLP)", index=comparables.index, dtype="string")
+    tramo_estimado.loc[es_clp] = tramos_clp
+    tramo_cat = pd.Categorical(tramo_estimado, categories=ORDEN_TRAMOS_ESTIMADO, ordered=True)
+
+    return comparables.assign(
+        EtiquetaCoincidencia=etiqueta_coinc,
+        BrechaRelativaPct=brecha_rel_pct,
+        TramoEstimado=tramo_cat,
+    )
+
+
+def tabla_control_confusion(
+    copia_graficar: pd.DataFrame,
+    moneda: str = "CLP",
+    z: float = 1.96,
+) -> pd.DataFrame:
+    """Evalúa coincidencia por ``TamanoGanador`` estratificada dentro de ``TramoEstimado``."""
+    _validar_columnas(
+        copia_graficar,
+        ("MonedaLicitacion", "TramoEstimado", "TamanoGanador", "CoincideConEstimado"),
+        "tabla_control_confusion",
+    )
+    sub = copia_graficar.loc[
+        copia_graficar["MonedaLicitacion"].eq(moneda)
+        & copia_graficar["TamanoGanador"].isin(ORDEN_TAMANO)
+    ].copy()
+    if sub.empty:
+        return pd.DataFrame()
+
+    filas = []
+    for tramo in ORDEN_TRAMOS_ESTIMADO[:4]:
+        sub_tramo = sub.loc[sub["TramoEstimado"].eq(tramo)]
+        if sub_tramo.empty:
+            continue
+        tasas = tasa_por_grupo(sub_tramo, "TamanoGanador", "CoincideConEstimado", z=z, orden=ORDEN_TAMANO)
+        tasas_idx = tasas.set_index("TamanoGanador")
+        tasa_micro = float(tasas_idx.loc["Micro", "TasaPct"]) if "Micro" in tasas_idx.index else math.nan
+        tasa_grande = float(tasas_idx.loc["Grande", "TasaPct"]) if "Grande" in tasas_idx.index else math.nan
+        brecha_pp = tasa_micro - tasa_grande
+        for _, fila in tasas.iterrows():
+            filas.append({
+                "TramoEstimado": tramo,
+                "TamanoGanador": fila["TamanoGanador"],
+                "Licitaciones": int(fila["N"]),
+                "Coinciden": int(fila["Exitos"]),
+                "TasaCoincidenciaPct": fila["TasaPct"],
+                "IC95_InfPct": fila["IC_InfPct"],
+                "IC95_SupPct": fila["IC_SupPct"],
+                "Brecha_Micro_vs_Grande_pp": brecha_pp,
+            })
+    return pd.DataFrame(filas)
+
+
+def graficar_coincidencia_por_tamano(
+    tabla_tamano: pd.DataFrame,
+    tasa_global_pct: float = 55.56047851129818,
+    n_global: tuple[int, int] = (1254, 2257),
+) -> Figure:
+    """Figura 1 (OE1/OE3): barras de coincidencia por tamaño con IC de Wilson y referencia global."""
+    requeridas = ("TamanoGanador", "Licitaciones", "TasaCoincidenciaPct", "IC95_InfPct", "IC95_SupPct")
+    _validar_columnas(tabla_tamano, requeridas, "graficar_coincidencia_por_tamano")
+    if tabla_tamano.empty:
+        raise ValueError("La tabla por tamaño está vacía.")
+
+    fig, ax = plt.subplots(figsize=(10.5, 5.0), constrained_layout=True)
+    x_pos = np.arange(len(tabla_tamano))
+    etiquetas = [f"{t}\n(n={n:,})" for t, n in zip(tabla_tamano["TamanoGanador"], tabla_tamano["Licitaciones"])]
+
+    tasas = tabla_tamano["TasaCoincidenciaPct"].to_numpy()
+    err_inf = tasas - tabla_tamano["IC95_InfPct"].to_numpy()
+    err_sup = tabla_tamano["IC95_SupPct"].to_numpy() - tasas
+    colores = ["#2b6cb0" if t in ORDEN_TAMANO else "#718096" for t in tabla_tamano["TamanoGanador"]]
+
+    ax.bar(x_pos, tasas, yerr=[err_inf, err_sup], color=colores, alpha=0.9, capsize=5, width=0.62)
+    ax.axhline(
+        tasa_global_pct,
+        color="#dd6b20",
+        linestyle="--",
+        linewidth=1.8,
+        label=f"Tasa global OE1: {tasa_global_pct:.1f}% ({n_global[0]:,} de {n_global[1]:,} comparables)",
+    )
+    ax.set_xticks(x_pos, etiquetas)
+    ax.set_ylim(0, 95)
+    ax.set_ylabel("Tasa de coincidencia con monto estimado (%)")
+    ax.set_xlabel("Tamaño del proveedor ganador (eje ordinal: Micro–Grande; grupos aparte en gris)")
+    ax.set_title(
+        "Micro alcanza 71,1 % de coincidencia frente a 49,0 % en Grande y 7,1 % en adjudicaciones Múltiples",
+        fontsize=11.5,
+        fontweight="bold",
+        pad=10,
+    )
+    ax.legend(loc="upper right", frameon=True, fontsize=9)
+    ax.grid(axis="y", linestyle="--", alpha=0.35)
+    for x, pct, e_sup in zip(x_pos, tasas, err_sup):
+        ax.text(x, pct + e_sup + 2.0, f"{pct:.1f}%", ha="center", va="bottom", fontsize=9, fontweight="bold")
+
+    _agregar_pie_fuente(fig, "Barras de error: IC 95 % método Wilson")
+    return fig
+
+
+def graficar_razon_escala_log(
+    comparables: pd.DataFrame,
+    rango: tuple[float, float] = (0.05, 20.0),
+) -> Figure:
+    """Figura 2 (OE2): histograma de la razón ganador/estimado en escala log con marcas en 1 y 1/1,19."""
+    _validar_columnas(comparables, ("RazonMonto",), "graficar_razon_escala_log")
+    razon = pd.to_numeric(comparables["RazonMonto"], errors="coerce").dropna()
+    razon = razon[razon > 0]
+    if razon.empty:
+        raise ValueError("No hay razones positivas para graficar.")
+
+    en_rango = razon[(razon >= rango[0]) & (razon <= rango[1])]
+    fuera = int(len(razon) - len(en_rango))
+    n_exacto = int(comparables["CoincideConEstimado"].astype(bool).sum()) if "CoincideConEstimado" in comparables else int((razon == 1.0).sum())
+    n_iva = int(((razon >= 0.835) & (razon <= 0.845)).sum())
+    marca_iva = 1.0 / 1.19
+
+    bins = np.logspace(np.log10(rango[0]), np.log10(rango[1]), 45)
+    fig, ax = plt.subplots(figsize=(10.5, 5.0), constrained_layout=True)
+    ax.hist(en_rango, bins=bins, color="#3182ce", edgecolor="white", alpha=0.84)
+    ax.set_xscale("log")
+    ax.set_xlim(rango[0], rango[1])
+
+    ticks = [0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0]
+    ax.set_xticks(ticks, [f"{t:g}" for t in ticks])
+
+    ax.axvline(1.0, color="#1a202c", linestyle="-", linewidth=1.8, label=f"Razón = 1 (coincidencia exacta, n={n_exacto:,})")
+    ax.axvline(marca_iva, color="#c53030", linestyle="--", linewidth=1.8,
+               label=f"Razón = 1/1,19 ≈ 0,840 (neto vs. IVA 19 %, n={n_iva:,} en [0,835; 0,845])")
+
+    y_max = ax.get_ylim()[1]
+    ax.set_ylim(0, y_max * 1.15)
+    ax.annotate(
+        f"1/1,19 ≈ 0,840\n(n={n_iva:,})",
+        xy=(marca_iva, y_max * 0.62),
+        xytext=(0.24, y_max * 0.78),
+        arrowprops={"arrowstyle": "->", "color": "#c53030", "lw": 1.3},
+        ha="center",
+        fontsize=9,
+        color="#9b2c2c",
+        fontweight="bold",
+    )
+    ax.annotate(
+        f"Razón = 1\n(n={n_exacto:,})",
+        xy=(1.0, y_max * 0.94),
+        xytext=(2.3, y_max * 0.96),
+        arrowprops={"arrowstyle": "->", "color": "#1a202c", "lw": 1.3},
+        ha="left",
+        va="top",
+        fontsize=9,
+        color="#1a202c",
+        fontweight="bold",
+    )
+
+    ax.set_xlabel("Razón MontoTotalGanadoras / MontoEstimadoLicitacion (adimensional, escala logarítmica)")
+    ax.set_ylabel("Cantidad de licitaciones (n)")
+    ax.set_title(
+        "El pico se concentra en razón = 1 (55,6 %) y 234 licitaciones caen en 1/1,19 (efecto IVA 19 %)",
+        fontsize=11.5,
+        fontweight="bold",
+        pad=10,
+    )
+    ax.legend(loc="upper right", frameon=True, fontsize=8.8)
+    ax.grid(axis="y", linestyle="--", alpha=0.35)
+
+    _agregar_pie_fuente(
+        fig,
+        f"Ventana [{rango[0]:g}; {rango[1]:g}]: {len(en_rango):,} de {len(razon):,} comparables ({fuera:,} casos extremos omitidos)",
+    )
+    return fig
+
+
+def graficar_cajas_brecha_relativa(
+    copia_graficar: pd.DataFrame,
+    y_lim: tuple[float, float] = (-115.0, 520.0),
+) -> Figure:
+    """Figura 3 (OE3): cajas de la brecha relativa (%) por tamaño ganador con n por categoría."""
+    _validar_columnas(
+        copia_graficar,
+        ("TamanoGanador", "BrechaRelativaPct"),
+        "graficar_cajas_brecha_relativa",
+    )
+    categorias = [c for c in ORDEN_TAMANOS_TABLA if c in set(copia_graficar["TamanoGanador"])]
+    series = [
+        copia_graficar.loc[copia_graficar["TamanoGanador"].eq(cat), "BrechaRelativaPct"].dropna().to_numpy()
+        for cat in categorias
+    ]
+    if not series:
+        raise ValueError("No hay datos de BrechaRelativaPct para graficar.")
+
+    etiquetas = [f"{cat}\n(n={len(arr):,})" for cat, arr in zip(categorias, series)]
+    fig, ax = plt.subplots(figsize=(10.5, 5.0), constrained_layout=True)
+
+    caja = ax.boxplot(
+        series,
+        tick_labels=etiquetas,
+        showfliers=False,
+        patch_artist=True,
+        medianprops={"color": "#1a202c", "linewidth": 2.0},
+        whiskerprops={"color": "#4a5568", "linewidth": 1.3},
+        capprops={"color": "#4a5568", "linewidth": 1.3},
+    )
+    for patch, cat in zip(caja["boxes"], categorias):
+        patch.set_facecolor("#63b3ed" if cat in ORDEN_TAMANO else "#cbd5e0")
+        patch.set_edgecolor("#2c5282" if cat in ORDEN_TAMANO else "#4a5568")
+        patch.set_alpha(0.85)
+
+    ax.axhline(0.0, color="#dd6b20", linestyle="--", linewidth=1.6, label="Sin brecha (0 %)")
+    ax.set_ylim(y_lim[0], y_lim[1])
+    ax.set_ylabel("Brecha relativa respecto al estimado (%)")
+    ax.set_xlabel("Tamaño del proveedor ganador (NoClasificado y Múltiple fuera del eje ordinal)")
+    ax.set_title(
+        "Mediana en 0 % para tamaños individuales y sesgo positivo marcado en adjudicaciones Múltiples (+151,2 %)",
+        fontsize=11.0,
+        fontweight="bold",
+        pad=10,
+    )
+    ax.legend(loc="upper left", frameon=True, fontsize=9)
+    ax.grid(axis="y", linestyle="--", alpha=0.35)
+
+    if "Múltiple" in categorias:
+        idx_mult = categorias.index("Múltiple") + 1
+        med_mult = float(np.median(series[idx_mult - 1]))
+        ax.annotate(
+            f"Mediana: +{med_mult:.1f}%\n(bigote sup. +1.084,6%)",
+            xy=(idx_mult, y_lim[1] - 12),
+            xytext=(idx_mult - 1.25, y_lim[1] - 60),
+            arrowprops={"arrowstyle": "->", "color": "#2d3748", "lw": 1.2},
+            fontsize=8.5,
+            ha="center",
+            color="#2d3748",
+        )
+
+    _agregar_pie_fuente(fig, "Cajas [Q1, Q3] y bigotes 1,5×IQR (showfliers=False por estimados simbólicos)")
     return fig
