@@ -1,0 +1,25 @@
+﻿Id;Seccion_notebook;Objetivo_F1;Indicador;Grupo_o_alcance;Valor;Unidad;N;Nota
+OE1_comparables;Sección 4 / 5;OE1;Licitaciones comparables;Global;2257.0;licitaciones;2292;EstadoBrecha == Calculada de 2.292 totales
+OE1_coincidencia_n;Sección 5 (contexto OE1);OE1;Licitaciones que coinciden;Global;1254.0;licitaciones;2257;Tolerancia F2 <= 1e-8
+OE1_coincidencia_pct;Sección 5 (contexto OE1);OE1;Tasa de coincidencia global;Global;55.56;%;2257;IC 95 % Wilson [53.50 %, 57.60 %]
+OE2_coincidencia_CLP;Sección 5.2;OE1 / OE2;Tasa de coincidencia por moneda;CLP;56.14;%;2230;Bajo: 520, Coincide: 1252, Sobre: 458
+OE2_coincidencia_CLF;Sección 5.2;OE1 / OE2;Tasa de coincidencia por moneda;CLF;0.0;%;20;Bajo: 15, Coincide: 0, Sobre: 5
+OE2_coincidencia_UTM;Sección 5.2;OE1 / OE2;Tasa de coincidencia por moneda;UTM;0.0;%;4;Bajo: 3, Coincide: 0, Sobre: 1
+OE2_coincidencia_USD;Sección 5.2;OE1 / OE2;Tasa de coincidencia por moneda;USD;66.67;%;3;Bajo: 1, Coincide: 2, Sobre: 0
+OE2_razon_iva_1_19;Sección 5.2 (Figura 2);OE2;Licitaciones cercanas a razón 1/1,19;"RazonMonto en [0,835; 0,845]";234.0;licitaciones;539;43.41 % de las adjudicadas bajo el estimado (efecto IVA 19 %)
+OE3_coincidencia_Micro;Sección 5.1 (Figura 1);OE3;Tasa de coincidencia por tamaño;Micro;71.11;%;405;IC 95 % Wilson [66.51 %, 75.31 %]
+OE3_brecha_rel_Micro;Sección 5.3 (Figura 3);OE3;Mediana de brecha relativa;Micro;0.0;%;405;Q1=0.00 %, Q3=0.00 %, IQR=0.00 pp
+OE3_coincidencia_Pequeña;Sección 5.1 (Figura 1);OE3;Tasa de coincidencia por tamaño;Pequeña;62.32;%;690;IC 95 % Wilson [58.64 %, 65.86 %]
+OE3_brecha_rel_Pequeña;Sección 5.3 (Figura 3);OE3;Mediana de brecha relativa;Pequeña;0.0;%;690;Q1=-15.62 %, Q3=0.00 %, IQR=15.62 pp
+OE3_coincidencia_Mediana;Sección 5.1 (Figura 1);OE3;Tasa de coincidencia por tamaño;Mediana;58.97;%;273;IC 95 % Wilson [53.05 %, 64.65 %]
+OE3_brecha_rel_Mediana;Sección 5.3 (Figura 3);OE3;Mediana de brecha relativa;Mediana;0.0;%;273;Q1=-15.97 %, Q3=0.00 %, IQR=15.97 pp
+OE3_coincidencia_Grande;Sección 5.1 (Figura 1);OE3;Tasa de coincidencia por tamaño;Grande;49.04;%;365;IC 95 % Wilson [43.95 %, 54.15 %]
+OE3_brecha_rel_Grande;Sección 5.3 (Figura 3);OE3;Mediana de brecha relativa;Grande;0.0;%;365;Q1=-0.00 %, Q3=4.23 %, IQR=4.23 pp
+OE3_coincidencia_NoClasificado;Sección 5.1 (Figura 1);OE3;Tasa de coincidencia por tamaño;NoClasificado;63.03;%;284;IC 95 % Wilson [57.27 %, 68.43 %]
+OE3_brecha_rel_NoClasificado;Sección 5.3 (Figura 3);OE3;Mediana de brecha relativa;NoClasificado;0.0;%;284;Q1=-1.87 %, Q3=0.00 %, IQR=1.87 pp
+OE3_coincidencia_Múltiple;Sección 5.1 (Figura 1);OE3;Tasa de coincidencia por tamaño;Múltiple;7.08;%;240;IC 95 % Wilson [4.47 %, 11.05 %]
+OE3_brecha_rel_Múltiple;Sección 5.3 (Figura 3);OE3;Mediana de brecha relativa;Múltiple;151.16;%;240;Q1=23.72 %, Q3=448.08 %, IQR=424.36 pp
+CONF_brecha_Hasta 1 M CLP;Sección 6;Control de confusión;Diferencia Micro - Grande dentro del tramo;CLP · Hasta 1 M CLP;41.52;puntos porcentuales;267;Micro=87.7 % vs Grande=46.2 %
+CONF_brecha_1 a 10 M CLP;Sección 6;Control de confusión;Diferencia Micro - Grande dentro del tramo;CLP · 1 a 10 M CLP;19.55;puntos porcentuales;555;Micro=65.4 % vs Grande=45.8 %
+CONF_brecha_10 a 50 M CLP;Sección 6;Control de confusión;Diferencia Micro - Grande dentro del tramo;CLP · 10 a 50 M CLP;14.92;puntos porcentuales;590;Micro=71.0 % vs Grande=56.1 %
+CONF_brecha_Más de 50 M CLP;Sección 6;Control de confusión;Diferencia Micro - Grande dentro del tramo;CLP · Más de 50 M CLP;13.47;puntos porcentuales;298;Micro=67.4 % vs Grande=54.0 %
