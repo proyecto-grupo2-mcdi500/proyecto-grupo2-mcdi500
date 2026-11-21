@@ -31,7 +31,7 @@ Las fechas de los commits corresponden al campo de autor de Git (`%as`). Las ref
 | 2026-11-16 | `4a097cf`, `32d3f26` | Integra el pipeline en el notebook y actualiza sus cuatro artefactos procesados. [PR #41](https://github.com/proyecto-grupo2-mcdi500/proyecto-grupo2-mcdi500/pull/41) | Conecta las reglas reutilizables con la ejecución reproducible y el contrato de datos consumido en F4. |
 | 2026-11-17 | `76c8fa5`, `7316e46` | Añade pruebas del pipeline, evidencia de Observer y comparación con recursividad. [PR #43](https://github.com/proyecto-grupo2-mcdi500/proyecto-grupo2-mcdi500/pull/43) · [PR #44](https://github.com/proyecto-grupo2-mcdi500/proyecto-grupo2-mcdi500/pull/44) | Cubre casos normales, límite y de excepción, registra el paso de las filas por el pipeline y muestra el límite de pila en datos planos. |
 | 2026-11-17 | `669b2d0`, `2f19968` | Preserva variables analíticas durante el tratamiento de faltantes y actualiza la ejecución de cierre. [PR #48](https://github.com/proyecto-grupo2-mcdi500/proyecto-grupo2-mcdi500/pull/48) · [PR #49](https://github.com/proyecto-grupo2-mcdi500/proyecto-grupo2-mcdi500/pull/49) | Protege las columnas necesarias para las comparaciones y documenta las cifras de referencia. |
-| 2026-11-21 | Pendiente de commit | Etapa 2, tarea 1.7. Mide el control temporal con 1.000, 5.000, 20.000 y 45.741 filas. | Comprueba equivalencia exacta y mide cómo cambia la ventaja al crecer el volumen. |
+| 2026-11-21 | `8a4fedb` | Etapa 2, tarea 1.7. Mide el control temporal con 1.000, 5.000, 20.000 y 45.741 filas. | Comprueba equivalencia exacta y mide cómo cambia la ventaja al crecer el volumen. |
 
 ## F4 — Visualización y comunicación
 
@@ -41,13 +41,5 @@ Las fechas de los commits corresponden al campo de autor de Git (`%as`). Las ref
 | 2026-11-21 | `7da9fdf` | Añade controles de entorno, esquema y contraste con la fuente, y la copia para graficar. [PR #52](https://github.com/proyecto-grupo2-mcdi500/proyecto-grupo2-mcdi500/pull/52) | Verifica la correspondencia entre ofertas y licitaciones antes de construir indicadores. |
 | 2026-11-21 | `efc510b`, `17e7916` | Añade las tres figuras, el control por monto, el registro de hallazgos y las dependencias fijadas. [PR #53](https://github.com/proyecto-grupo2-mcdi500/proyecto-grupo2-mcdi500/pull/53) · [PR #54](https://github.com/proyecto-grupo2-mcdi500/proyecto-grupo2-mcdi500/pull/54) | Vincula cada figura a su objetivo y deja trazables las cifras y el entorno que las produce. |
 | 2026-11-21 | `eaead01` | Etapa 2, tareas 2.2 y 2.3. Amplía OE2 y OE3 con el escenario IVA, las tasas con Wilson, las pruebas, la estratificación y la sensibilidad a duplicados. [PR #57](https://github.com/proyecto-grupo2-mcdi500/proyecto-grupo2-mcdi500/pull/57), integrado en `main` el 2026-11-21 con el commit de merge `7bb0e2d`. | Separa 22 copias adicionales de las 44 filas marcadas y cuantifica qué resultados dependen de cada supuesto. |
-| 2026-11-21 | Pendiente de commit | Etapa 2, tareas 1.7 y 1.8. Mide la asignación del tamaño ganador y documenta el historial de F1 a F4. | Contrasta el recorrido por filas con el agrupamiento de pandas sobre las mismas ofertas y deja trazabilidad de los cambios. |
-| 2026-11-21 | Pendiente de commit | Corrección adicional. Retira los tres diagramas de caja de sensibilidad de la sección 8.2. | Recupera las tres figuras originales de F4 y conserva las tablas y pruebas estadísticas de sensibilidad. |
-
-### Cambios locales pendientes de hash
-
-- F3, tarea 1.7. Mediciones del control temporal en cuatro tamaños.
-- F4 y changelog, tareas 1.7 y 1.8. Medición de la asignación del tamaño ganador y documentación del historial de fases.
-- F4, corrección adicional. Retiro de los tres diagramas de caja de sensibilidad de la sección 8.2.
-
-Las filas correspondientes tienen «Pendiente de commit» en la columna de hash. Se completarán después de registrar los cambios locales en Git.
+| 2026-11-21 | `8a4fedb` | Etapa 2, tareas 1.7 y 1.8. Mide la asignación del tamaño ganador y documenta el historial de F1 a F4. | Contrasta el recorrido por filas con el agrupamiento de pandas sobre las mismas ofertas y deja trazabilidad de los cambios. |
+| 2026-11-21 | `8a4fedb` | Corrección adicional. Retira los tres diagramas de caja de sensibilidad de la sección 8.2. | Recupera las tres figuras originales de F4 y conserva las tablas y pruebas estadísticas de sensibilidad. |
