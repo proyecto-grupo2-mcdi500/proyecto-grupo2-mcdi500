@@ -1,9 +1,11 @@
-# Dependencias directas del proyecto, con versión fija (Python 3.12).
-# Análisis: lo que importan src/ y los notebooks.
+# Dependencias directas del proyecto, con versión fija desde .venv.
+# Análisis, estadística y visualización: lo que importan src/ y los notebooks.
 numpy==2.5.4
 pandas==3.1.0
-# Visualización (Fase 4): generación reproducible de gráficos desde src/comunicacion.py.
 matplotlib==3.11.2
+scipy==1.18.1
+# Pruebas automatizadas.
+pytest==9.2.0
 # Ejecución de los notebooks: kernel del proyecto y JupyterLab.
 ipykernel==7.4.0
-jupyterlab==4.6.5
+jupyterlab==4.6.6

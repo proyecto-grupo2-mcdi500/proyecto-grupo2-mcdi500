@@ -20,6 +20,16 @@
         "instalada": "3.11.2",
         "declarada": "3.11.2",
         "coincide": true
+      },
+      "scipy": {
+        "instalada": "1.18.1",
+        "declarada": "1.18.1",
+        "coincide": true
+      },
+      "pytest": {
+        "instalada": "9.2.0",
+        "declarada": "9.2.0",
+        "coincide": true
       }
     },
     "estilo_figuras_rcparams": {
