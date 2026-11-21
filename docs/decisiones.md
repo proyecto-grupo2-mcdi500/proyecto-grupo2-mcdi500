@@ -107,3 +107,33 @@ Este registro documenta de forma ordenada las decisiones técnicas, metodológic
 - **Justificación:** Favorece alta cohesión, bajo acoplamiento y detección temprana de regresiones ante cambios de esquema o código.
 - **Fuente / Evidencia:** Commit `f1640ea`, [`src/README.md`](../src/README.md), [`src/pruebas_preprocesamiento.py`](../src/pruebas_preprocesamiento.py) y [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (Secciones `1`, `4.1` y `7`).
 - **Impacto medido:** Ningún duplicado funcional entre F1, F2 y F3; las pruebas unitarias e integrales se ejecutan en cada corrida completa de `F3_Nucleo_Algoritmico.ipynb` con resultado `ok` en todas las celdas.
+
+---
+
+## 11. Copia interpretable para graficar en F4 sin revertir escalamiento ni codificación
+
+- **Problema:** Al diseñar la Fase 4 suele ser necesario mantener una matriz transformada para cálculo y construir una copia interpretable con unidades y etiquetas originales antes de graficar (`Apunte F4`). Sin embargo, aplicar funciones inversas artificiales cuando no hubo escalamiento ni codificación entera agrega complejidad innecesaria.
+- **Decisión:** No implementar `revertir_escalamiento()` ni `reconstruir_categorias()` en [`src/comunicacion.py`](../src/comunicacion.py). En la Sección `4` de [`F4/F4_Visualizacion_Comunicacion.ipynb`](../F4/F4_Visualizacion_Comunicacion.ipynb), construir `copia_graficar` directamente sobre las salidas de `preparar_comparables()` y `asignar_tamano_ganador()`, añadiendo únicamente `EtiquetaCoincidencia` (`Coincide` / `Difiere`), `TramoEstimado` (cuatro rangos legibles en `CLP` más `"Otra moneda (no CLP)"`) y `BrechaRelativaPct` (`(BrechaMonto / MontoEstimadoLicitacion) * 100`), manteniendo `NoClasificado` y `Múltiple` fuera del eje ordinal `TamanoGanadorOrdinal`.
+- **Justificación:** Las fases `F2` y `F3` conservaron los montos en su unidad monetaria original y las etiquetas en texto (`Micro < Pequeña < Mediana < Grande`). Dejar `NoClasificado` (`284`) y `Múltiple` (`240`) fuera del eje ordinal evita introducir un orden ficticio en las tendencias por tamaño sin ocultar esas `524` licitaciones.
+- **Fuente / Evidencia:** [`src/comunicacion.py`](../src/comunicacion.py), [`F4/F4_Visualizacion_Comunicacion.ipynb`](../F4/F4_Visualizacion_Comunicacion.ipynb) (Sección `4`) y [`docs/metadatos_f4.json`](./metadatos_f4.json).
+- **Impacto medido:** Copia `copia_graficar` verificada de **`2.257 × 19`** (`Hasta 1 M CLP`: `350`, `1 a 10 M CLP`: `739`, `10 a 50 M CLP`: `783`, `Más de 50 M CLP`: `358`, `Otra moneda (no CLP)`: `27`) con `100 %` de registros `NoClasificado` y `Múltiple` preservados como `NA` en `TamanoGanadorOrdinal`.
+
+---
+
+## 12. Lectura selectiva (`usecols`), contrato contra `diccionario_f3.csv` y verificación contra `data/raw`
+
+- **Problema:** Cargar todas las columnas de los CSV procesados sin validar contrato ni contrastar contra la fuente original expone la Fase 4 a rupturas silenciosas de esquema, tipos ambiguos en `pandas` (`object` en booleanos con faltantes) o errores de arrastre.
+- **Decisión:** Implementar `cargar_artefactos()` en [`src/comunicacion.py`](../src/comunicacion.py) con `sep=";"` y `usecols` (`7` de `17` columnas en `ofertas` y `11` de `24` en `licitaciones`), tipar columnas booleanas con `<NA>` como `boolean`, exigir contrato mediante `assert` frente a [`diccionario_f3.csv`](../data/processed/diccionario_f3.csv) y [`parametros_f3.csv`](../data/processed/parametros_f3.csv), y ejecutar en la Sección `3` de F4 una verificación muestral independiente recalculada directamente desde `data/raw/04LicitacionesEne.csv` (cuando está disponible localmente).
+- **Justificación:** Garantiza consistencia estricta entre entrada, procesamiento y salida antes de graficar, reduciendo además el uso de memoria conforme a la medición `4.3` de F3.
+- **Fuente / Evidencia:** [`F4/F4_Visualizacion_Comunicacion.ipynb`](../F4/F4_Visualizacion_Comunicacion.ipynb) (Secciones `2`, `3` y `5`) y [`docs/metadatos_f4.json`](./metadatos_f4.json).
+- **Impacto medido:** Contrato aprobado sobre las **`41` columnas** del diccionario (`45.741` ofertas, `2.292` licitaciones únicas, `45.603` ofertas CLP válidas) y diferencia máxima absoluta de **`0,0`** frente a `data/raw` en la muestra de `7` licitaciones comparables (`1` a `114` ítems ganadores en `CLP`, `CLF` y `USD`).
+
+---
+
+## 13. Métricas adimensionales (`RazonMonto`, `LogRazonMonto`), medianas/IQR e intervalos de Wilson en F4
+
+- **Problema:** Los montos entre monedas distintas no son conmensurables en una sola unidad y dentro de cada moneda las distribuciones de brecha presentan asimetría y valores extremos que distorsionan medias aritméticas o porcentajes puntuales sin tamaño muestral.
+- **Decisión:** Incorporar en [`src/comunicacion.py`](../src/comunicacion.py) la razón multiplicativa (`RazonMonto`), su logaritmo natural (`LogRazonMonto`) y `BrechaRelativaPct`, resumir magnitudes con **mediana y rango intercuartílico (`IQR`)** sin mezclar monedas, y reportar tasas de coincidencia con **intervalos de confianza de Wilson al `95 %`** (`intervalo_wilson`, `tasa_por_grupo`).
+- **Justificación:** La razón y la log-razón permiten comparar proporcionalmente desviaciones relativas, la mediana e `IQR` resisten valores extremos y el intervalo de Wilson evita intervalos fuera de `[0 %, 100 %]` en grupos con tamaño muestral pequeño (como `CLF`, `UTM` o `USD`).
+- **Fuente / Evidencia:** [`src/comunicacion.py`](../src/comunicacion.py) (`preparar_comparables`, `intervalo_wilson`, `tasa_por_grupo`, `resumen_sentido_por_moneda`, `resumen_magnitud_por_moneda`, `tabla_resumen_por_tamano`) y [`F4/F4_Visualizacion_Comunicacion.ipynb`](../F4/F4_Visualizacion_Comunicacion.ipynb) (Sección `4.1`).
+- **Impacto medido:** Trazabilidad explícita de cada objetivo e indicador (`P1` y `P2` de `F1`) antes del graficado, con cobertura completa de las `2.257` licitaciones comparables (`CLP`: `2.230`, `CLF`: `20`, `UTM`: `4`, `USD`: `3`).
