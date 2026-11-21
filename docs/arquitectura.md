@@ -1,6 +1,6 @@
 # Arquitectura del Sistema — Proyecto Grupo 2 (MCDI-500)
 
-Este documento describe la organización estructural del proyecto **Análisis de Licitaciones Públicas en Chile (Enero 2025)**, los patrones de diseño empleados en el núcleo orientado a objetos, el análisis de escalabilidad, la evolución del código desde la Fase 2 hasta la Fase 3 y el fundamento técnico de la decisión entre recursividad y división funcional.
+Este documento describe la organización estructural del proyecto **Análisis de Licitaciones Públicas en Chile (Enero 2025)**, los patrones de diseño empleados en el núcleo orientado a objetos, el análisis de escalabilidad, la evolución del código desde la Fase 2 hasta la Fase 4 y el fundamento técnico de la decisión entre recursividad y división funcional.
 
 ---
 
@@ -15,6 +15,7 @@ Este documento describe la organización estructural del proyecto **Análisis de
 | **Pruebas unitarias de reglas F2** | Ejecuta casos normales, límite y de error sobre datos ficticios mediante `ejecutar_pruebas_preprocesamiento()` | [`src/pruebas_preprocesamiento.py`](../src/pruebas_preprocesamiento.py) |
 | **Núcleo POO y pipeline F3** | Jerarquía de transformadores ajustables (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`), observador `Bitacora`, orquestador `Pipeline`, contenedor `ResultadoF3`, constructor `construir_pipeline()` y controles temporales (`control_iterativo`, `control_vectorizado`) | [`src/pipeline_licitaciones.py`](../src/pipeline_licitaciones.py) |
 | **Instrumentación de eficiencia** | Mide tiempo mínimo con `timeit` (`medir_tiempo`), memoria pico separada con `tracemalloc` (`medir_memoria`) y compara equivalencia exacta (`comparar`) | [`src/medicion.py`](../src/medicion.py) |
+| **Indicadores y gráficos F4** | Carga selectiva (`usecols`, `sep=";"`) de los cuatro artefactos procesados, calcula razón/log-razón, sentido de la brecha, medianas/IQR, intervalos de Wilson, tabla por tamaño ganador y genera figuras exportables (`guardar_figura`) | [`src/comunicacion.py`](../src/comunicacion.py) |
 | **Definición del problema (F1)** | Formaliza problemática, objetivos, preguntas, ficha técnica de roles, pruebas de `utilidades.py` y validación del entorno | [`F1/F1_Definicion.ipynb`](../F1/F1_Definicion.ipynb) |
 | **Preprocesamiento exploratorio (F2)** | Aplica y documenta las reglas de limpieza, perfilamiento, brechas e IQR generando las salidas oficiales en `data/processed/` | [`F2/F2_Preprocesamiento.ipynb`](../F2/F2_Preprocesamiento.ipynb) |
 | **Núcleo algorítmico y POO (F3)** | Orquesta el pipeline POO, verifica equivalencia exacta con F2, ejecuta mediciones de eficiencia, genera diccionario/parámetros y ejecuta `ejecutar_pruebas_pipeline()` | [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) |
@@ -37,10 +38,13 @@ flowchart LR
     POO --> F3
     F2 --> PROC["data/processed/<br>(ofertas + brecha por licitación)"]
     F3 --> DOC["docs/ + diccionario_f3.csv + parametros_f3.csv"]
+    PROC --> COM["src/comunicacion.py<br>(usecols + indicadores + gráficos)"]
+    DOC --> COM
+    COM --> F4["F4/<br>(notebook de visualización)"]
 ```
 
-1. **Reglas puras separadas de la orquestación (`preprocesamiento.py` vs. `pipeline_licitaciones.py`):** Las reglas de negocio de F2 son funciones deterministas que operan sobre `DataFrame` y pueden probarse de forma aislada (`pruebas_preprocesamiento.py`). La capa de F3 las envuelve en transformadores polimórficos sin duplicar lógica ni divergencias numéricas entre fases.
-2. **Cuadernos enfocados en análisis, verificación y narrativa:** `F1/`, `F2/` y `F3/` no almacenan copias locales de `data/` ni implementan algoritmos extensos duplicados; importan módulos desde `src/`.
+1. **Reglas puras separadas de la orquestación (`preprocesamiento.py` vs. `pipeline_licitaciones.py`) y de la comunicación (`comunicacion.py`):** Las reglas de negocio de F2 son funciones deterministas que operan sobre `DataFrame` y pueden probarse de forma aislada (`pruebas_preprocesamiento.py`). La capa de F3 las envuelve en transformadores polimórficos sin duplicar lógica, y F4 delega el cálculo de indicadores (`intervalo_wilson`, `tasa_por_grupo`, razón, log-razón, medianas/IQR y resumen por tamaño) y la construcción/guardado de figuras a `src/comunicacion.py`.
+2. **Cuadernos enfocados en análisis, verificación y narrativa:** `F1/`, `F2/`, `F3/` y `F4/` no almacenan copias locales de `data/` ni implementan algoritmos extensos duplicados; importan módulos desde `src/`.
 3. **Privacidad por diseño desde la lectura:** `cargar_csv()` filtra los encabezados sensibles con `es_columna_privada()` antes de construir el `DataFrame` en memoria (`71` de `72` columnas leídas) y `.gitignore` impide versionar `data/raw/*.csv`.
 4. **Instrumentación desacoplada:** `src/medicion.py` mide tiempo y memoria en llamadas separadas (para evitar que el sobrecosto de `tracemalloc` contamine las mediciones de tiempo) y exige igualdad exacta (`check_exact=True`) antes de reportar una optimización.
 
@@ -80,7 +84,7 @@ flowchart LR
 
 ---
 
-## 5. Evolución del Código desde F2 hasta F3
+## 5. Evolución del Código desde F2 hasta F4
 
 El diseño evolucionó de forma incremental desde prototipos en cuadernos hasta una arquitectura modular validada:
 
@@ -90,6 +94,7 @@ El diseño evolucionó de forma incremental desde prototipos en cuadernos hasta 
 4. **Alineación modular por responsabilidad ([`f1640ea`](../src/README.md)):** Se renombraron `src/preprocesamiento.py` y `src/pruebas_preprocesamiento.py` para separar utilidades de F1 (`src/utilidades.py`), reglas de F2 y pipeline de F3, además de versionar las salidas oficiales de F2 (`0c2298b`).
 5. **Validación sistemática de casos normal, límite y excepción ([`1fd6e12`](../F3/F3_Nucleo_Algoritmico.ipynb), [`92cb884`](../F3/F3_Nucleo_Algoritmico.ipynb)):** Se añadió `ejecutar_pruebas_pipeline()` en la Sección 7 de `F3_Nucleo_Algoritmico.ipynb` verificando escenarios reales y sintéticos (`1` sola fila, `0` ofertas CLP, columnas sin nulos, errores de esquema y archivo inexistente).
 6. **Consolidación POO con herencia real y ajuste uniforme ([`23f3a5a`](../src/pipeline_licitaciones.py)):** Se concentró en `Transformador` el control de `_ajustado`, la validación de `columnas_requeridas` y la copia defensiva; `TratamientoFaltantes` pasó a ser transformador ajustable (aprende columnas `> 90 %` y las excluye al aplicar); y `ExtremosLogIQR` ingresó a la secuencia única de pasos de `Pipeline`, preservando equivalencia exacta (`check_exact=True`) con las dos salidas de F2.
+7. **Extracción de indicadores y gráficos de F4 en [`src/comunicacion.py`](../src/comunicacion.py):** Se consolidó la lectura selectiva con `usecols` y `sep=";"` de los cuatro artefactos de `data/processed/` (`cargar_artefactos`), sin `revertir_escalamiento` ni `reconstruir_categorias` por no aplicar al pipeline sin escalamiento, junto con `intervalo_wilson`, `tasa_por_grupo`, `guardar_figura` y los indicadores de razón, log-razón, sentido, medianas/IQR y resumen por tamaño ganador para que `F4` solo invoque funciones probadas del módulo.
 
 ---
 
