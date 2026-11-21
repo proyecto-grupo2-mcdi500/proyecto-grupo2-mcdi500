@@ -852,9 +852,10 @@ def graficar_coincidencia_por_tamano(
     ax.set_ylim(0, 95)
     ax.set_ylabel("Tasa de coincidencia con monto estimado (%)")
     ax.set_xlabel("Tamaño del proveedor ganador (eje ordinal: Micro–Grande; grupos aparte en gris)")
+    tasa_txt = f"{tasa_global_pct:.1f}".replace(".", ",")
     ax.set_title(
-        "Micro alcanza 71,1 % de coincidencia frente a 49,0 % en Grande y 7,1 % en adjudicaciones Múltiples",
-        fontsize=11.5,
+        f"El monto estimado coincide con el total de las ofertas ganadoras en el {tasa_txt} % de las licitaciones comparables",
+        fontsize=10.8,
         fontweight="bold",
         pad=10,
     )
@@ -990,14 +991,17 @@ def graficar_cajas_brecha_relativa(
     if "Múltiple" in categorias:
         idx_mult = categorias.index("Múltiple") + 1
         med_mult = float(np.median(series[idx_mult - 1]))
+        med_txt = f"+{med_mult:.1f} %".replace(".", ",")
         ax.annotate(
-            f"Mediana: +{med_mult:.1f}%\n(bigote sup. +1.084,6%)",
-            xy=(idx_mult, y_lim[1] - 12),
-            xytext=(idx_mult - 1.25, y_lim[1] - 60),
-            arrowprops={"arrowstyle": "->", "color": "#2d3748", "lw": 1.2},
-            fontsize=8.5,
+            f"Mediana: {med_txt}\n(bigote sup. +1.084,6 %)",
+            xy=(idx_mult - 0.18, med_mult),
+            xytext=(idx_mult - 1.35, med_mult + 45.0),
+            arrowprops={"arrowstyle": "->", "color": "#1a202c", "lw": 1.4},
+            fontsize=8.8,
+            fontweight="bold",
             ha="center",
-            color="#2d3748",
+            va="center",
+            color="#1a202c",
         )
 
     _agregar_pie_fuente(fig, "Cajas [Q1, Q3] y bigotes 1,5×IQR (showfliers=False por estimados simbólicos)")
