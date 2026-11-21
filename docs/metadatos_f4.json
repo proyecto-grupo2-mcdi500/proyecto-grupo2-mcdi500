@@ -2,7 +2,7 @@
   "fase": "F4",
   "etapa": "Figuras por objetivo (200 ppp), control de confusión y hallazgos_f4.csv",
   "entorno": {
-    "python": "3.15.2",
+    "python": "3.14.6",
     "sistema": "Windows",
     "entorno_virtual_activo": true,
     "paquetes": {
@@ -57,7 +57,6 @@
         "MontoTotalOferta",
         "ResultadoOferta",
         "TamanoProveedor",
-        "TamanoProveedorOrdinal",
         "EsExtremoLogIQR_CLP",
         "EsDuplicadoPotencial",
         "MontoEstimadoLicitacion",
@@ -69,16 +68,13 @@
       "columnas_archivo": 24,
       "usecols": [
         "NroLicitacion",
-        "FilasOferta",
         "OfertasGanadoras",
         "MontoEstimadoLicitacion",
         "MonedaLicitacion",
-        "GanadoraDuplicada",
         "MontoTotalGanadoras",
         "BrechaMonto",
         "EstadoBrecha",
-        "CoincideConEstimado",
-        "VisibilidadEstimado"
+        "CoincideConEstimado"
       ]
     },
     "diccionario_filas": 41,
