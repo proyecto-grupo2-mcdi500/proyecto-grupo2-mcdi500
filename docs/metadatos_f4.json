@@ -57,7 +57,6 @@
         "MontoTotalOferta",
         "ResultadoOferta",
         "TamanoProveedor",
-        "TamanoProveedorOrdinal",
         "EsExtremoLogIQR_CLP",
         "EsDuplicadoPotencial",
         "MontoEstimadoLicitacion",
@@ -69,16 +68,13 @@
       "columnas_archivo": 24,
       "usecols": [
         "NroLicitacion",
-        "FilasOferta",
         "OfertasGanadoras",
         "MontoEstimadoLicitacion",
         "MonedaLicitacion",
-        "GanadoraDuplicada",
         "MontoTotalGanadoras",
         "BrechaMonto",
         "EstadoBrecha",
-        "CoincideConEstimado",
-        "VisibilidadEstimado"
+        "CoincideConEstimado"
       ]
     },
     "diccionario_filas": 41,

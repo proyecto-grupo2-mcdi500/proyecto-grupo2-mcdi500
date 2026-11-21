@@ -26,7 +26,6 @@ COLUMNAS_OFERTAS_F4: tuple[str, ...] = (
     "MontoTotalOferta",
     "ResultadoOferta",
     "TamanoProveedor",
-    "TamanoProveedorOrdinal",
     "EsExtremoLogIQR_CLP",
     "EsDuplicadoPotencial",
     "MontoEstimadoLicitacion",
@@ -35,17 +34,17 @@ COLUMNAS_OFERTAS_F4: tuple[str, ...] = (
 
 COLUMNAS_LICITACIONES_F4: tuple[str, ...] = (
     "NroLicitacion",
-    "FilasOferta",
     "OfertasGanadoras",
     "MontoEstimadoLicitacion",
     "MonedaLicitacion",
-    "GanadoraDuplicada",
     "MontoTotalGanadoras",
     "BrechaMonto",
     "EstadoBrecha",
     "CoincideConEstimado",
-    "VisibilidadEstimado",
 )
+
+COLUMNAS_DICCIONARIO_F4 = ("Tabla", "Columna", "Tipo en Python")
+COLUMNAS_PARAMETROS_F4 = ("Parámetro", "Valor")
 
 ORDEN_SENTIDO: tuple[str, ...] = ("Bajo el estimado", "Coincide", "Sobre el estimado")
 ORDEN_TAMANOS_TABLA: tuple[str, ...] = (*ORDEN_TAMANO, "NoClasificado", "Múltiple")
@@ -117,8 +116,8 @@ def cargar_artefactos(
     """Carga los cuatro artefactos de ``data/processed/`` con ``sep=';'`` y ``usecols``.
 
     A diferencia del proyecto modelo, no implementa ``revertir_escalamiento`` ni
-    ``reconstruir_categorias``: F2 y F3 conservan los montos en su moneda original y
-    ``TamanoProveedorOrdinal`` conserva sus categorías explícitas en texto.
+    ``reconstruir_categorias``: F2 y F3 conservan los montos en su moneda original.
+    El tamaño ordinal del ganador se deriva en F4 desde ``TamanoProveedor``.
 
     Parámetros
     ----------
@@ -143,8 +142,12 @@ def cargar_artefactos(
     licitaciones = _leer_csv_procesado(
         raiz_proc / ARCHIVOS_PROCESADOS["licitaciones"], columnas_licitaciones
     )
-    diccionario = _leer_csv_procesado(raiz_proc / ARCHIVOS_PROCESADOS["diccionario"])
-    parametros = _leer_csv_procesado(raiz_proc / ARCHIVOS_PROCESADOS["parametros"])
+    diccionario = _leer_csv_procesado(
+        raiz_proc / ARCHIVOS_PROCESADOS["diccionario"], COLUMNAS_DICCIONARIO_F4
+    )
+    parametros = _leer_csv_procesado(
+        raiz_proc / ARCHIVOS_PROCESADOS["parametros"], COLUMNAS_PARAMETROS_F4
+    )
     return ArtefactosF4(
         ofertas=ofertas,
         licitaciones=licitaciones,
