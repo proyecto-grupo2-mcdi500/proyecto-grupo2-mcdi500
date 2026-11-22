@@ -75,12 +75,6 @@ proyecto-grupo2-mcdi500/
 │   ├── README.md
 │   ├── utilidades.py
 │   └── validar_dataset.py
-├── tests/
-│   ├── conftest.py
-│   ├── test_comunicacion.py
-│   ├── test_pipeline.py
-│   ├── test_preprocesamiento.py
-│   └── test_regresion_f2.py
 ├── F1/
 │   ├── brainstorming/
 │   │   └── ideas-dataset.md
@@ -91,10 +85,22 @@ proyecto-grupo2-mcdi500/
 │   ├── F3_Nucleo_Algoritmico.ipynb
 │   └── README.md
 ├── F4/
+│   ├── figuras/
+│   │   ├── 01_coincidencia_por_tamano.png
+│   │   ├── 02_razon_ganador_estimado_log.png
+│   │   └── 03_cajas_brecha_relativa_tamano.png
 │   ├── F4_Visualizacion_Comunicacion.ipynb
 │   └── README.md
-├── CHANGELOG.md
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_comunicacion.py
+│   ├── test_pipeline.py
+│   ├── test_preprocesamiento.py
+│   └── test_regresion_f2.py
 ├── .mailmap
+├── CHANGELOG.md
+├── pytest.ini
 ├── README.md
 ├── requirements.txt
 └── validar_dataset.py
