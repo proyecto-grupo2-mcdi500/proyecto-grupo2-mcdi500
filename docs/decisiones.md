@@ -105,7 +105,7 @@ Este registro documenta de forma ordenada las decisiones técnicas, metodológic
 - **Problema:** Mantener funciones de F1 (`utilidades`), reglas de F2 (`preprocesamiento`), orquestación POO (`pipeline_licitaciones`) y medición (`medicion`) mezcladas en un único archivo dificultaba la comprensión, el trabajo en paralelo y la verificación por capas.
 - **Decisión:** Separar cada responsabilidad en su propio módulo dentro de `src/` y acompañar tanto las reglas puras (`pruebas_preprocesamiento.py`) como el flujo POO (`ejecutar_pruebas_pipeline()`) con baterías automatizadas sobre datos ficticios antes de procesar el archivo real.
 - **Justificación:** Favorece alta cohesión, bajo acoplamiento y detección temprana de regresiones ante cambios de esquema o código.
-- **Fuente / Evidencia:** Commit `f1640ea`, [`src/README.md`](../src/README.md), [`src/pruebas_preprocesamiento.py`](../src/pruebas_preprocesamiento.py) y [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (Secciones `1`, `4.1` y `7`).
+- **Fuente / Evidencia:** Commit `f1640ea`, [`src/README.md`](../src/README.md), [`src/pruebas_preprocesamiento.py`](https://github.com/proyecto-grupo2-mcdi500/proyecto-grupo2-mcdi500/blob/f1640eab066a276914d153d9c33db5d11e6177a6/src/pruebas_preprocesamiento.py) y [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (Secciones `1`, `4.1` y `7`).
 - **Impacto medido:** Ningún duplicado funcional entre F1, F2 y F3; las pruebas unitarias e integrales se ejecutan en cada corrida completa de `F3_Nucleo_Algoritmico.ipynb` con resultado `ok` en todas las celdas.
 
 ---
@@ -180,7 +180,21 @@ Este registro documenta de forma ordenada las decisiones técnicas, metodológic
 
 ---
 
-## 18. Mantener la copia del proyecto como entrada y documentar su procedencia frente a la fuente pública
+## 18. Pruebas unificadas en `tests/` con `pytest`
+
+- **Problema:** Las pruebas de F2 y F3 vivían en `src/pruebas_preprocesamiento.py` y `src/pruebas_pipeline.py` como funciones que solo se ejecutaban desde los notebooks, sin un comando único para verificar el proyecto completo. Además, F4 no tenía pruebas propias y la retroalimentación de la Sumativa 2 pidió un módulo de pruebas en `tests/` con casos conocidos y casos nuevos.
+- **Decisión:** Trasladar las pruebas a `tests/`, ejecutadas con `pytest` desde la raíz (`pytest.ini`), y eliminar los módulos `src/pruebas_*.py` para que `src/` no dependa de las pruebas. La suite queda en cuatro archivos:
+  1. `test_preprocesamiento.py`: reglas de F2 (duplicados, brecha, tamaño, esquema, IQR y SHA-256).
+  2. `test_pipeline.py`: los `17` casos de las clases de F3; `ejecutar_pruebas_pipeline()` se mantiene para la tabla de la sección `7` de F3.
+  3. `test_regresion_f2.py`: igualdad exacta del pipeline frente a las salidas de F2 con `pd.testing.assert_frame_equal`, sobre el raw y sobre datos sintéticos.
+  4. `test_comunicacion.py`: casos conocidos de F4 comparados con `docs/hallazgos_f4.csv` y siete casos nuevos de la retroalimentación (razón igual a `1`, coincidencia del `100 %`, tamaño sin casos, monedas distintas de `CLP`, artefacto faltante, Wilson con `0` éxitos o grupo vacío, y contrato roto).
+- **Justificación:** Un solo comando verifica F2, F3 y F4, y cualquier cambio en `src/` que altere una cifra publicada falla antes de llegar al informe. La prueba que necesita el raw se omite con un mensaje claro cuando el archivo no está, de modo que la suite también corre en un clon sin datos.
+- **Fuente / Evidencia:** [`tests/`](../tests/), [`pytest.ini`](../pytest.ini), [`F2/F2_Preprocesamiento.ipynb`](../F2/F2_Preprocesamiento.ipynb) y [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (secciones `1` y `7`), que importan las pruebas desde `tests/`.
+- **Impacto medido:** `36` pruebas aprobadas con `pytest` en unos `6 s` cuando está el raw; sin el raw, `35` aprobadas y `1` omitida en unos `2 s`. La regresión confirma igualdad exacta (`check_exact=True`) con `45.741` ofertas y `2.292` licitaciones de F2, y los casos conocidos reproducen desde `src/` las cifras de `docs/hallazgos_f4.csv` (por ejemplo, `1.254` de `2.257` en OE1 y `228` de `520` en OE2). `data/processed/` y las figuras de F4 no cambian.
+
+---
+
+## 19. Mantener la copia del proyecto como entrada y documentar su procedencia frente a la fuente pública
 
 - **Problema:** La retroalimentación de la Sumativa 2 sugirió documentar la descarga desde el portal público de ChileCompra «con el mismo SHA-256 esperado». Al localizar la fuente pública ([`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z) de Mercado Público, publicado el 23 de abril de 2025) se constató que la copia del proyecto no es idéntica: al inicio del proyecto el grupo quitó las columnas `Proveedor` y `ProveedorRUT` usando Excel, que además reescribió el formato de algunos valores (fechas sin segundos, montos redondeados, códigos largos en notación científica). El SHA-256 del archivo público no puede coincidir con el documentado.
 - **Decisión:** Mantener la copia del proyecto (SHA-256 sin `\r` `ec308de2…41bf`) como entrada de F2–F4, sin regenerar salidas. Documentar en [`data/raw/README.md`](../data/raw/README.md) la fuente pública con su propio SHA-256, las diferencias con la copia y la equivalencia de resultados. No versionar el crudo ni una muestra seudonimizada.

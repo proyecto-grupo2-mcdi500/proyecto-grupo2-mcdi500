@@ -12,11 +12,13 @@ Este documento describe la organización estructural del proyecto **Análisis de
 | **Validador heurístico de dataset** | Perfila columnas, estima roles analíticos en crudo y verifica umbrales del curso (filas, columnas, nulos, peso MB y duplicados) | [`src/validar_dataset.py`](../src/validar_dataset.py) |
 | **Utilidades transversales** | Localiza la raíz del repositorio, normaliza nombres de columnas a `snake_case` y expone la excepción de dominio `ProyectoError` | [`src/utilidades.py`](../src/utilidades.py) |
 | **Reglas puras de preprocesamiento** | Funciones deterministas de F2: lectura sin identificadores (`cargar_csv`), conversión de fechas/montos, tratamiento de blancos, duplicados potenciales, escala ordinal `TamanoProveedorOrdinal`, brecha por licitación, IQR logarítmico en CLP y validación final (`validar_procesado`) | [`src/preprocesamiento.py`](../src/preprocesamiento.py) |
-| **Pruebas unitarias de reglas F2** | Ejecuta casos normales, límite y de error sobre datos ficticios mediante `ejecutar_pruebas_preprocesamiento()` | [`src/pruebas_preprocesamiento.py`](../src/pruebas_preprocesamiento.py) |
+| **Pruebas unitarias de reglas F2** | Ejecuta casos normales, límite y de error sobre datos ficticios con pytest | [`tests/test_preprocesamiento.py`](../tests/test_preprocesamiento.py) |
 | **Núcleo POO y pipeline F3** | Jerarquía de transformadores ajustables (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`), observador `Bitacora`, orquestador `Pipeline`, contenedor `ResultadoF3`, constructor `construir_pipeline()` y controles temporales (`control_iterativo`, `control_vectorizado`) | [`src/pipeline_licitaciones.py`](../src/pipeline_licitaciones.py) |
 | **Instrumentación de eficiencia** | Mide tiempo mínimo con `timeit` (`medir_tiempo`), memoria pico separada con `tracemalloc` (`medir_memoria`) y compara equivalencia exacta (`comparar`) | [`src/medicion.py`](../src/medicion.py) |
 | **Indicadores y gráficos F4** | Carga selectiva (`usecols`, `sep=";"`) de los cuatro artefactos procesados, calcula razón/log-razón, sentido de la brecha, medianas/IQR, intervalos de Wilson, sensibilidad de IVA/duplicados, pruebas estadísticas y genera figuras exportables (`guardar_figura`) | [`src/comunicacion.py`](../src/comunicacion.py) |
-| **Pruebas del pipeline POO** | Valida clases de `pipeline_licitaciones.py` y `validar_procesado()` en `17` casos normal, límite y excepción (`ejecutar_pruebas_pipeline()`) | [`src/pruebas_pipeline.py`](../src/pruebas_pipeline.py) |
+| **Pruebas del pipeline POO** | Valida clases de `pipeline_licitaciones.py` y `validar_procesado()` en `17` casos normal, límite y excepción | [`tests/test_pipeline.py`](../tests/test_pipeline.py) |
+| **Regresión y equivalencia F2 (Guía S3)** | Valida equivalencia exacta con `pd.testing.assert_frame_equal` contra salidas F2 | [`tests/test_regresion_f2.py`](../tests/test_regresion_f2.py) |
+| **Pruebas de F4 y robustez** | Verifica casos conocidos de F4 (`hallazgos_f4.csv`) y casos de borde del feedback (razón 1, 100 % coincidencia, categorías vacías, no-CLP, contratos rotos) | [`tests/test_comunicacion.py`](../tests/test_comunicacion.py) |
 | **Definición del problema (F1)** | Formaliza problemática, objetivos, preguntas, ficha técnica de roles, pruebas de `utilidades.py` y validación del entorno | [`F1/F1_Definicion.ipynb`](../F1/F1_Definicion.ipynb) |
 | **Preprocesamiento exploratorio (F2)** | Aplica y documenta las reglas de limpieza, perfilamiento, brechas e IQR generando las salidas oficiales en `data/processed/` | [`F2/F2_Preprocesamiento.ipynb`](../F2/F2_Preprocesamiento.ipynb) |
 | **Núcleo algorítmico y POO (F3)** | Orquesta el pipeline POO, verifica equivalencia exacta con F2, ejecuta mediciones de eficiencia, genera diccionario/parámetros y ejecuta `ejecutar_pruebas_pipeline()` | [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) |
@@ -44,11 +46,16 @@ flowchart TB
         VAL["src/validar_dataset.py<br>(+ validar_dataset.py CLI)"]
         UTI["src/utilidades.py<br>(ProyectoError, raíz, normalización)"]
         PRE["src/preprocesamiento.py<br>(SHA-256, cargar_csv, reglas F2)"]
-        PR_PRE["src/pruebas_preprocesamiento.py"]
         POO["src/pipeline_licitaciones.py<br>(Transformador, Pipeline, Bitacora)"]
-        PR_PIP["src/pruebas_pipeline.py"]
         MED["src/medicion.py<br>(timeit, tracemalloc, comparar)"]
         COM["src/comunicacion.py<br>(usecols, Wilson, IVA, figuras)"]
+    end
+
+    subgraph TST["Suite de pruebas unificada (tests/)"]
+        T_PRE["tests/test_preprocesamiento.py"]
+        T_PIP["tests/test_pipeline.py"]
+        T_REG["tests/test_regresion_f2.py (Guía S3)"]
+        T_COM["tests/test_comunicacion.py (F4 + feedback)"]
     end
 
     subgraph ART["Artefactos (data/, docs/, figuras)"]
@@ -65,10 +72,12 @@ flowchart TB
     PRE --> F2
     PRE --> POO
     PRE --> COM
-    PR_PRE -.->|prueba| PRE
+    T_PRE -.->|prueba con pytest| PRE
     POO --> F3
     MED --> F3
-    PR_PIP -.->|prueba 17 casos| POO
+    T_PIP -.->|prueba 17 casos con pytest| POO
+    T_REG -.->|assert_frame_equal| PROC_DAT
+    T_COM -.->|prueba F4 y robustez| COM
     F2 -->|exporta tablas| PROC_DAT
     F3 -->|genera metadatos| PROC_META
     PROC_DAT --> COM
@@ -79,7 +88,7 @@ flowchart TB
     DOCS -.->|documenta contratos| F4
 ```
 
-1. **Reglas puras separadas de la orquestación (`preprocesamiento.py` vs. `pipeline_licitaciones.py`) y de la comunicación (`comunicacion.py`):** Las reglas de negocio de F2 son funciones deterministas que operan sobre `DataFrame` y pueden probarse de forma aislada (`pruebas_preprocesamiento.py`). La capa de F3 las envuelve en transformadores polimórficos sin duplicar lógica, y F4 delega el cálculo de indicadores (`intervalo_wilson`, `tasa_por_grupo`, razón, log-razón, medianas/IQR y resumen por tamaño) y la construcción/guardado de figuras a `src/comunicacion.py`.
+1. **Reglas puras separadas de la orquestación (`preprocesamiento.py` vs. `pipeline_licitaciones.py`) y de la comunicación (`comunicacion.py`):** Las reglas de negocio de F2 son funciones deterministas que operan sobre `DataFrame` y pueden probarse de forma aislada (`tests/test_preprocesamiento.py`). La capa de F3 las envuelve en transformadores polimórficos sin duplicar lógica, y F4 delega el cálculo de indicadores (`intervalo_wilson`, `tasa_por_grupo`, razón, log-razón, medianas/IQR y resumen por tamaño) y la construcción/guardado de figuras a `src/comunicacion.py`.
 2. **Cuadernos enfocados en análisis, verificación y narrativa:** `F1/`, `F2/`, `F3/` y `F4/` no almacenan copias locales de `data/` ni implementan algoritmos extensos duplicados; importan módulos desde `src/`.
 3. **Privacidad por diseño desde la lectura:** `cargar_csv()` filtra los encabezados sensibles con `es_columna_privada()` antes de construir el `DataFrame` en memoria (`71` de `72` columnas leídas) y `.gitignore` impide versionar `data/raw/*.csv`.
 4. **Instrumentación desacoplada:** `src/medicion.py` mide tiempo y memoria en llamadas separadas (para evitar que el sobrecosto de `tracemalloc` contamine las mediciones de tiempo) y exige igualdad exacta (`check_exact=True`) antes de reportar una optimización.
@@ -213,6 +222,7 @@ El diseño evolucionó de forma incremental desde prototipos en cuadernos hasta 
 5. **Validación sistemática de casos normal, límite y excepción ([`1fd6e12`](../F3/F3_Nucleo_Algoritmico.ipynb), [`92cb884`](../F3/F3_Nucleo_Algoritmico.ipynb)):** Se añadió `ejecutar_pruebas_pipeline()` en la Sección 7 de `F3_Nucleo_Algoritmico.ipynb` verificando escenarios reales y sintéticos (`1` sola fila, `0` ofertas CLP, columnas sin nulos, errores de esquema y archivo inexistente).
 6. **Consolidación POO con herencia real y ajuste uniforme ([`23f3a5a`](../src/pipeline_licitaciones.py)):** Se concentró en `Transformador` el control de `_ajustado`, la validación de `columnas_requeridas` y la copia defensiva; `TratamientoFaltantes` pasó a ser transformador ajustable (aprende columnas `> 90 %` y las excluye al aplicar); y `ExtremosLogIQR` ingresó a la secuencia única de pasos de `Pipeline`, preservando equivalencia exacta (`check_exact=True`) con las dos salidas de F2.
 7. **Extracción de indicadores y gráficos de F4 en [`src/comunicacion.py`](../src/comunicacion.py):** Se consolidó la lectura selectiva con `usecols` y `sep=";"` de los cuatro artefactos de `data/processed/` (`cargar_artefactos`), sin `revertir_escalamiento` ni `reconstruir_categorias` por no aplicar al pipeline sin escalamiento, junto con `intervalo_wilson`, `tasa_por_grupo`, `guardar_figura` y los indicadores de razón, log-razón, sentido, medianas/IQR y resumen por tamaño ganador para que `F4` solo invoque funciones probadas del módulo.
+8. **Unificación y profesionalización de pruebas en `tests/` con `pytest`:** Se migraron las pruebas de reglas y de clases POO hacia `tests/` (`test_preprocesamiento.py` y `test_pipeline.py`), incorporando pruebas de regresión contra F2 con `pd.testing.assert_frame_equal` (Guía S3 en `test_regresion_f2.py`) y validaciones de robustez en `test_comunicacion.py` (razón exacta 1, 100 % de coincidencia, categorías de tamaño vacías, exclusión de monedas no CLP, artefactos ausentes, Wilson con 0 éxitos o grupos vacíos y contratos rotos), permitiendo ejecutar las 36 pruebas con el comando estándar `pytest`.
 
 ---
 

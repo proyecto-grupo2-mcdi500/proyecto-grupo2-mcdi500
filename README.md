@@ -72,8 +72,6 @@ proyecto-grupo2-mcdi500/
 │   ├── medicion.py
 │   ├── pipeline_licitaciones.py
 │   ├── preprocesamiento.py
-│   ├── pruebas_pipeline.py
-│   ├── pruebas_preprocesamiento.py
 │   ├── README.md
 │   ├── utilidades.py
 │   └── validar_dataset.py
@@ -87,10 +85,22 @@ proyecto-grupo2-mcdi500/
 │   ├── F3_Nucleo_Algoritmico.ipynb
 │   └── README.md
 ├── F4/
+│   ├── figuras/
+│   │   ├── 01_coincidencia_por_tamano.png
+│   │   ├── 02_razon_ganador_estimado_log.png
+│   │   └── 03_cajas_brecha_relativa_tamano.png
 │   ├── F4_Visualizacion_Comunicacion.ipynb
 │   └── README.md
-├── CHANGELOG.md
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_comunicacion.py
+│   ├── test_pipeline.py
+│   ├── test_preprocesamiento.py
+│   └── test_regresion_f2.py
 ├── .mailmap
+├── CHANGELOG.md
+├── pytest.ini
 ├── README.md
 ├── requirements.txt
 └── validar_dataset.py
@@ -104,9 +114,8 @@ proyecto-grupo2-mcdi500/
   - `pipeline_licitaciones.py`: clases del núcleo algorítmico de F3 (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`, `Pipeline` y `Bitacora`).
   - `medicion.py`: medición de tiempo (`timeit`) y memoria (`tracemalloc`) para comparar implementaciones.
   - `comunicacion.py`: carga de artefactos, indicadores y figuras de F4.
-  - `pruebas_preprocesamiento.py`: pruebas de las reglas de F2 con datos ficticios.
-  - `pruebas_pipeline.py`: pruebas de las clases de F3 con datos ficticios.
   - `utilidades.py`: utilidades generales (raíz del proyecto, nombres de columnas y `ProyectoError`).
+- `tests/`: suite unificada de pruebas con `pytest` (`test_preprocesamiento.py`, `test_pipeline.py`, `test_regresion_f2.py` y `test_comunicacion.py`).
 - `validar_dataset.py` y `src/validar_dataset.py`: scripts y módulos reutilizables para revisar y validar archivos de datos entre fases.
 - `data/raw/`: ubicación local de los datos originales (`data/raw/04LicitacionesEne.csv`). El archivo no se versiona porque contiene datos personales; ver *Obtener los datos*.
 - `data/processed/`: salidas de F2 y documentación generada por F3 (detalle en [`data/processed/README.md`](data/processed/README.md)).
@@ -259,7 +268,7 @@ El archivo de entrada `data/raw/04LicitacionesEne.csv` no está en el repositori
 2. Descomprímelo y deja el CSV en `data/raw/04LicitacionesEne.csv`.
 3. Verifica su SHA-256 (ver [`data/raw/README.md`](data/raw/README.md)) o en Python mediante `verificar_hash_raw()` de `src/preprocesamiento.py` (compara automáticamente contra `ec308de2...` ignorando `\r`).
 
-Sin el archivo crudo, F4 igual corre completo a partir de las salidas versionadas en `data/processed/`.
+Sin el archivo crudo, F4 igual corre completo a partir de las salidas versionadas en `data/processed/`, y `pytest` solo omite la prueba de regresión contra F2.
 
 No abras ni guardes el CSV con Excel: lo reescribe con otro formato y altera el contenido.
 
@@ -285,3 +294,24 @@ El script raíz `validar_dataset.py` ejecuta el validador de `src/validar_datase
 ```bash
 python validar_dataset.py data/raw/04LicitacionesEne.csv --sep ";" --encoding latin-1
 ```
+
+-------------------------------------------------------------------------------------------
+
+## Ejecutar las pruebas automatizadas (`pytest`)
+
+Toda la suite de pruebas del proyecto se ejecuta con un único comando desde la raíz del repositorio, con el entorno virtual activo:
+
+```bash
+pytest
+```
+o alternativamente:
+```bash
+python -m pytest
+```
+
+La suite (`tests/`) incluye 36 pruebas automatizadas organizadas en:
+- `tests/test_preprocesamiento.py`: reglas de preprocesamiento de F2 (esquema, tipos, nulos, duplicados, hash SHA-256 e IQR).
+- `tests/test_pipeline.py`: 17 casos unitarios y de integración del pipeline orientado a objetos de F3 (normales, límite y de excepción).
+- `tests/test_regresion_f2.py`: comparación del pipeline contra F2 mediante `pd.testing.assert_frame_equal` (Guía S3).
+- `tests/test_comunicacion.py`: casos conocidos de F4 recalculados desde `src/` y comparados con `docs/hallazgos_f4.csv` y casos de robustez del feedback (razón 1,0, 100 % de coincidencia, tamaño sin observaciones, exclusión de monedas no CLP, artefacto faltante, Wilson con 0 éxitos o grupo vacío, y rechazo de contratos rotos).
+
