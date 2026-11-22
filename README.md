@@ -16,7 +16,7 @@ Integrantes:    Ernesto Siebert Aguilera
 Las licitaciones públicas permiten a las instituciones adquirir bienes y servicios mediante procesos diseñados para promover la transparencia, la eficiencia y la libre competencia. El análisis sistemático de estos registros permite describir el comportamiento de las contrataciones del Estado, identificar tendencias de mercado y detectar posibles anomalías o patrones atípicos que ameriten un análisis más exhaustivo.
 
 En este proyecto se analizan los registros de licitaciones de compras públicas correspondientes a **enero de 2025**, obtenidos desde el portal oficial de datos abiertos:
-* **Fuente:** [ChileCompra — Datos Abiertos](https://datos-abiertos.chilecompra.cl/descargas/ordenes-y-licitaciones)
+* **Fuente:** Mercado Público (ChileCompra), licitaciones por sector: [`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z), primer semestre de 2025
 
 El proyecto mide con qué frecuencia el monto estimado registrado de cada licitación coincide con la suma de sus ofertas ganadoras, cuantifica la brecha cuando difieren (dentro de una misma moneda) y examina si ambas cambian según el tamaño del proveedor ganador. El enfoque es descriptivo y cada hallazgo se interpreta dentro de las restricciones de los datos.
 
@@ -253,11 +253,13 @@ python -m venv .venv
 
 ## Obtener los datos
 
-El archivo de entrada `data/raw/04LicitacionesEne.csv` no está en el repositorio (está excluido en `.gitignore`). Cada persona puede obtenerlo de forma reproducible sin cuenta institucional:
+El archivo de entrada `data/raw/04LicitacionesEne.csv` no está en el repositorio (está excluido en `.gitignore`). Proviene de la fuente pública [`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z) de Mercado Público, sin las columnas `Proveedor` y `ProveedorRUT`. El detalle está en [`data/raw/README.md`](data/raw/README.md).
 
-1. Descarga el archivo desde el portal público [ChileCompra — Datos Abiertos (`ordenes-y-licitaciones`)](https://datos-abiertos.chilecompra.cl/descargas/ordenes-y-licitaciones) (apartado *Licitaciones*, año `2025`, mes `Enero`, sector *Municipalidades*). Como espejo alternativo para integrantes y docente UNAB también está [04LicitacionesEne.zip en OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7).
+1. Para reproducir byte a byte las salidas versionadas, descarga la copia exacta del proyecto desde [04LicitacionesEne.zip en OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7) (cuenta UNAB). Sin cuenta UNAB, el archivo público permite comprobar las mismas cifras del análisis, con otro SHA-256.
 2. Descomprímelo y deja el CSV en `data/raw/04LicitacionesEne.csv`.
 3. Verifica su SHA-256 (ver [`data/raw/README.md`](data/raw/README.md)) o en Python mediante `verificar_hash_raw()` de `src/preprocesamiento.py` (compara automáticamente contra `ec308de2...` ignorando `\r`).
+
+Sin el archivo crudo, F4 igual corre completo a partir de las salidas versionadas en `data/processed/`.
 
 No abras ni guardes el CSV con Excel: lo reescribe con otro formato y altera el contenido.
 

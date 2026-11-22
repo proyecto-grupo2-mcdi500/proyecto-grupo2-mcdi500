@@ -18,18 +18,19 @@ REQUERIDAS = {
     "MonedaOferta", "TamanoProveedor", "ResultadoOferta",
 }
 SHA256_RAW_LF = "ec308de2f2785fea3cf3304b200e350b8e9b9a92f3bd828d9bf0e152c7a041bf"
-URL_PORTAL_PUBLICO = "https://datos-abiertos.chilecompra.cl/descargas/ordenes-y-licitaciones"
+URL_FUENTE_PUBLICA = "https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z"
 
 
 def _mensaje_instrucciones_raw(motivo: str) -> str:
-    """Construye un mensaje uniforme con los pasos de descarga pública y verificación SHA-256."""
+    """Construye un mensaje uniforme con los pasos de descarga y verificación SHA-256."""
     return (
         f"{motivo}\n"
-        "Instrucciones de descarga reproducible:\n"
-        f"1. Descarga el archivo desde el portal público de ChileCompra ({URL_PORTAL_PUBLICO}): "
-        "apartado Licitaciones, año 2025, mes Enero (sector Municipalidades, 04LicitacionesEne.zip).\n"
-        "   (Alternativa institucional con cuenta UNAB en data/raw/README.md).\n"
-        "2. Descomprime y ubica el CSV en data/raw/04LicitacionesEne.csv sin abrirlo ni guardarlo con Excel.\n"
+        "Instrucciones de descarga:\n"
+        "1. Copia exacta del proyecto (reproduce las salidas versionadas): 04LicitacionesEne.zip "
+        "en OneDrive con cuenta UNAB (enlace en data/raw/README.md).\n"
+        f"   Fuente pública sin cuenta (Mercado Público, ChileCompra): {URL_FUENTE_PUBLICA} (otro SHA-256; incluye Proveedor y "
+        "ProveedorRUT, que se descartan al leer).\n"
+        "2. Deja el CSV en data/raw/04LicitacionesEne.csv sin abrirlo ni guardarlo con Excel.\n"
         f"3. Verifica que su SHA-256 sin '\\r' (LF) sea {SHA256_RAW_LF} (ver data/raw/README.md)."
     )
 

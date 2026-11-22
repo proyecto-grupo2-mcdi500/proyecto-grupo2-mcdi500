@@ -4,30 +4,47 @@ El archivo de entrada `04LicitacionesEne.csv` no se versiona (está excluido en 
 
 | Dato | Valor |
 |---|---|
-| Archivo | `04LicitacionesEne.csv` (45.741 filas, 72 columnas, separador `;`, codificación `latin-1`) |
-| Descarga pública (recomendada) | [ChileCompra — Datos Abiertos (`ordenes-y-licitaciones`)](https://datos-abiertos.chilecompra.cl/descargas/ordenes-y-licitaciones), apartado **Licitaciones**, año **2025**, mes **Enero** (sector Municipalidades) |
-| Acceso público | Libre desde el portal oficial de ChileCompra (no requiere cuenta UNAB) |
-| Espejo alternativo (cuenta UNAB) | [04LicitacionesEne.zip en OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7) (solo integrantes del grupo y docente con cuenta institucional UNAB) |
+| Archivo del proyecto | `04LicitacionesEne.csv` (45.741 filas, 72 columnas, separador `;`, codificación `latin-1`) |
+| Fuente pública oficial | [`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z) de Mercado Público (ChileCompra), licitaciones por sector, primer semestre de 2025. Contiene `04LicitacionesEne.csv`, `04LicitacionesFeb.csv` y `04LicitacionesMar.csv` |
+| Copia exacta del proyecto (cuenta UNAB) | [04LicitacionesEne.zip en OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7) (solo integrantes del grupo y docente con cuenta institucional UNAB) |
+
+## Relación entre la fuente pública y el archivo del proyecto
+
+El archivo del proyecto proviene del `04LicitacionesEne.csv` publicado en `Municipalidades.7z`, con dos diferencias:
+
+1. **Se quitaron las columnas `Proveedor` y `ProveedorRUT`** (identificadores directos de los oferentes). El archivo público tiene 74 columnas; el del proyecto, 72.
+2. **El grupo hizo esa eliminación en Excel**, que volvió a escribir el archivo. Excel no cambió filas ni columnas, pero sí el formato de algunos valores: las fechas perdieron los segundos (`11:07:00` → `11:07`), los códigos largos pasaron a notación científica (`2152204004001` → `2,15E+12`), algunos ceros a la izquierda se perdieron (`00798` → `798`), algunos montos se redondearon (`15756302,999999998` → `15756303`) y algunos textos se convirtieron en fecha (`10-2025` → `oct-25`).
+
+Por eso el archivo público y el del proyecto tienen SHA-256 distintos (ver la tabla de abajo). Las cifras del análisis no cambian: con el archivo público, el pipeline de F3 entrega las mismas 2.257 licitaciones comparables y las mismas 1.254 coincidencias; solo 7 de 2.292 licitaciones difieren en `MontoTotalGanadoras`, en menos de una parte en 10⁻⁹, por el redondeo de Excel. Al leer, `cargar_csv()` descarta `Proveedor` y `ProveedorRUT` mediante `es_columna_privada()`.
 
 ## Cómo obtenerlo
 
-### Opción A — Portal público oficial de ChileCompra (sin cuenta UNAB)
+### Opción A — Copia exacta del proyecto (cuenta UNAB)
 
-1. Abre [ChileCompra — Datos Abiertos (`ordenes-y-licitaciones`)](https://datos-abiertos.chilecompra.cl/descargas/ordenes-y-licitaciones).
-2. Selecciona **Licitaciones** → año **2025** → mes **Enero** (sector **Municipalidades**, archivo `04LicitacionesEne.zip`).
-3. Descarga y descomprime `04LicitacionesEne.zip`.
-4. Deja el CSV exactamente en `data/raw/04LicitacionesEne.csv`.
-5. Comprueba que tenga exactamente el mismo SHA-256 indicado abajo (`ec308de2f2785fea3cf3304b200e350b8e9b9a92f3bd828d9bf0e152c7a041bf` en LF / sin `\r`).
-
-### Opción B — Espejo en OneDrive (solo cuenta UNAB)
+Reproduce byte a byte las salidas versionadas en `data/processed/`.
 
 1. Abre el [enlace de OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7) con tu cuenta institucional UNAB y usa **Descargar**.
 2. Descomprime `04LicitacionesEne.zip` y deja el CSV directamente en `data/raw/04LicitacionesEne.csv`.
-3. Verifica su SHA-256 (ambas fuentes entregan exactamente el mismo archivo y hash).
+3. Verifica su SHA-256 (sección siguiente).
+
+### Opción B — Fuente pública oficial (sin cuenta)
+
+Permite revisar el origen de los datos y comprobar las cifras del análisis, pero no reproduce byte a byte las salidas versionadas, por las diferencias descritas arriba.
+
+1. Descarga [`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z) y extrae `04LicitacionesEne.csv` (requiere un descompresor de 7z, por ejemplo 7-Zip).
+2. Compara su SHA-256 con la fila «Fuente pública» de la tabla de abajo.
+
+### Sin el archivo crudo
+
+F4 corre completo sin `data/raw/04LicitacionesEne.csv`: parte de las salidas versionadas de F2 y F3 en `data/processed/` y omite solo las comprobaciones que necesitan el crudo. F2 y F3 sí lo necesitan y se detienen con un mensaje que indica cómo obtenerlo.
+
+### Por qué no se versiona el crudo ni una muestra
+
+Además de `Proveedor` y `ProveedorRUT`, las columnas de texto libre contienen datos de terceros: en `NombreOferta` hay razones sociales (4.672 filas), RUT (272), correos (134) y teléfonos (194); en `EspecificacionesProveedor`, RUT (217), correos (460) y teléfonos (1.740); y `Descripcion` incluye nombres de funcionarios. `cargar_csv()` descarta `EspecificacionesProveedor` al leer y ninguna de estas columnas se exporta: las salidas versionadas solo tienen columnas numéricas, de fecha y categóricas. Anonimizar el texto libre no es confiable, por lo que tampoco se versiona una muestra.
 
 Cuidados, sobre todo en Windows:
 
-- **No abras y guardes el CSV con Excel.** Excel lo vuelve a escribir y puede alterar el contenido, aunque pandas lo siga leyendo sin error. Si necesitas mirarlo, ciérralo sin guardar.
+- **No abras y guardes el CSV con Excel.** Excel lo vuelve a escribir y altera el contenido, como ocurrió con la versión del proyecto descrita arriba, aunque pandas lo siga leyendo sin error. Si necesitas mirarlo, ciérralo sin guardar.
 - **No lo dejes dentro de una subcarpeta.** *Extraer todo* crea `04LicitacionesEne\04LicitacionesEne.csv`; mueve el CSV para que quede directamente en `data\raw\`.
 - **Revisa el nombre.** Si el navegador lo descargó como `04LicitacionesEne (1).zip`, el CSV interior igual se llama `04LicitacionesEne.csv`; no le cambies el nombre.
 
@@ -52,12 +69,14 @@ El resultado debe ser uno de estos (PowerShell lo muestra en mayúsculas; es el 
 
 | Versión | SHA-256 |
 |---|---|
-| CSV tal como viene en el zip (saltos de línea de Windows, CRLF) | `480d475e356997e6a98429106bfadc0e7646890bb7e9553d03c5bd087aa3ed04` |
-| Mismo contenido con saltos de línea Unix (LF) | `ec308de2f2785fea3cf3304b200e350b8e9b9a92f3bd828d9bf0e152c7a041bf` |
+| Copia del proyecto, tal como viene en el zip de OneDrive (CRLF) | `480d475e356997e6a98429106bfadc0e7646890bb7e9553d03c5bd087aa3ed04` |
+| Copia del proyecto con saltos de línea Unix (LF) | `ec308de2f2785fea3cf3304b200e350b8e9b9a92f3bd828d9bf0e152c7a041bf` |
+| Fuente pública, `04LicitacionesEne.csv` extraído de `Municipalidades.7z` (CRLF) | `1b17e13f16d0b17ccd356bc9f47322a9302b415ad12151fc70106b21277fab22` |
+| Fuente pública con saltos de línea Unix (LF) | `9e1a0589a4baf07909bc04e72a5b026574e02e11203e4908ed75d582526b2909` |
 
-Ambas tienen el mismo contenido y pandas las lee igual. Cualquier otro valor indica que el archivo fue modificado (por ejemplo, guardado con Excel) o que es una versión anterior: bórralo y descárgalo de nuevo.
+Las dos primeras filas tienen el mismo contenido y pandas las lee igual; lo mismo ocurre con las dos últimas. Cualquier otro valor indica que el archivo fue modificado o que es una versión distinta: bórralo y descárgalo de nuevo.
 
-Para comprobar el zip antes de descomprimirlo, su SHA-256 es `6b02ece3198802e0be733b93e3456b032e3811da69c8412a740af76992c57420`.
+Para comprobar los comprimidos antes de extraerlos: el zip de OneDrive tiene SHA-256 `6b02ece3198802e0be733b93e3456b032e3811da69c8412a740af76992c57420` y `Municipalidades.7z` (publicado el 23 de abril de 2025), `fd49de170dba09c0cf17c2a0606bd04405dd461426676c080d2d533dfff5b8e3`.
 
 ### Verificación automática en Python (`src/preprocesamiento.py`)
 
