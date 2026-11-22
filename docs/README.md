@@ -38,7 +38,7 @@ Las reglas viven en `src/preprocesamiento.py`: `F2/F2_Preprocesamiento.ipynb` la
 
 ### 2.2. Limpieza y conversión de montos de oferta (`Float64`)
 - **Columnas transformadas:** `MontoNetoOferta` y `MontoTotalOferta`.
-- **Problema detectado en crudo:** Ambas columnas eran leídas como texto (`str`) debido a la presencia de comas decimales (`1.123` casos en `MontoNetoOferta` y `193` casos en `MontoTotalOferta`, como `32773109,24` o `10504,202`).
+- **Problema detectado en el raw:** Ambas columnas eran leídas como texto (`str`) debido a la presencia de comas decimales (`1.123` casos en `MontoNetoOferta` y `193` casos en `MontoTotalOferta`, como `32773109,24` o `10504,202`).
 - **Regla aplicada:** Eliminación de espacios laterales (`.str.strip()`), reemplazo de coma decimal `,` por punto `.` sin eliminar dígitos ni redondear, y conversión a tipo numérico `Float64`.
 - **Resultado de validación:** **0 nulos originales y 0 fallos de conversión** en ambas variables.
 

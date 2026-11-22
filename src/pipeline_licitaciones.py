@@ -317,7 +317,7 @@ class Pipeline:
         Parámetros
         ----------
         ruta : Path
-            Ruta al archivo CSV crudo de licitaciones.
+            Ruta al archivo fuente (raw) de licitaciones.
 
         Retorna
         -------

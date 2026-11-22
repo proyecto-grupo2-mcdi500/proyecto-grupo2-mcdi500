@@ -41,7 +41,7 @@ Las preguntas de investigación y las restricciones de los datos están en las s
 
 El análisis está implementado principalmente en **Python**:
 
-* **Entorno:** Python en `.venv` y JupyterLab. La ejecución guardada de F4 usa Python 3.14.6.
+* **Entorno:** Python en `.venv` y JupyterLab. La ejecución guardada de F1 a F4 usa Python 3.12.3.
 * **Procesamiento, estadística y visualización:** `pandas`, `numpy`, `scipy` y `matplotlib`
 * **Entorno de desarrollo:** Git, GitHub, VS Code
 
@@ -133,7 +133,7 @@ Las carpetas de fase (`F1/` a `F4/`) no deben contener copias propias de `data/`
 -------------------------------------------------------------------------------------------
 ### macOS / Linux
 
-Ejecuta los comandos desde la **raíz del repositorio**, donde está `requirements.txt`. Usa Python 3.14 si necesitas reproducir el entorno de la ejecución guardada de F4.
+Ejecuta los comandos desde la **raíz del repositorio**, donde está `requirements.txt`. Usa Python 3.12 si necesitas reproducir el entorno de la ejecución guardada de F1 a F4.
 
 ### 1. Crear y activar el entorno virtual
 
@@ -191,7 +191,7 @@ Si alguna de estas condiciones no se cumple, el cuaderno se detiene en el PASO 5
 | --- | --- | --- |
 | El intérprete no contiene `.venv` | Kernel equivocado | *Kernel → Change Kernel* → Python (grupo2-mcdi500) |
 | `ModuleNotFoundError` con un paquete instalado | Se instaló fuera del entorno o falta el paso 3 | Activar `.venv` y repetir los pasos 2 y 3 |
-| Falla `pip install -r requirements.txt` | No hay una distribución compatible con el intérprete | Comprueba `python --version` y vuelve a crear `.venv` con Python 3.14 |
+| Falla `pip install -r requirements.txt` | No hay una distribución compatible con el intérprete | Comprueba `python --version` y vuelve a crear `.venv` con Python 3.12 |
 
 -------------------------------------------------------------------------------------------
 ### Windows
@@ -244,7 +244,7 @@ Abrir `F1/F1_Definicion.ipynb` en VS Code, seleccionar el kernel **Python (grupo
 | --- | --- | --- |
 | VS Code pide seleccionar un kernel | Primera vez que se abre el cuaderno | Hacer clic en *Select Kernel* → *Python (grupo2-mcdi500)* |
 | `ModuleNotFoundError` al ejecutar una celda | Librerías instaladas en otro intérprete o kernel sin reiniciar | Ejecutar los pasos 2 y 3 en Git Bash y presionar *Restart* en la barra superior del notebook |
-| Falla `pip install -r requirements.txt` | No hay una distribución compatible con el intérprete | Comprueba `python --version` y vuelve a crear `.venv` con Python 3.14 |
+| Falla `pip install -r requirements.txt` | No hay una distribución compatible con el intérprete | Comprueba `python --version` y vuelve a crear `.venv` con Python 3.12 |
 
 ### Windows con PowerShell
 
@@ -280,10 +280,10 @@ Los notebooks se ejecutan en este orden, con el entorno activado y el kernel **P
 
 | Fase | Qué ejecutar | Entradas y salidas |
 | --- | --- | --- |
-| F1 | [F1_Definicion.ipynb](F1/F1_Definicion.ipynb) | Define el problema, los objetivos y las restricciones, y verifica el entorno. Si está disponible, consulta el CSV crudo para contrastar su encabezado. F2 usa la definición de F1 y no requiere archivos generados por esta fase. |
+| F1 | [F1_Definicion.ipynb](F1/F1_Definicion.ipynb) | Define el problema, los objetivos y las restricciones, y verifica el entorno. Si está disponible, consulta el archivo fuente (raw) para contrastar su encabezado. F2 usa la definición de F1 y no requiere archivos generados por esta fase. |
 | F2 | [F2_Preprocesamiento.ipynb](F2/F2_Preprocesamiento.ipynb) | Lee `data/raw/04LicitacionesEne.csv`. Genera `data/processed/04LicitacionesEne_procesado.csv` (ofertas por ítem) y `data/processed/04LicitacionesEne_brecha_por_licitacion.csv` (una fila por licitación), que usan F3 y F4. |
-| F3 | [F3_Nucleo_Algoritmico.ipynb](F3/F3_Nucleo_Algoritmico.ipynb) | Ejecuta el pipeline sobre el mismo CSV crudo y comprueba la igualdad con los dos CSV de F2. Genera `data/processed/diccionario_f3.csv` y `data/processed/parametros_f3.csv`, requeridos por F4. |
-| F4 | [F4_Visualizacion_Comunicacion.ipynb](F4/F4_Visualizacion_Comunicacion.ipynb) | Lee los cuatro CSV de F2 y F3. Si está disponible, usa el crudo para contrastar las cifras y evaluar duplicados. Guarda tres PNG en `F4/figuras/`, los hallazgos en `docs/hallazgos_f4.csv` y los metadatos en `docs/metadatos_f4.json`. Consulta la [guía de F4](F4/README.md). |
+| F3 | [F3_Nucleo_Algoritmico.ipynb](F3/F3_Nucleo_Algoritmico.ipynb) | Ejecuta el pipeline sobre el mismo raw y comprueba la igualdad con los dos CSV de F2. Genera `data/processed/diccionario_f3.csv` y `data/processed/parametros_f3.csv`, requeridos por F4. |
+| F4 | [F4_Visualizacion_Comunicacion.ipynb](F4/F4_Visualizacion_Comunicacion.ipynb) | Lee los cuatro CSV de F2 y F3. Si está disponible, usa el raw para contrastar las cifras y evaluar duplicados. Guarda tres PNG en `F4/figuras/`, los hallazgos en `docs/hallazgos_f4.csv` y los metadatos en `docs/metadatos_f4.json`. Consulta la [guía de F4](F4/README.md). |
 
 -------------------------------------------------------------------------------------------
 

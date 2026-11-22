@@ -27,7 +27,7 @@ def ruta_processed(ruta_raiz: Path) -> Path:
 
 @pytest.fixture(scope="session")
 def ruta_raw(ruta_raiz: Path) -> Path:
-    """Devuelve la ruta al archivo crudo en data/raw."""
+    """Devuelve la ruta al archivo fuente (raw) en data/raw."""
     return ruta_raiz / "data" / "raw" / "04LicitacionesEne.csv"
 
 

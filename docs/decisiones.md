@@ -11,8 +11,8 @@ Este registro documenta de forma ordenada las decisiones técnicas, metodológic
 - **Justificación:** El delimitador `;` es conocido y estable desde la Fase 1. No existe beneficio al inferirlo en cada corrida.
 - **Fuente / Evidencia:** [`src/preprocesamiento.py`](../src/preprocesamiento.py) (`cargar_csv`) y [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (Sección `4.3`, celdas `f3-lectura-code` y `f3-lectura-interpretacion`).
 - **Impacto medido:**
-  - Estrategia **B** (`sep=";"`, motor C) vs. **A** (`sep=None`, motor Python): tiempo mínimo bajó de **`1.269,643 ms` a `301,425 ms`** (**`4,2×` más rápida**) y memoria pico de **`223,130 MB` a `48,654 MB`** (**`4,6×` menos memoria**) con exactamente el mismo `DataFrame` (`45.741 × 71`).
-  - Estrategia **C** (`usecols` sobre `14` columnas) vs. **B**: bajó de **`294,177 ms` a `127,483 ms`** (**`2,3×` más rápida**) y de **`48,654 MB` a `10,915 MB`** (**`4,5×` menos memoria**).
+  - Estrategia **B** (`sep=";"`, motor C) vs. **A** (`sep=None`, motor Python): tiempo mínimo bajó de **`1.177,925 ms` a `295,251 ms`** (**`4,0×` más rápida**) y memoria pico de **`223,134 MB` a `48,653 MB`** (**`4,6×` menos memoria**) con exactamente el mismo `DataFrame` (`45.741 × 71`).
+  - Estrategia **C** (`usecols` sobre `14` columnas) vs. **B**: bajó de **`291,809 ms` a `126,327 ms`** (**`2,3×` más rápida**) y de **`48,654 MB` a `10,916 MB`** (**`4,5×` menos memoria**).
 
 ---
 
@@ -22,7 +22,7 @@ Este registro documenta de forma ordenada las decisiones técnicas, metodológic
 - **Decisión:** Escribir los controles temporales y reglas de cálculo mediante operaciones vectorizadas por columna en `pandas`/`numpy` (`control_vectorizado`, `calcular_brecha`), manteniendo `control_iterativo` únicamente como oráculo de verificación en F3.
 - **Justificación:** La vectorización mantiene complejidad temporal y espacial $O(n)$ pero ejecuta las comparaciones en código C compilado con un arreglo booleano compacto.
 - **Fuente / Evidencia:** [`src/pipeline_licitaciones.py`](../src/pipeline_licitaciones.py) (`control_iterativo`, `control_vectorizado`) y [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (Sección `4.2`, celdas `f3-memoria-code` y `f3-memoria-interpretacion`).
-- **Impacto medido:** Sobre `45.741` filas (`7` repeticiones): `control_vectorizado` tardó **`0,144 ms`** con **`0,224 MB`** pico frente a **`80,395 ms`** y **`4,003 MB`** de `control_iterativo` (**`559×` más rápida y `18×` menos memoria**), entregando idéntico resultado (`0` alertas).
+- **Impacto medido:** Sobre `45.741` filas (`7` repeticiones): `control_vectorizado` tardó **`0,165 ms`** con **`0,224 MiB`** pico frente a **`80,335 ms`** y **`3,998 MiB`** de `control_iterativo` (**`486×` más rápida y `18×` menos memoria**), entregando idéntico resultado (`0` alertas).
 
 ---
 
@@ -32,7 +32,7 @@ Este registro documenta de forma ordenada las decisiones técnicas, metodológic
 - **Decisión:** Adoptar **división funcional** (`preprocesamiento.py` + bucle acotado sobre `5` transformadores en `Pipeline`) y operaciones vectorizadas por columna, descartando la recursividad sobre filas.
 - **Justificación:** Los datos conforman una tabla plana sin anidamiento jerárquico y Python impone un límite de pila (~`1.000` marcos) incompatible con `45.741` registros. La recursividad se reserva solo para estructuras de profundidad variable (árboles o grafos).
 - **Fuente / Evidencia:** [`docs/arquitectura.md`](./arquitectura.md#6-recursividad-o-división-funcional) y [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (Secciones `2` y `4.2`).
-- **Impacto medido:** Cero desbordamientos de pila (`RecursionError`), flujo lineal en `5` pasos encapsulados y mejora de **`559×`** en velocidad en el control temporal de `45.741` registros; con `900` filas, la suma recursiva fue `11×` más lenta que la vectorizada.
+- **Impacto medido:** Cero desbordamientos de pila (`RecursionError`), flujo lineal en `5` pasos encapsulados y mejora de **`486×`** en velocidad en el control temporal de `45.741` registros; con `900` filas, la suma recursiva fue `11×` más lenta que la vectorizada.
 
 ---
 
@@ -66,13 +66,13 @@ Este registro documenta de forma ordenada las decisiones técnicas, metodológic
 
 ---
 
-## 7. Filtrado temprano de privacidad (`es_columna_privada`) y exclusión de datos crudos en Git
+## 7. Filtrado temprano de privacidad (`es_columna_privada`) y exclusión del raw en Git
 
-- **Problema:** El CSV crudo de ChileCompra incluye nombre y RUT de proveedores, los cuales no deben versionarse ni propagarse a archivos derivados en el repositorio público.
+- **Problema:** El archivo fuente (raw) de ChileCompra incluye nombre y RUT de proveedores, los cuales no deben versionarse ni propagarse a archivos derivados en el repositorio público.
 - **Decisión:** Excluir identificadores directos al momento de leer en `cargar_csv()` mediante `es_columna_privada()`, exportar en `04LicitacionesEne_procesado.csv` únicamente una lista autorizada de `17` columnas (`MOTIVOS` + `3` derivadas) y bloquear `data/raw/*.csv` y `data/raw/*.zip` en `.gitignore`.
 - **Justificación:** Minimiza exposición de datos personales desde la entrada en memoria y asegura cumplimiento de buenas prácticas de privacidad y límites de GitHub (`< 100 MB`).
 - **Fuente / Evidencia:** Commit `47d4589`, [`.gitignore`](../.gitignore), [`src/preprocesamiento.py`](../src/preprocesamiento.py) (`es_columna_privada`, `validar_procesado`) y [`data/processed/README.md`](../data/processed/README.md).
-- **Impacto medido:** Reducción inmediata de `72` columnas crudas a `71` en memoria (retirando el campo privado al leer) y a **`17` columnas** en el CSV procesado (`~7,0 MB` frente a `56,8 MB` del crudo), con `0` datos personales en `data/processed/`.
+- **Impacto medido:** Reducción inmediata de `72` columnas del raw a `71` en memoria (retirando el campo privado al leer) y a **`17` columnas** en el CSV procesado (`~7,0 MB` frente a `56,8 MB` del raw), con `0` datos personales en `data/processed/`.
 
 ---
 
