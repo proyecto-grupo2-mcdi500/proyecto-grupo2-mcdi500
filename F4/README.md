@@ -19,9 +19,9 @@ Las rutas se indican desde la raíz del repositorio.
 | `data/processed/04LicitacionesEne_brecha_por_licitacion.csv` | Tabla por licitación generada en F2. Aporta el estimado, el total ganador, la moneda y la brecha. |
 | `data/processed/diccionario_f3.csv` | Diccionario generado en F3 para verificar el esquema y los tipos. |
 | `data/processed/parametros_f3.csv` | Parámetros y conteos de referencia generados en F3. |
-| `data/raw/04LicitacionesEne.csv` | CSV que se descarga por separado. Es necesario para regenerar F2 y F3 y, en F4, para contrastar con la fuente y ejecutar el escenario que retira solo las copias adicionales. |
+| `data/raw/04LicitacionesEne.csv` | Copia del proyecto (Opción A), que se descarga por separado. Es necesaria para regenerar F2 y F3 y, en F4, para contrastar con la fuente y ejecutar el escenario que retira solo las copias adicionales. Con el archivo público de Mercado Público, F4 omite esas comprobaciones con un aviso. |
 
-Descarga y descomprime `04LicitacionesEne.zip`. Coloca el archivo **`04LicitacionesEne.csv`** directamente en **`data/raw/`**. Las opciones de descarga y la comprobación SHA-256 están en la [guía de datos originales](../data/raw/README.md). F4 puede abrir y ejecutar el análisis con los cuatro CSV procesados aunque falte el crudo. En ese caso registra las comprobaciones y el escenario que omite.
+Descarga y descomprime `04LicitacionesEne.zip`. Coloca el archivo **`04LicitacionesEne.csv`** directamente en **`data/raw/`**. Las opciones de descarga y la comprobación SHA-256 están en la [guía de datos originales](../data/raw/README.md). F4 puede abrir y ejecutar el análisis con los cuatro CSV procesados aunque falte el raw o se use el archivo público. En ese caso registra las comprobaciones y el escenario que omite.
 
 ## Salidas
 

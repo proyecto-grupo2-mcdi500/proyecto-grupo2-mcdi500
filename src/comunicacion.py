@@ -55,7 +55,7 @@ ORDEN_TRAMOS_ESTIMADO: tuple[str, ...] = (
     "Más de 50 M CLP",
     "Otra moneda (no CLP)",
 )
-FUENTE_DATOS_F4: str = "Fuente: ChileCompra, datos abiertos, municipalidades, enero de 2025"
+FUENTE_DATOS_F4: str = "Fuente: Mercado Público (ChileCompra), licitaciones de municipalidades, enero de 2025"
 
 
 @dataclass(frozen=True)

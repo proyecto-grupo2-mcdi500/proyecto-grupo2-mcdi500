@@ -18,6 +18,9 @@ REQUERIDAS = {
     "MonedaOferta", "TamanoProveedor", "ResultadoOferta",
 }
 SHA256_RAW_LF = "ec308de2f2785fea3cf3304b200e350b8e9b9a92f3bd828d9bf0e152c7a041bf"
+# Archivo público de Mercado Público (04LicitacionesEne.csv dentro de Municipalidades.7z),
+# con Proveedor y ProveedorRUT y sin el paso por Excel. Ver decisión 19 en docs/decisiones.md.
+SHA256_FUENTE_PUBLICA_LF = "9e1a0589a4baf07909bc04e72a5b026574e02e11203e4908ed75d582526b2909"
 URL_FUENTE_PUBLICA = "https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z"
 
 
@@ -28,8 +31,8 @@ def _mensaje_instrucciones_raw(motivo: str) -> str:
         "Instrucciones de descarga:\n"
         "1. Copia exacta del proyecto (reproduce las salidas versionadas): 04LicitacionesEne.zip "
         "en OneDrive con cuenta UNAB (enlace en data/raw/README.md).\n"
-        f"   Fuente pública sin cuenta (Mercado Público, ChileCompra): {URL_FUENTE_PUBLICA} (otro SHA-256; incluye Proveedor y "
-        "ProveedorRUT, que se descartan al leer).\n"
+        f"   Fuente pública sin cuenta (Mercado Público, ChileCompra): {URL_FUENTE_PUBLICA}. Tiene otro SHA-256 "
+        "y sirve para revisar el origen y comprobar la equivalencia con pytest, no para ejecutar F2 y F3.\n"
         "2. Deja el CSV en data/raw/04LicitacionesEne.csv sin abrirlo ni guardarlo con Excel.\n"
         f"3. Verifica que su SHA-256 sin '\\r' (LF) sea {SHA256_RAW_LF} (ver data/raw/README.md)."
     )
@@ -49,10 +52,42 @@ def calcular_sha256_sin_cr(ruta: Path, tamano_bloque: int = 1024 * 1024) -> str:
     return digest.hexdigest()
 
 
+def identificar_raw(
+    ruta: Path,
+    hash_proyecto: str = SHA256_RAW_LF,
+    hash_publico: str = SHA256_FUENTE_PUBLICA_LF,
+) -> str:
+    """Indica qué archivo hay en ``ruta``: ``"proyecto"``, ``"publico"``, ``"otro"`` o ``"ausente"``.
+
+    ``"proyecto"`` es la copia con la que se ejecutan los notebooks (Opción A de
+    ``data/raw/README.md``); ``"publico"`` es el archivo de Mercado Público (Opción B).
+    """
+    destino = Path(ruta)
+    if not destino.is_file():
+        return "ausente"
+    actual = calcular_sha256_sin_cr(destino)
+    if actual == hash_proyecto.strip().lower():
+        return "proyecto"
+    if actual == hash_publico.strip().lower():
+        return "publico"
+    return "otro"
+
+
 def verificar_hash_raw(ruta: Path, hash_esperado: str = SHA256_RAW_LF) -> str:
     """Verifica que ``ruta`` exista y su SHA-256 (sin ``\\r``) coincida con ``hash_esperado``."""
     esperado = hash_esperado.strip().lower()
     actual = calcular_sha256_sin_cr(ruta)
+    if actual == SHA256_FUENTE_PUBLICA_LF and esperado != actual:
+        raise ValueError(
+            f"{ruta} es el archivo público de Mercado Público (Opción B en data/raw/README.md), "
+            "no la copia del proyecto.\n"
+            "El archivo público sirve para revisar el origen de los datos y para comprobar, con "
+            "pytest, que entrega las mismas cifras del análisis (tests/test_regresion_f2.py).\n"
+            "F2 y F3 se ejecutan con la copia del proyecto (Opción A), cuyo SHA-256 garantiza que "
+            "se reproducen byte a byte las salidas versionadas en data/processed/. "
+            "Ver la decisión 19 en docs/decisiones.md.\n\n"
+            + _mensaje_instrucciones_raw("Para ejecutar F2 y F3:")
+        )
     if actual != esperado:
         raise ValueError(
             _mensaje_instrucciones_raw(
