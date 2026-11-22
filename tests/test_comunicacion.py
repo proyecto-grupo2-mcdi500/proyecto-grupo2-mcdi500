@@ -72,17 +72,64 @@ def test_casos_conocidos_f4_tasas_por_tamano(ruta_processed: Path):
     tabla = tabla_resumen_por_tamano(comp_tamano, moneda=None).set_index("TamanoGanador")
 
     esperados = {
-        "Micro": {"Licitaciones": 405, "Tasa": 71.11, "MedianaBrecha": 0.0},
-        "Pequeña": {"Licitaciones": 690, "Tasa": 62.32, "MedianaBrecha": 0.0},
-        "Mediana": {"Licitaciones": 273, "Tasa": 58.97, "MedianaBrecha": 0.0},
-        "Grande": {"Licitaciones": 365, "Tasa": 49.04, "MedianaBrecha": 0.0},
-        "NoClasificado": {"Licitaciones": 284, "Tasa": 63.03, "MedianaBrecha": 0.0},
-        "Múltiple": {"Licitaciones": 240, "Tasa": 7.08, "MedianaBrecha": 151.16},
+        "Micro": {"Licitaciones": 405, "Tasa": 71.11, "BrechaRelPct": 0.0},
+        "Pequeña": {"Licitaciones": 690, "Tasa": 62.32, "BrechaRelPct": 0.0},
+        "Mediana": {"Licitaciones": 273, "Tasa": 58.97, "BrechaRelPct": 0.0},
+        "Grande": {"Licitaciones": 365, "Tasa": 49.04, "BrechaRelPct": 0.0},
+        "NoClasificado": {"Licitaciones": 284, "Tasa": 63.03, "BrechaRelPct": 0.0},
+        "Múltiple": {"Licitaciones": 240, "Tasa": 7.08, "BrechaRelPct": 151.16},
     }
     for tamano, vals in esperados.items():
         assert tamano in tabla.index
         assert tabla.loc[tamano, "Licitaciones"] == vals["Licitaciones"]
         assert pytest.approx(tabla.loc[tamano, "TasaCoincidenciaPct"], abs=0.01) == vals["Tasa"]
+        # La mediana de la brecha relativa equivale a (mediana de la razón - 1) × 100.
+        brecha_rel = (tabla.loc[tamano, "MedianaRazon"] - 1.0) * 100.0
+        assert pytest.approx(brecha_rel, abs=0.01) == vals["BrechaRelPct"]
+
+
+def test_casos_conocidos_f4_coinciden_con_hallazgos_csv(ruta_processed: Path, ruta_hallazgos_f4: Path):
+    """Recalcula desde src/ las cifras de OE1, OE2 y OE3 exportadas por F4 en docs/hallazgos_f4.csv.
+
+    Si alguien cambia el notebook y no el módulo (o al revés), esta prueba falla.
+    """
+    hallazgos = pd.read_csv(ruta_hallazgos_f4, sep=";", encoding="utf-8-sig").set_index("Id")
+    artefactos = cargar_artefactos(ruta_processed)
+    comp = preparar_comparables(artefactos.licitaciones)
+
+    def esperado(id_hallazgo: str) -> tuple[float, int]:
+        fila = hallazgos.loc[id_hallazgo]
+        return float(fila["Valor"]), int(fila["N"])
+
+    # OE1: comparables y coincidencia global
+    assert esperado("OE1_comparables") == (len(comp), len(artefactos.licitaciones))
+    n_coincide = int(comp["CoincideConEstimado"].astype(bool).sum())
+    assert esperado("OE1_coincidencia_n") == (n_coincide, len(comp))
+    valor, n = esperado("OE1_coincidencia_pct")
+    assert n == len(comp) and pytest.approx(100.0 * n_coincide / len(comp), abs=0.005) == valor
+
+    # OE2: coincidencia por moneda y ventana compatible con IVA en CLP
+    por_moneda = resumen_sentido_por_moneda(comp).set_index("MonedaLicitacion")
+    for moneda, fila in por_moneda.iterrows():
+        valor, n = esperado(f"OE2_coincidencia_{moneda}")
+        assert n == fila["Licitaciones"]
+        assert pytest.approx(fila["CoincidePct"], abs=0.005) == valor
+    evidencia_iva, _ = sensibilidad_iva(comp)
+    valor, n = esperado("OE2_razon_iva_1_19")
+    assert valor == evidencia_iva.set_index("MonedaLicitacion").loc["CLP", "CercaIVA"]
+    assert n == por_moneda.loc["CLP", "BajoEstimado"]
+
+    # OE3: tasa y mediana de brecha relativa por tamaño ganador
+    tabla = tabla_resumen_por_tamano(
+        asignar_tamano_ganador(comp, artefactos.ofertas), moneda=None
+    ).set_index("TamanoGanador")
+    for tamano, fila in tabla.iterrows():
+        valor, n = esperado(f"OE3_coincidencia_{tamano}")
+        assert n == fila["Licitaciones"]
+        assert pytest.approx(fila["TasaCoincidenciaPct"], abs=0.005) == valor
+        valor, n = esperado(f"OE3_brecha_rel_{tamano}")
+        assert n == fila["Licitaciones"]
+        assert pytest.approx((fila["MedianaRazon"] - 1.0) * 100.0, abs=0.005) == valor
 
 
 def test_asignar_tamano_ganador_vectorizado_vs_iterativo(ruta_processed: Path):

@@ -96,11 +96,13 @@ def test_verificar_hash_raw_crlf_lf_y_errores():
         assert hash_crlf == hash_lf
         assert verificar_hash_raw(ruta_crlf, hash_esperado=hash_lf) == hash_lf
 
-        with pytest.raises(FileNotFoundError, match="ChileCompra"):
+        with pytest.raises(FileNotFoundError, match="ChileCompra") as falta:
             verificar_hash_raw(Path(carpeta) / "no_existe.csv")
+        assert SHA256_RAW_LF in str(falta.value)
 
-        with pytest.raises(ValueError, match="data/raw/README.md"):
+        with pytest.raises(ValueError, match="data/raw/README.md") as distinto:
             verificar_hash_raw(ruta_lf)
+        assert SHA256_RAW_LF in str(distinto.value)
 
 
 def ejecutar_pruebas_preprocesamiento() -> None:

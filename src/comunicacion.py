@@ -402,7 +402,9 @@ def asignar_tamano_ganador_iterativo(
     asignadas = pd.Series(np.asarray(etiquetas, dtype=object), index=licitaciones.index)
     return licitaciones.assign(
         TamanoGanador=asignadas,
-        TamanoGanadorOrdinal=pd.Categorical(asignadas, categories=ORDEN_TAMANO, ordered=True),
+        TamanoGanadorOrdinal=pd.Categorical(
+            asignadas.where(asignadas.isin(ORDEN_TAMANO)), categories=ORDEN_TAMANO, ordered=True,
+        ),
     )
 
 
