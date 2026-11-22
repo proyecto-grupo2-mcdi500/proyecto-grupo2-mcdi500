@@ -83,6 +83,7 @@
   },
   "verificacion_raw": {
     "disponible": true,
+    "archivo": "proyecto",
     "filas_crudo": 45741,
     "licitaciones_unicas_crudo": 2292,
     "muestra_licitaciones": 7,
