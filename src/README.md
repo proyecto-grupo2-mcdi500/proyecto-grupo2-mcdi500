@@ -13,11 +13,11 @@ Esta carpeta contiene los módulos y funciones reutilizables por más de una fas
   - `calcular_brecha()`: brecha por licitación entre la suma de ofertas ganadoras y el monto estimado.
   - `calcular_limites_iqr()` y `aplicar_bandera_atipicos()`: valores extremos en CLP con IQR sobre logaritmos.
   - `validar_procesado()`: comprobaciones finales antes de exportar.
-- **`pruebas_preprocesamiento.py`**: `ejecutar_pruebas_preprocesamiento()` prueba las reglas anteriores con datos ficticios (casos normal, límite y de error).
 - **`pipeline_licitaciones.py`**: Pipeline orientado a objetos de la Fase 3: `Transformador` (clase base), `TransformacionFija`, `TratamientoFaltantes` (aprende qué columnas superan el 90 % de faltantes), `ExtremosLogIQR` (ajusta y reutiliza los límites IQR), `Pipeline` con observadores y `Bitacora`; además, `control_iterativo()` y `control_vectorizado()` para el control temporal.
-- **`pruebas_pipeline.py`**: `ejecutar_pruebas_pipeline()` valida las clases de `pipeline_licitaciones.py` (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`, `Bitacora`, `Pipeline` y `ResultadoF3`) y las invariantes de `validar_procesado()` con datos ficticios (17 casos: normales, límite y excepción).
 - **`medicion.py`**: Comparación de implementaciones de un mismo cálculo (Fase 3):
   - `medir_tiempo(funcion, repeticiones)`: menor tiempo de varias ejecuciones con `timeit`.
   - `medir_memoria(funcion)`: memoria pico en MB con `tracemalloc`, en una ejecución aparte de la de tiempo.
   - `comparar(implementaciones)`: mide cada versión, verifica que todas entreguen el mismo resultado y devuelve una tabla comparativa.
+- **`comunicacion.py`**: Carga selectiva de artefactos de `data/processed/`, cálculo de indicadores (intervalos de Wilson, razón, log-razón, tasas por tamaño, sensibilidad de IVA) y generación de figuras de la Fase 4.
 - **`validar_dataset.py`**: Validador heurístico del conjunto de datos según los umbrales del curso (dimensiones, roles analíticos detectados en crudo, porcentaje de nulos, tamaño en MB y duplicados). El script `validar_dataset.py` en la raíz actúa como punto de entrada por línea de comandos (`python validar_dataset.py ...`).
+- **`pruebas_preprocesamiento.py`** y **`pruebas_pipeline.py`**: Módulos de compatibilidad hacia atrás que redirigen a la suite de pruebas oficial en **`tests/`** (`test_preprocesamiento.py` y `test_pipeline.py`). La suite completa se corre desde la raíz del repositorio con `pytest`.

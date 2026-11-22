@@ -100,13 +100,18 @@ Este registro documenta de forma ordenada las decisiones técnicas, metodológic
 
 ---
 
-## 10. Separación modular en `src/` por responsabilidad y validación automatizada
+## 10. Separación modular en `src/` por responsabilidad y suite unificada con `pytest` en `tests/`
 
-- **Problema:** Mantener funciones de F1 (`utilidades`), reglas de F2 (`preprocesamiento`), orquestación POO (`pipeline_licitaciones`) y medición (`medicion`) mezcladas en un único archivo dificultaba la comprensión, el trabajo en paralelo y la verificación por capas.
-- **Decisión:** Separar cada responsabilidad en su propio módulo dentro de `src/` y acompañar tanto las reglas puras (`pruebas_preprocesamiento.py`) como el flujo POO (`ejecutar_pruebas_pipeline()`) con baterías automatizadas sobre datos ficticios antes de procesar el archivo real.
-- **Justificación:** Favorece alta cohesión, bajo acoplamiento y detección temprana de regresiones ante cambios de esquema o código.
-- **Fuente / Evidencia:** Commit `f1640ea`, [`src/README.md`](../src/README.md), [`src/pruebas_preprocesamiento.py`](../src/pruebas_preprocesamiento.py) y [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (Secciones `1`, `4.1` y `7`).
-- **Impacto medido:** Ningún duplicado funcional entre F1, F2 y F3; las pruebas unitarias e integrales se ejecutan en cada corrida completa de `F3_Nucleo_Algoritmico.ipynb` con resultado `ok` en todas las celdas.
+- **Problema:** Mantener funciones de F1 (`utilidades`), reglas de F2 (`preprocesamiento`), orquestación POO (`pipeline_licitaciones`) y medición (`medicion`) mezcladas en un único archivo dificultaba la comprensión, el trabajo en paralelo y la verificación por capas. Asimismo, los scripts de prueba sueltos en `src/` impedían una ejecución automatizada centralizada con un único comando estándar.
+- **Decisión:** Separar cada responsabilidad en su propio módulo dentro de `src/` y migrar la suite completa de pruebas hacia un directorio canónico **`tests/`** gestionado por **`pytest`** (`pytest.ini`), integrando:
+  1. `test_preprocesamiento.py`: verificación de reglas F2 (duplicados, fechas/montos, tamaño, IQR, SHA-256).
+  2. `test_pipeline.py`: 17 casos del pipeline POO de F3 (`ejecutar_pruebas_pipeline()`).
+  3. `test_regresion_f2.py`: equivalencia exacta contra F2 mediante `pd.testing.assert_frame_equal` (Guía S3).
+  4. `test_comunicacion.py`: contrastes conocidos de F4 (`docs/hallazgos_f4.csv`) y casos de robustez del feedback (razón 1,0, coincidencia 100 %, categoría de tamaño vacía, monedas no CLP excluidas, artefacto faltante, Wilson con 0 éxitos o grupo vacío, y rechazo de contratos rotos).
+  Se mantienen módulos puente en `src/pruebas_*.py` para compatibilidad retroactiva.
+- **Justificación:** Favorece alta cohesión, bajo acoplamiento y detección temprana de regresiones ante cambios de esquema o código, permitiendo validar todo el proyecto con un solo comando (`pytest`).
+- **Fuente / Evidencia:** [`src/README.md`](../src/README.md), [`tests/`](../tests/), [`pytest.ini`](../pytest.ini) y [`F3/F3_Nucleo_Algoritmico.ipynb`](../F3/F3_Nucleo_Algoritmico.ipynb) (Secciones `1`, `4.1` y `7`).
+- **Impacto medido:** 35 pruebas automatizadas descubiertas y ejecutadas por `pytest` en menos de 5 segundos; 100 % de casos aprobados; trazabilidad conservada para los cuadernos interactivos.
 
 ---
 
