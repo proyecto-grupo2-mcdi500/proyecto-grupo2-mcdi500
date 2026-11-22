@@ -33,4 +33,4 @@ Descarga y descomprime `04LicitacionesEne.zip`. Coloca el archivo **`04Licitacio
 | `docs/hallazgos_f4.csv` | Registro de indicadores y secciones del notebook que los producen. |
 | `docs/metadatos_f4.json` | Entorno de ejecución, entradas, verificaciones y configuración de las figuras. |
 
-Los PNG se exportan a 200 ppp y `F4/figuras/` está excluida de Git.
+Los PNG se exportan a 200 ppp y se versionan en `F4/figuras/`, porque el informe y el video los usan.

@@ -2,8 +2,8 @@
   "fase": "F4",
   "etapa": "Figuras por objetivo (200 ppp), control de confusión y hallazgos_f4.csv",
   "entorno": {
-    "python": "3.14.6",
-    "sistema": "Windows",
+    "python": "3.12.3",
+    "sistema": "Darwin",
     "entorno_virtual_activo": true,
     "paquetes": {
       "pandas": {
@@ -34,7 +34,7 @@
     },
     "estilo_figuras_rcparams": {
       "figure.dpi": 120,
-      "savefig.dpi": 150,
+      "savefig.dpi": 200,
       "font.size": 10,
       "axes.titlesize": 11,
       "axes.labelsize": 10,
@@ -128,8 +128,8 @@
   },
   "figuras_200ppp": {
     "dpi": 200,
-    "versionadas_en_git": false,
-    "archivos_locales": [
+    "versionadas_en_git": true,
+    "archivos": [
       "F4/figuras/01_coincidencia_por_tamano.png",
       "F4/figuras/02_razon_ganador_estimado_log.png",
       "F4/figuras/03_cajas_brecha_relativa_tamano.png"
