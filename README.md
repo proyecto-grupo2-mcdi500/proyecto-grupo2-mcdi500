@@ -15,7 +15,7 @@ Integrantes:    Ernesto Siebert Aguilera
 
 Las licitaciones públicas permiten a las instituciones adquirir bienes y servicios mediante procesos diseñados para promover la transparencia, la eficiencia y la libre competencia. El análisis sistemático de estos registros permite describir el comportamiento de las contrataciones del Estado, identificar tendencias de mercado y detectar posibles anomalías o patrones atípicos que ameriten un análisis más exhaustivo.
 
-En este proyecto se analizan los registros de licitaciones de compras públicas correspondientes a **enero de 2025**, obtenidos desde el portal oficial de datos abiertos:
+En este proyecto se analizan los registros de licitaciones de compras públicas correspondientes a **enero de 2025**, obtenidos desde Mercado Público, la plataforma de compras públicas de ChileCompra:
 * **Fuente:** Mercado Público (ChileCompra), licitaciones por sector: [`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z), primer semestre de 2025
 
 El proyecto mide con qué frecuencia el monto estimado registrado de cada licitación coincide con la suma de sus ofertas ganadoras, cuantifica la brecha cuando difieren (dentro de una misma moneda) y examina si ambas cambian según el tamaño del proveedor ganador. El enfoque es descriptivo y cada hallazgo se interpreta dentro de las restricciones de los datos.
@@ -264,11 +264,11 @@ python -m venv .venv
 
 El archivo fuente del proyecto (raw), `data/raw/04LicitacionesEne.csv`, no está en el repositorio (está excluido en `.gitignore`). Proviene de la fuente pública [`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z) de Mercado Público, sin las columnas `Proveedor` y `ProveedorRUT`. El detalle está en [`data/raw/README.md`](data/raw/README.md).
 
-1. Para reproducir byte a byte las salidas versionadas, descarga la copia exacta del proyecto desde [04LicitacionesEne.zip en OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7) (cuenta UNAB). Sin cuenta UNAB, el archivo público permite comprobar las mismas cifras del análisis, con otro SHA-256.
+1. Para reproducir byte a byte las salidas versionadas, descarga la copia exacta del proyecto desde [04LicitacionesEne.zip en OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7) (cuenta UNAB). Sin cuenta UNAB, el archivo público (Opción B) permite revisar el origen y comprobar con `pytest` que entrega las mismas cifras; F2 y F3 se ejecutan con la copia del proyecto.
 2. Descomprímelo y deja el CSV en `data/raw/04LicitacionesEne.csv`.
 3. Verifica su SHA-256 (ver [`data/raw/README.md`](data/raw/README.md)) o en Python mediante `verificar_hash_raw()` de `src/preprocesamiento.py` (compara automáticamente contra `ec308de2...` ignorando `\r`).
 
-Sin el raw, F4 igual corre completo a partir de las salidas versionadas en `data/processed/`, y `pytest` solo omite la prueba de regresión contra F2.
+Sin el raw, o con el archivo público, F1 y F4 corren completos y omiten las comprobaciones contra `data/raw`; F2 y F3 se detienen con un mensaje que explica cómo obtener la copia del proyecto. La tabla de cada caso, incluido `pytest`, está en [`data/raw/README.md`](data/raw/README.md#qué-ocurre-en-cada-caso).
 
 No abras ni guardes el CSV con Excel: lo reescribe con otro formato y altera el contenido.
 
@@ -309,9 +309,9 @@ o alternativamente:
 python -m pytest
 ```
 
-La suite (`tests/`) incluye 36 pruebas automatizadas organizadas en:
-- `tests/test_preprocesamiento.py`: reglas de preprocesamiento de F2 (esquema, tipos, nulos, duplicados, hash SHA-256 e IQR).
+La suite (`tests/`) incluye 38 pruebas automatizadas organizadas en:
+- `tests/test_preprocesamiento.py`: reglas de preprocesamiento de F2 (esquema, tipos, nulos, duplicados, hash SHA-256, identificación del archivo de `data/raw` e IQR).
 - `tests/test_pipeline.py`: 17 casos unitarios y de integración del pipeline orientado a objetos de F3 (normales, límite y de excepción).
-- `tests/test_regresion_f2.py`: comparación del pipeline contra F2 mediante `pd.testing.assert_frame_equal` (Guía S3).
+- `tests/test_regresion_f2.py`: comparación del pipeline contra F2 mediante `pd.testing.assert_frame_equal` (Guía S3). Con la copia del proyecto exige igualdad exacta; con el archivo público de Mercado Público comprueba que entrega las mismas cifras (decisión 19). Según el archivo que haya en `data/raw`, una de las dos se omite.
 - `tests/test_comunicacion.py`: casos conocidos de F4 recalculados desde `src/` y comparados con `docs/hallazgos_f4.csv` y casos de robustez del feedback (razón 1,0, 100 % de coincidencia, tamaño sin observaciones, exclusión de monedas no CLP, artefacto faltante, Wilson con 0 éxitos o grupo vacío, y rechazo de contratos rotos).
 

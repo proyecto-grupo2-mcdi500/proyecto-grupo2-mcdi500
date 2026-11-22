@@ -15,7 +15,7 @@ El archivo del proyecto proviene del `04LicitacionesEne.csv` publicado en `Munic
 1. **Se quitaron las columnas `Proveedor` y `ProveedorRUT`** (identificadores directos de los oferentes). El archivo público tiene 74 columnas; el del proyecto, 72.
 2. **El grupo hizo esa eliminación en Excel**, que volvió a escribir el archivo. Excel no cambió filas ni columnas, pero sí el formato de algunos valores: las fechas perdieron los segundos (`11:07:00` → `11:07`), los códigos largos pasaron a notación científica (`2152204004001` → `2,15E+12`), algunos ceros a la izquierda se perdieron (`00798` → `798`), algunos montos se redondearon (`15756302,999999998` → `15756303`) y algunos textos se convirtieron en fecha (`10-2025` → `oct-25`).
 
-Por eso el archivo público y el del proyecto tienen SHA-256 distintos (ver la tabla de abajo). Las cifras del análisis no cambian: con el archivo público, el pipeline de F3 entrega las mismas 2.257 licitaciones comparables y las mismas 1.254 coincidencias; solo 7 de 2.292 licitaciones difieren en `MontoTotalGanadoras`, en menos de una parte en 10⁻⁹, por el redondeo de Excel. Al leer, `cargar_csv()` descarta `Proveedor` y `ProveedorRUT` mediante `es_columna_privada()`.
+Por eso el archivo público y el del proyecto tienen SHA-256 distintos (ver la tabla de abajo). Las cifras del análisis no cambian, y `pytest` lo comprueba (ver Opción B): con el archivo público, el pipeline de F3 entrega las mismas 2.257 licitaciones comparables y las mismas 1.254 coincidencias; solo 7 de 2.292 licitaciones difieren en `MontoTotalGanadoras`, en menos de una parte en 10⁻⁹, por el redondeo de Excel. Al leer, `cargar_csv()` descarta `Proveedor` y `ProveedorRUT` mediante `es_columna_privada()`.
 
 ## Cómo obtenerlo
 
@@ -29,14 +29,24 @@ Reproduce byte a byte las salidas versionadas en `data/processed/`.
 
 ### Opción B — Fuente pública oficial (sin cuenta)
 
-Permite revisar el origen de los datos y comprobar las cifras del análisis, pero no reproduce byte a byte las salidas versionadas, por las diferencias descritas arriba.
+Permite revisar el origen de los datos y comprobar, con `pytest`, que el archivo público entrega las mismas cifras del análisis. No sirve para ejecutar F2 y F3: los notebooks verifican el SHA-256 de la copia del proyecto, que es lo que garantiza que se reproducen byte a byte las salidas versionadas en `data/processed/`.
 
 1. Descarga [`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z) y extrae `04LicitacionesEne.csv` (requiere un descompresor de 7z, por ejemplo 7-Zip).
 2. Compara su SHA-256 con la fila «Fuente pública» de la tabla de abajo.
+3. Para comprobar la equivalencia, déjalo en `data/raw/04LicitacionesEne.csv` y ejecuta `pytest` desde la raíz. La prueba `test_fuente_publica_entrega_las_mismas_cifras` ([`tests/test_regresion_f2.py`](../../tests/test_regresion_f2.py)) pasa el archivo público por el pipeline y lo compara con `data/processed/`: las mismas 2.292 licitaciones con el mismo estado de brecha, 2.257 comparables y 1.254 coincidencias; solo difieren los montos redondeados por Excel (menos de una parte en 10⁻⁹) y las fechas, que no intervienen en la brecha (decisión 19 en [`docs/decisiones.md`](../../docs/decisiones.md)).
 
-### Sin el raw
+El portal de datos abiertos de ChileCompra (`datos-abiertos.chilecompra.cl`) entrega otro archivo, con otro esquema y otro SHA-256; no es la fuente de este proyecto.
 
-F4 corre completo sin `data/raw/04LicitacionesEne.csv`: parte de las salidas versionadas de F2 y F3 en `data/processed/` y omite solo las comprobaciones que necesitan el raw. F2 y F3 sí lo necesitan y se detienen con un mensaje que indica cómo obtenerlo.
+### Qué ocurre en cada caso
+
+El código identifica el archivo por su SHA-256 (`identificar_raw()` en `src/preprocesamiento.py`):
+
+| Paso | Copia del proyecto (Opción A) | Archivo público (Opción B) | Sin archivo |
+|---|---|---|---|
+| F1 | Corre y contrasta el encabezado (72 columnas) | Corre; omite el contraste con un aviso | Corre; avisa que falta |
+| F2 y F3 | Corren y reproducen `data/processed/` byte a byte | Se detienen con un mensaje que explica la Opción A | Se detienen con las instrucciones de descarga |
+| F4 | Corre con las comprobaciones contra `data/raw` (secciones 3 y 8) | Corre desde `data/processed/`; omite esas comprobaciones con un aviso | Igual que con el archivo público |
+| `pytest` | Pasa la regresión exacta contra F2; omite la de equivalencia | Pasa la de equivalencia; omite la regresión exacta | Omite ambas; pasan las demás |
 
 ### Por qué no se versiona el raw ni una muestra
 

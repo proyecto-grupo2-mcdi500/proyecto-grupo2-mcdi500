@@ -7,7 +7,7 @@ La carpeta `F3/` contiene el notebook de la tercera fase del proyecto, `F3_Nucle
 Los datos y módulos compartidos del proyecto se mantienen en `data/` y `src/`, y la suite unificada de pruebas automatizadas reside en `tests/`.
 
 ### 2. Cómo ejecutarlo
-1. Descarga el archivo de entrada en `data/raw/04LicitacionesEne.csv` (ver *Obtener los datos* en el [`README.md`](../README.md) de la raíz).
+1. Deja la copia del proyecto (Opción A) en `data/raw/04LicitacionesEne.csv` (ver *Obtener los datos* en el [`README.md`](../README.md) de la raíz). Con el archivo público de Mercado Público, F3 se detiene y explica por qué (decisión 19).
 2. Ejecuta `F2/F2_Preprocesamiento.ipynb`: genera las dos salidas de `data/processed/` que F3 usa como referencia.
 3. Abre `F3_Nucleo_Algoritmico.ipynb` con el kernel **Python (grupo2-mcdi500)** y ejecuta todas las celdas con *Restart Kernel and Run All Cells* (unos 20 segundos).
 
@@ -19,7 +19,7 @@ F3 escribe `data/processed/diccionario_f3.csv` y `data/processed/parametros_f3.c
 * **`src/medicion.py`**: medición del tiempo mínimo de ejecución (`timeit`) y de la memoria pico (`tracemalloc`).
 * **`tests/test_preprocesamiento.py`**: pruebas automáticas de las reglas de preprocesamiento con datos ficticios (`ejecutar_pruebas_preprocesamiento()`, ejecutable también con `pytest`).
 * **`tests/test_pipeline.py`**: pruebas automáticas de las clases del pipeline POO (`Transformador`, `TransformacionFija`, `TratamientoFaltantes`, `ExtremosLogIQR`, `Bitacora`, `Pipeline` y `ResultadoF3`) y de `validar_procesado()` con datos ficticios (17 casos: normales, límite y de excepción, mediante `ejecutar_pruebas_pipeline()`).
-* **`tests/test_regresion_f2.py`**: verificación de equivalencia exacta de salidas mediante `pd.testing.assert_frame_equal` (Guía S3).
+* **`tests/test_regresion_f2.py`**: verificación de equivalencia exacta de salidas mediante `pd.testing.assert_frame_equal` (Guía S3) con la copia del proyecto, y de las mismas cifras con el archivo público de Mercado Público (decisión 19).
 
 Para correr toda la suite de pruebas del proyecto con un solo comando:
 ```bash

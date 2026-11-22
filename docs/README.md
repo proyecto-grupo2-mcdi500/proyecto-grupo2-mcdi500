@@ -11,7 +11,7 @@ Esta carpeta reúne la documentación técnica compartida del proyecto **Anális
 
 | Atributo | Detalle |
 | :--- | :--- |
-| **Fuente oficial** | [ChileCompra — Portal de Datos Abiertos](https://datos-abiertos.chilecompra.cl/descargas/ordenes-y-licitaciones) |
+| **Fuente oficial** | Mercado Público (ChileCompra), licitaciones por sector: [`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z), archivo `04LicitacionesEne.csv` (procedencia y diferencias con la copia del proyecto en [`data/raw/README.md`](../data/raw/README.md)) |
 | **Periodo cubierto** | Enero de 2025 (procesos publicados/cerrados en el periodo e historial asociado) |
 | **Archivo de entrada (`raw`)** | `data/raw/04LicitacionesEne.csv` (local, no versionado; descarga en `data/raw/README.md`) |
 | **Formato y codificación original** | Texto plano CSV delimitado por punto y coma (`;`), codificación `latin-1` (ISO-8859-1) |
