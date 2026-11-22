@@ -233,7 +233,3 @@ data/processed/*.csv
 !data/processed/04LicitacionesEne_brecha_por_licitacion.csv
 !data/processed/diccionario_f3.csv
 !data/processed/parametros_f3.csv
-
-# Figuras PNG exportadas localmente en F4 (se embeben en el notebook sin versionar)
-F4/figuras/
-
