@@ -8,9 +8,10 @@ import pytest
 
 from src.preprocesamiento import (
     SHA256_RAW_LF, aplicar_bandera_atipicos, calcular_brecha, calcular_limites_iqr,
-    calcular_sha256_sin_cr, cargar_csv, marcar_duplicados, ordenar_tamano,
+    calcular_sha256_sin_cr, cargar_csv, identificar_raw, marcar_duplicados, ordenar_tamano,
     verificar_hash_raw,
 )
+from src import preprocesamiento
 
 
 def test_marcar_duplicados_y_calcular_brecha():
@@ -105,6 +106,33 @@ def test_verificar_hash_raw_crlf_lf_y_errores():
         assert SHA256_RAW_LF in str(distinto.value)
 
 
+def test_identificar_raw_y_mensaje_fuente_publica(monkeypatch: pytest.MonkeyPatch):
+    """Distingue la copia del proyecto, el archivo público, otro archivo y la ausencia."""
+    with TemporaryDirectory() as carpeta:
+        proyecto = Path(carpeta) / "proyecto.csv"
+        publico = Path(carpeta) / "publico.csv"
+        otro = Path(carpeta) / "otro.csv"
+        proyecto.write_bytes(b"a;b\r\n1;2\r\n")
+        publico.write_bytes(b"a;b;Proveedor\n1;2;X\n")
+        otro.write_bytes(b"a;b\n9;9\n")
+        hashes = {
+            "hash_proyecto": calcular_sha256_sin_cr(proyecto),
+            "hash_publico": calcular_sha256_sin_cr(publico),
+        }
+
+        assert identificar_raw(proyecto, **hashes) == "proyecto"
+        assert identificar_raw(publico, **hashes) == "publico"
+        assert identificar_raw(otro, **hashes) == "otro"
+        assert identificar_raw(Path(carpeta) / "no_existe.csv", **hashes) == "ausente"
+
+        # Con el archivo público, el error explica la Opción B y remite a la decisión 19.
+        monkeypatch.setattr(preprocesamiento, "SHA256_FUENTE_PUBLICA_LF", hashes["hash_publico"])
+        with pytest.raises(ValueError, match="archivo público de Mercado Público") as error:
+            verificar_hash_raw(publico, hash_esperado=hashes["hash_proyecto"])
+        assert "decisión 19" in str(error.value)
+        assert SHA256_RAW_LF in str(error.value)
+
+
 def ejecutar_pruebas_preprocesamiento() -> None:
     """Función de compatibilidad directa para ejecutar las pruebas sin runner de pytest."""
     test_marcar_duplicados_y_calcular_brecha()
@@ -112,3 +140,5 @@ def ejecutar_pruebas_preprocesamiento() -> None:
     test_cargar_csv_esquema_invalido()
     test_limites_iqr_y_bandera_atipicos()
     test_verificar_hash_raw_crlf_lf_y_errores()
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        test_identificar_raw_y_mensaje_fuente_publica(monkeypatch)

@@ -1,16 +1,25 @@
-"""Pruebas de regresión y equivalencia contra F2 mediante pd.testing.assert_frame_equal (Guía S3)."""
+"""Pruebas de regresión y equivalencia contra F2 mediante pd.testing.assert_frame_equal (Guía S3).
+
+Según el archivo que haya en data/raw/04LicitacionesEne.csv (ver data/raw/README.md):
+
+- copia del proyecto (Opción A): igualdad exacta con las salidas versionadas de F2;
+- archivo público de Mercado Público (Opción B): equivalencia de las cifras del análisis
+  (decisión 19 en docs/decisiones.md);
+- sin archivo u otro archivo: ambas pruebas se omiten con un mensaje.
+"""
 
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import numpy as np
 import pandas as pd
 import pytest
 
 from src.pipeline_licitaciones import TratamientoFaltantes, construir_pipeline
 from src.preprocesamiento import (
     MOTIVOS, aplicar_bandera_atipicos, calcular_brecha, calcular_limites_iqr,
-    cargar_csv, convertir_tipos, marcar_duplicados, ordenar_tamano,
+    cargar_csv, convertir_tipos, identificar_raw, marcar_duplicados, ordenar_tamano,
     validar_procesado,
 )
 from tests.conftest import escribir_csv_temporal
@@ -18,8 +27,12 @@ from tests.conftest import escribir_csv_temporal
 
 def test_assert_frame_equal_f3_contra_f2_oficial(ruta_raw: Path, ruta_processed: Path):
     """Guía S3: Compara la salida del pipeline actual contra las dos entregadas en F2."""
-    if not ruta_raw.is_file():
-        pytest.skip(f"No se encontró {ruta_raw}: requiere el CSV original de 385 MB para comparar datos completos.")
+    tipo = identificar_raw(ruta_raw)
+    if tipo != "proyecto":
+        pytest.skip(
+            f"data/raw/04LicitacionesEne.csv es '{tipo}': la igualdad exacta con F2 requiere la copia "
+            "del proyecto (Opción A en data/raw/README.md)."
+        )
 
     pipe = construir_pipeline()
     resultado = pipe.ejecutar(ruta_raw)
@@ -39,6 +52,76 @@ def test_assert_frame_equal_f3_contra_f2_oficial(ruta_raw: Path, ruta_processed:
             StringIO(tabla.to_csv(sep=";", index=False)), sep=";", dtype="string", keep_default_na=False
         )
         pd.testing.assert_frame_equal(referencia, exportada, check_exact=True)
+
+
+def _exportar_como_f2(tabla: pd.DataFrame) -> pd.DataFrame:
+    """Devuelve la tabla tal como quedaría al exportarla y releerla igual que en F2."""
+    return pd.read_csv(
+        StringIO(tabla.to_csv(sep=";", index=False)), sep=";", dtype="string", keep_default_na=False
+    )
+
+
+def test_fuente_publica_entrega_las_mismas_cifras(ruta_raw: Path, ruta_processed: Path):
+    """Decisión 19: el archivo público de Mercado Público entrega las mismas cifras del análisis.
+
+    La copia del proyecto se obtuvo del archivo público quitando Proveedor y ProveedorRUT en
+    Excel, que además redondeó algunos montos y quitó los segundos a las fechas. Esta prueba
+    pasa el archivo público por el mismo pipeline y comprueba que:
+
+    - la tabla por licitación es idéntica salvo MontoTotalGanadoras en 7 licitaciones
+      (diferencias relativas menores a 1e-9) y BrechaMonto en esas mismas licitaciones
+      (diferencias menores a 0,01 en la moneda de la licitación);
+    - se mantienen las 2.257 licitaciones comparables y las 1.254 coincidencias;
+    - la tabla por oferta es idéntica salvo montos (diferencias relativas menores a 1e-9) y las
+      tres fechas. Las fechas del archivo público incluyen segundos (11:07:00), formato que el
+      lector actual no interpreta; no intervienen en la brecha (trabajo futuro, decisión 19).
+    """
+    tipo = identificar_raw(ruta_raw)
+    if tipo != "publico":
+        pytest.skip(
+            f"data/raw/04LicitacionesEne.csv es '{tipo}': esta prueba se ejecuta con el archivo "
+            "público de Mercado Público (Opción B en data/raw/README.md)."
+        )
+
+    resultado = construir_pipeline().ejecutar(ruta_raw)
+    pares = {
+        "licitaciones": (
+            "04LicitacionesEne_brecha_por_licitacion.csv", resultado.licitaciones,
+            {"MontoTotalGanadoras": (1e-9, 0.0), "BrechaMonto": (0.0, 0.01)}, (),
+        ),
+        "ofertas": (
+            "04LicitacionesEne_procesado.csv", resultado.ofertas,
+            {"MontoTotalOferta": (1e-9, 0.0), "MontoNetoOferta": (1e-9, 0.0)},
+            ("FechaPublicacion", "FechaCierre", "FechaAdjudicacion"),
+        ),
+    }
+    for nombre, (archivo, tabla, montos, fechas) in pares.items():
+        referencia = pd.read_csv(
+            ruta_processed / archivo, sep=";", encoding="utf-8-sig", dtype="string",
+            keep_default_na=False,
+        )
+        publica = _exportar_como_f2(tabla)
+        assert list(publica.columns) == list(referencia.columns), nombre
+
+        exactas = [c for c in referencia.columns if c not in (*montos, *fechas)]
+        pd.testing.assert_frame_equal(publica[exactas], referencia[exactas], check_exact=True)
+        for columna, (rtol, atol) in montos.items():
+            ref = pd.to_numeric(referencia[columna].replace("", np.nan))
+            pub = pd.to_numeric(publica[columna].replace("", np.nan))
+            assert ref.isna().equals(pub.isna()), (nombre, columna)
+            assert np.allclose(pub, ref, rtol=rtol, atol=atol, equal_nan=True), (nombre, columna)
+
+    licitaciones = _exportar_como_f2(resultado.licitaciones)
+    referencia = pd.read_csv(
+        ruta_processed / "04LicitacionesEne_brecha_por_licitacion.csv", sep=";",
+        encoding="utf-8-sig", dtype="string", keep_default_na=False,
+    )
+    distintas = licitaciones["MontoTotalGanadoras"].ne(referencia["MontoTotalGanadoras"])
+    assert int(distintas.sum()) == 7
+    assert not licitaciones["BrechaMonto"].ne(referencia["BrechaMonto"])[~distintas].any()
+    comparables = licitaciones["EstadoBrecha"].eq("Calculada")
+    assert int(comparables.sum()) == 2257
+    assert int((comparables & licitaciones["CoincideConEstimado"].eq("True")).sum()) == 1254
 
 
 def test_assert_frame_equal_pipeline_contra_reglas_f2_sintetico():
