@@ -5,7 +5,7 @@ El notebook [F4_Visualizacion_Comunicacion.ipynb](F4_Visualizacion_Comunicacion.
 ## Ejecutar F4 desde cero
 
 1. Abre una terminal en la **raíz del repositorio**, donde está `requirements.txt`. Crea `.venv`, instala las dependencias y registra el kernel según la [guía de configuración](../README.md#configurar-el-entorno).
-2. Para regenerar los datos desde la fuente, coloca el CSV crudo en la ruta de la tabla de entradas y ejecuta **F1 → F2 → F3** siguiendo el [orden de ejecución](../README.md#ejecutar-los-notebooks). Si los cuatro CSV versionados de `data/processed/` ya están disponibles, puedes abrir F4 directamente.
+2. Para regenerar los datos desde la fuente, coloca el archivo fuente (raw) en la ruta de la tabla de entradas y ejecuta **F1 → F2 → F3** siguiendo el [orden de ejecución](../README.md#ejecutar-los-notebooks). Si los cuatro CSV versionados de `data/processed/` ya están disponibles, puedes abrir F4 directamente.
 3. Desde la raíz, inicia JupyterLab con `python -m jupyter lab` en el entorno activo. En PowerShell puedes usar `.\.venv\Scripts\python.exe -m jupyterlab`. También puedes abrir la raíz como carpeta de trabajo en VS Code.
 4. Abre `F4/F4_Visualizacion_Comunicacion.ipynb`, selecciona **Python (grupo2-mcdi500)** (identificador `grupo2_mcdi500`) y elige **Restart Kernel and Run All Cells**. Guarda el notebook si quieres conservar las tablas y figuras visibles.
 
