@@ -1,6 +1,6 @@
 # Datos originales
 
-El archivo de entrada `04LicitacionesEne.csv` no se versiona (está excluido en `.gitignore`). Cada integrante lo descarga y lo deja en esta carpeta.
+El archivo fuente del proyecto (raw), `04LicitacionesEne.csv`, no se versiona (está excluido en `.gitignore`). Cada integrante lo descarga y lo deja en esta carpeta.
 
 | Dato | Valor |
 |---|---|
@@ -34,11 +34,11 @@ Permite revisar el origen de los datos y comprobar las cifras del análisis, per
 1. Descarga [`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z) y extrae `04LicitacionesEne.csv` (requiere un descompresor de 7z, por ejemplo 7-Zip).
 2. Compara su SHA-256 con la fila «Fuente pública» de la tabla de abajo.
 
-### Sin el archivo crudo
+### Sin el raw
 
-F4 corre completo sin `data/raw/04LicitacionesEne.csv`: parte de las salidas versionadas de F2 y F3 en `data/processed/` y omite solo las comprobaciones que necesitan el crudo. F2 y F3 sí lo necesitan y se detienen con un mensaje que indica cómo obtenerlo.
+F4 corre completo sin `data/raw/04LicitacionesEne.csv`: parte de las salidas versionadas de F2 y F3 en `data/processed/` y omite solo las comprobaciones que necesitan el raw. F2 y F3 sí lo necesitan y se detienen con un mensaje que indica cómo obtenerlo.
 
-### Por qué no se versiona el crudo ni una muestra
+### Por qué no se versiona el raw ni una muestra
 
 Además de `Proveedor` y `ProveedorRUT`, las columnas de texto libre contienen datos de terceros: en `NombreOferta` hay razones sociales (4.672 filas), RUT (272), correos (134) y teléfonos (194); en `EspecificacionesProveedor`, RUT (217), correos (460) y teléfonos (1.740); y `Descripcion` incluye nombres de funcionarios. `cargar_csv()` descarta `EspecificacionesProveedor` al leer y ninguna de estas columnas se exporta: las salidas versionadas solo tienen columnas numéricas, de fecha y categóricas. Anonimizar el texto libre no es confiable, por lo que tampoco se versiona una muestra.
 

@@ -262,13 +262,13 @@ python -m venv .venv
 
 ## Obtener los datos
 
-El archivo de entrada `data/raw/04LicitacionesEne.csv` no está en el repositorio (está excluido en `.gitignore`). Proviene de la fuente pública [`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z) de Mercado Público, sin las columnas `Proveedor` y `ProveedorRUT`. El detalle está en [`data/raw/README.md`](data/raw/README.md).
+El archivo fuente del proyecto (raw), `data/raw/04LicitacionesEne.csv`, no está en el repositorio (está excluido en `.gitignore`). Proviene de la fuente pública [`Municipalidades.7z`](https://chc-lic-files.mercadopublico.cl/sector/2025/Sem1/Municipalidades.7z) de Mercado Público, sin las columnas `Proveedor` y `ProveedorRUT`. El detalle está en [`data/raw/README.md`](data/raw/README.md).
 
 1. Para reproducir byte a byte las salidas versionadas, descarga la copia exacta del proyecto desde [04LicitacionesEne.zip en OneDrive](https://uandresbelloedu-my.sharepoint.com/:u:/g/personal/o_salgadosanhueza1_uandresbello_edu/IQCmmeS9mqScQ7om4C8pptK-AawF-4DLpDESncr5zrz-5uM?e=L8yMs7) (cuenta UNAB). Sin cuenta UNAB, el archivo público permite comprobar las mismas cifras del análisis, con otro SHA-256.
 2. Descomprímelo y deja el CSV en `data/raw/04LicitacionesEne.csv`.
 3. Verifica su SHA-256 (ver [`data/raw/README.md`](data/raw/README.md)) o en Python mediante `verificar_hash_raw()` de `src/preprocesamiento.py` (compara automáticamente contra `ec308de2...` ignorando `\r`).
 
-Sin el archivo crudo, F4 igual corre completo a partir de las salidas versionadas en `data/processed/`, y `pytest` solo omite la prueba de regresión contra F2.
+Sin el raw, F4 igual corre completo a partir de las salidas versionadas en `data/processed/`, y `pytest` solo omite la prueba de regresión contra F2.
 
 No abras ni guardes el CSV con Excel: lo reescribe con otro formato y altera el contenido.
 
